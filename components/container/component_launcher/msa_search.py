@@ -22,54 +22,8 @@ import sys
 from pprint import pprint
 
 
-from google.cloud.lifesciences_v2beta.services.workflows_service_v2_beta import WorkflowsServiceV2BetaClient
-
-#from . import batch_prediction_job_remote_runner
-#from . import bigquery_job_remote_runner
-#from . import create_endpoint_remote_runner
-#from . import custom_job_remote_runner
-#from . import delete_endpoint_remote_runner
-#from . import deploy_model_remote_runner
-#from . import export_model_remote_runner
-#from . import hyperparameter_tuning_job_remote_runner
-#from . import upload_model_remote_runner
-#from . import wait_gcp_resources
-
-_JOB_TYPE = [
-    'MSASearch'
-]
-#_JOB_TYPE_TO_ACTION_MAP = {
-#     'MSASearch': '',
-#    'CustomJob':
-#        custom_job_remote_runner.create_custom_job,
-#    'BatchPredictionJob':
-#        batch_prediction_job_remote_runner.create_batch_prediction_job,
-#    'HyperparameterTuningJob':
-#        hyperparameter_tuning_job_remote_runner
-#        .create_hyperparameter_tuning_job,
-#    'UploadModel':
-#        upload_model_remote_runner.upload_model,
-#    'CreateEndpoint':
-#        create_endpoint_remote_runner.create_endpoint,
-#    'DeleteEndpoint':
-#        delete_endpoint_remote_runner.delete_endpoint,
-#    'ExportModel':
-#        export_model_remote_runner.export_model,
-#    'DeployModel':
-#        deploy_model_remote_runner.deploy_model,
-#    'BigqueryQueryJob':
-#        bigquery_job_remote_runner.bigquery_query_job,
-#    'BigqueryCreateModelJob':
-#        bigquery_job_remote_runner.bigquery_create_model_job,
-#    'BigqueryPredictModelJob':
-#        bigquery_job_remote_runner.bigquery_predict_model_job,
-#    'BigqueryExportModelJob':
-#        bigquery_job_remote_runner.bigquery_export_model_job,
-#    'BigqueryEvaluateModelJob':
-#        bigquery_job_remote_runner.bigquery_evaluate_model_job,
-#    'Wait':
-#        wait_gcp_resources.wait_gcp_resources
-#}
+#from . import cls_runner
+import cls_runner
 
 
 def _make_parent_dirs_and_return_path(file_path: str):
@@ -216,33 +170,31 @@ def run_cls_pipeline(
 
 
 
-    parent = f'projects/{project}/locations/{location}' 
-    client = WorkflowsServiceV2BetaClient()
-
-    request = {
-        "parent": parent,
-        "pipeline": {
-            "actions": [
-                {
-                    "container_name": 'alphafold-inference',
-                    "image_uri": 'gcr.io/jk-mlops-dev/alphafold-inference',
-                    "commands": [
-                         'echo', 'hello' 
-                    ],
-                    #"entrypoint": '/bin/bash',
-                },
-            ],
-            "resources": {
-                "regions": ["us-central1"],
-                "virtual_machine": {
-                    "machine_type": "n1-standard-4",
-                }
-            }
-        },
+    pipeline = {
+        "actions": [
+            {
+                "container_name": 'alphafold-inference',
+                "image_uri": 'gcr.io/jk-mlops-dev/alphafold-inference',
+                "commands": [
+                        'echo', 'hello' 
+                ],
+                #"entrypoint": '/bin/bash',
+            },
+        ],
+        "resources": {
+            "regions": ["us-central1"],
+            "virtual_machine": {
+                "machine_type": "n1-standard-4",
+                'boot_disk_size_gb': 500,
+            },
+        }
     }
+    
 
-    response = client.run_pipeline(request)
-    print(response)
+    pipeline_runner = cls_runner.PipelineRunner(project, location)
+
+    lro = pipeline_runner.run_pipeline(pipeline)
+    print(lro)
 
    # credentials = GoogleCredentials.get_application_default()
 
@@ -288,11 +240,6 @@ def main(argv):
   """
   parsed_args = _parse_args(argv)
   job_type = parsed_args['type']
-
-  if job_type not in _JOB_TYPE:
-    raise ValueError('Unsupported job type: ' + job_type)
-
-  logging.info('Job started for type: ' + job_type)
 
   run_cls_pipeline(**parsed_args)
 

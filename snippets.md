@@ -8,9 +8,9 @@ gcr.io/jk-mlops-dev/alphafold-inference
 
 
 
-python launcher.py \
+python msa_search.py \
 --type MSASearch \
---project jk_mlops_dev \
+--project jk-mlops-dev \
 --location us-central1 \
 --payload '{}' \
 --gcp_resources '{}'
