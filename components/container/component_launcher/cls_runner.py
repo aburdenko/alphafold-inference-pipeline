@@ -45,7 +45,7 @@ class PipelineRunner():
         self.location = location
         self.parent = f'projects/{project}/locations/{location}'
         self.client = WorkflowsServiceV2BetaClient()
-        self.last_logged_event_index = -1 
+        self.last_logged_event_index = 0
 
 
     def _validate_pub_sub_topic(pub_sub_topic: str):
@@ -85,11 +85,10 @@ class PipelineRunner():
             # lro can throw a TypeError exception when transitioning states
             try: 
                 status = lro.done()
-                latest_event_index = len(lro.metadata.events) - 1
-                if latest_event_index > self.last_logged_event_index:
-                    for i in range(self.last_logged_event_index+1, latest_event_index+1):
-                        print(lro.metadata.events[i].description)
-                    self.last_logged_event_index = latest_event_index
+                newest_event_index = len(lro.metadata.events)
+                for i in range(newest_event_index - self.last_logged_event_index):
+                    print(lro.metadata.events[i].description)
+                self.last_logged_event_index = newest_event_index 
                 if status:
                     break
             except TypeError:
