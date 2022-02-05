@@ -233,7 +233,7 @@ def run_cls_pipeline(
                 },
             ],
             "resources": {
-                "regions": ["us-central11"],
+                "regions": ["us-central1"],
                 "virtual_machine": {
                     "machine_type": "n1-standard-4",
                 }
