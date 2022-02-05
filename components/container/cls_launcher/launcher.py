@@ -19,6 +19,11 @@ import logging
 import os
 import sys
 
+from pprint import pprint
+
+
+from google.cloud.lifesciences_v2beta.services.workflows_service_v2_beta import WorkflowsServiceV2BetaClient
+
 #from . import batch_prediction_job_remote_runner
 #from . import bigquery_job_remote_runner
 #from . import create_endpoint_remote_runner
@@ -207,6 +212,53 @@ def run_cls_pipeline(
     print(location)
     print(payload)
     print(gcp_resources)
+
+
+
+
+    parent = f'projects/{project}/locations/{location}' 
+    client = WorkflowsServiceV2BetaClient()
+
+    request = {
+        "parent": parent,
+        "pipeline": {
+            "actions": [
+                {
+                    "container_name": 'alphafold-inference',
+                    "image_uri": 'gcr.io/jk-mlops-dev/alphafold-inference',
+                    "commands": [
+                         'echo', 'hello' 
+                    ],
+                    #"entrypoint": '/bin/bash',
+                },
+            ],
+            "resources": {
+                "regions": ["us-central11"],
+                "virtual_machine": {
+                    "machine_type": "n1-standard-4",
+                }
+            }
+        },
+    }
+
+    response = client.run_pipeline(request)
+    print(response)
+
+   # credentials = GoogleCredentials.get_application_default()
+
+   # service = discovery.build('lifesciences', 'v2beta', credentials=credentials)
+
+   # # The project and location that this request should be executed against.
+   # parent = f'projects/{project}/locations/{location}'  
+
+   # run_pipeline_request_body = {
+   #     # TODO: Add desired entries to the request body.
+   # }
+
+   # request = service.projects().locations().pipelines().run(parent=parent, body=run_pipeline_request_body)
+   # response = request.execute()
+
+    #pprint(response)
 
     #remote_runner = job_remote_runner.JobRemoteRunner(type, project, location,
     #                                                  gcp_resources)
