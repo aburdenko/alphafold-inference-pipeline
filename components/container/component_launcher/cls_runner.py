@@ -23,10 +23,6 @@ import time
 from pprint import pprint
 
 
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
-
-
 from google.api_core.operation import Operation
 from google.cloud.lifesciences_v2beta.services.workflows_service_v2_beta import WorkflowsServiceV2BetaClient
 from google.cloud.lifesciences_v2beta.types import RunPipelineRequest
@@ -49,41 +45,8 @@ class PipelineRunner():
         self.location = location
         self.parent = f'projects/{project}/locations/{location}'
         self.client = WorkflowsServiceV2BetaClient()
-        self.credentials = GoogleCredentials.get_application_default()
-        self.service = discovery.build('lifesciences', 'v2beta', credentials=self.credentials)
+        self.last_logged_event_index = -1 
 
-
-    def check_if_job_exists(self) -> Optional[str]:
-        pass
-        """Check if the job already exists."""
-        #if path.exists(self.gcp_resources) and os.stat(
-        #        self.gcp_resources).st_size != 0:
-        #    with open(self.gcp_resources) as f:
-        #        serialized_gcp_resources = f.read()
-        #        job_resources = json_format.Parse(serialized_gcp_resources,
-        #                                          GcpResources())
-        #        # Resources should only contain one item.
-        #        if len(job_resources.resources) != 1:
-        #            raise ValueError(
-        #                f'gcp_resources should contain one resource, found {len(job_resources.resources)}'
-        #            )
-
-        #        job_name_group = re.findall(
-        #            job_resources.resources[0].resource_uri,
-        #            f'{self.job_uri_prefix}(.*)')
-
-        #        if not job_name_group or not job_name_group[0]:
-        #            raise ValueError(
-        #                'Job Name in gcp_resource is not formatted correctly or is empty.'
-        #            )
-        #        job_name = job_name_group[0]
-
-        #        logging.info(
-        #            '%s name already exists: %s. Continue polling the status',
-        #            self.job_type, job_name)
-        #    return job_name
-        #else:
-        #    return None
 
     def _validate_pub_sub_topic(pub_sub_topic: str):
         """Validates pub_sub topic."""
@@ -122,10 +85,13 @@ class PipelineRunner():
             # lro can throw a TypeError exception when transitioning states
             try: 
                 status = lro.done()
+                latest_event_index = len(lro.metadata.events) - 1
+                if latest_event_index > self.last_logged_event_index:
+                    for i in range(self.last_logged_event_index+1, latest_event_index+1):
+                        print(lro.metadata.events[i].description)
+                    self.last_logged_event_index = latest_event_index
                 if status:
                     break
-                logging.info('Still waiting')
-                print('Still waiting')
             except TypeError:
                 time.sleep(_LRO_ERROR_RETRY_DELAY_IN_SECONDS)
                 continue
