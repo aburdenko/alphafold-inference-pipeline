@@ -1,8 +1,22 @@
+docker run -it --rm \
+-v /mnt/disks/alphafold-datasets:/data \
+-v /home/jupyter/alphafold-inference-pipeline/fasta:/fasta \
+-v /home/jupyter/alphafold-inference-pipeline:/src \
+--entrypoint /bin/bash \
+gcr.io/jk-mlops-dev/alphafold-inference
+
+
 python jackhmmer_runner.py \
 --fasta_path /fasta/T1050.fasta \
 --database_path /data/uniref90/uniref90.fasta \
 --n_cpu 8 \
 --max_sto_sequences 501 \
+--output_dir /data/output_msas
+
+
+python hhblits_runner.py \
+--fasta_path /fasta/T1050.fasta \
+--database_paths /data/uniclust30/uniclust30_2018_08/uniclust30_2018_08,/data/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt \
 --output_dir /data/output_msas
 
 
