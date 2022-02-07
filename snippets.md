@@ -1,9 +1,9 @@
 
 
 docker run -it --rm \
--v /home/jupyter/alphafold-inference-pipeline/components:/src \
+-v /home/jupyter/alphafold-inference-pipeline:/src \
 -v /mnt/disks/alphafold-datasets:/data \
--v /home/jupyter/fasta:/fasta \
+-v /home/jupyter/alphafold-inference-pipeline/fasta:/fasta \
 gcr.io/jk-mlops-dev/alphafold-inference
 
 
@@ -14,3 +14,7 @@ python msa_search.py \
 --location us-central1 \
 --payload '{}' \
 --gcp_resources '{}'
+
+
+python get_msas.py \
+--
