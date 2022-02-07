@@ -17,6 +17,7 @@ FROM gcr.io/jk-mlops-dev/alphafold
 WORKDIR /scripts
 
 ADD jackhmmer_runner.py .
+ADD hhblits_runner.py .
 ADD runner_utils.py .
 
 ENV PYTHONPATH=/app/alphafold

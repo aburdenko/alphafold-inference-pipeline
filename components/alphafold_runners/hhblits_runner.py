@@ -62,7 +62,7 @@ def run_hhblits(
     database_paths: Sequence[str],
     n_cpu: int,
     output_dir: str): 
-    """Runs jackhmeer and saves results to a file."""
+    """Runs hhblits and saves results to a file."""
 
     runner = hhblits.HHBlits(
         binary_path=FLAGS.hhblits_binary_path,
