@@ -1,0 +1,172 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-jackhmmer-search": {
+        "executorLabel": "exec-jackhmmer-search",
+        "inputDefinitions": {
+          "parameters": {
+            "alpha-fold-databases-disk-size": {
+              "type": "INT"
+            },
+            "alpha-fold-databases-image": {
+              "type": "STRING"
+            },
+            "boot_disk_size": {
+              "type": "INT"
+            },
+            "database_path": {
+              "type": "STRING"
+            },
+            "fasta_path": {
+              "type": "STRING"
+            },
+            "location": {
+              "type": "STRING"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "output_dir": {
+              "type": "STRING"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-jackhmmer-search": {
+          "container": {
+            "args": [
+              "--image",
+              "gcr.io/jk-mlops-dev/alphafold-inference",
+              "--project",
+              "{{$.inputs.parameters['project']}}",
+              "--regions",
+              "{{$.inputs.parameters['location']}}",
+              "--machine-type",
+              "{{$.inputs.parameters['machine_type']}}",
+              "--boot-disk-size",
+              "{{$.inputs.parameters['boot_disk_size']}}",
+              "--mount",
+              "DB={{$.inputs.parameters['alpha-fold-databases-image']}}{{$.inputs.parameters['alpha-fold-databases-disk-size']}}",
+              "--input",
+              "FASTA_PATH={{$.inputs.parameters['fasta_path']}}",
+              "--oputput-recursive",
+              "OUTPUT_PATH={{$.outputs.parameters['output_dir'].output_file}}",
+              "--command",
+              "'python /scripts/jackhmmer_runner.py --fasta_path ${FASTA_PATH} --output_dir ${OUTPUT_PATH} --database_path ${DB}{{$.inputs.parameters['database_path']}}'",
+              "--wait"
+            ],
+            "command": [
+              "dsub",
+              "--provider",
+              "google-cls-v2"
+            ],
+            "image": "gcr.io/jk-mlops-dev/dsub:latest"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "alphafold-inference"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "jackhmmer-search": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-jackhmmer-search"
+            },
+            "inputs": {
+              "parameters": {
+                "alpha-fold-databases-disk-size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "3000"
+                    }
+                  }
+                },
+                "alpha-fold-databases-image": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022"
+                    }
+                  }
+                },
+                "boot_disk_size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "100"
+                    }
+                  }
+                },
+                "database_path": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "/uniref90/uniref90.fasta"
+                    }
+                  }
+                },
+                "fasta_path": {
+                  "componentInputParameter": "fasta_path"
+                },
+                "location": {
+                  "componentInputParameter": "region"
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "n1-standard-8"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "jackhmmer-search"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "fasta_path": {
+            "type": "STRING"
+          },
+          "project": {
+            "type": "STRING"
+          },
+          "region": {
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.11"
+  },
+  "runtimeConfig": {
+    "parameters": {
+      "project": {
+        "stringValue": "jk-mlops-dev"
+      },
+      "region": {
+        "stringValue": "us-central1"
+      }
+    }
+  }
+}
