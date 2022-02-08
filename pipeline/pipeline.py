@@ -12,15 +12,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gcr.io/jk-mlops-dev/alphafold
-
-WORKDIR /scripts
-
-ADD jackhmmer_runner.py .
-ADD hhblits_runner.py .
-ADD hhsearch_runner.py .
-ADD runner_utils.py .
-
-ENV PYTHONPATH=/app/alphafold
-
-ENTRYPOINT ["/bin/bash", "-c"]
