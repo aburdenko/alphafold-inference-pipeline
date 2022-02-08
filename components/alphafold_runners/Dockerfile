@@ -18,6 +18,7 @@ WORKDIR /scripts
 
 ADD jackhmmer_runner.py .
 ADD hhblits_runner.py .
+ADD hhsearch.py .
 ADD runner_utils.py .
 
 ENV PYTHONPATH=/app/alphafold

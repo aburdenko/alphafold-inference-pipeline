@@ -30,13 +30,13 @@ from alphafold.common import residue_constants
 from alphafold.data import msa_identifiers
 from alphafold.data import parsers
 from alphafold.data import templates
-from alphafold.data.tools import jackhmmer
+from alphafold.data.tools import hmmsearch 
 
 from runner_utils import run_msa_tool
 
 
-_OUTPUT_FILE_NAME = 'output.sto'
-_DEFAULT_MSA_FORMAT = 'sto'
+_OUTPUT_FILE_NAME = 'output.a3m'
+_DEFAULT_MSA_FORMAT = 'a3m'
 FLAGS = flags.FLAGS
 
 logging.set_verbosity(logging.INFO)
@@ -44,31 +44,31 @@ logging.set_verbosity(logging.INFO)
 flags.DEFINE_string(
     'fasta_path', None, 'A path to FASTA file')
 
-flags.DEFINE_string(
-    'database_path', None, 'A paths to a sequence databases to search')
+flags.DEFINE_list(
+    'database_paths', None, 'Paths to a list of sequence databases to search')
 flags.DEFINE_string('output_dir', None, 'Path to a directory that will '
                     'store the results.')
 flags.DEFINE_integer(
-    'n_cpu', 8, 'The number of CPUs to give Jackhmmer'
+    'n_cpu', 4, 'The number of CPUs to give Jackhmmer'
 )
 flags.DEFINE_integer(
     'max_sto_sequences', 501, 'A maximum number of sequences to use for template search'
 )
-flags.DEFINE_string('jackhmmer_binary_path', shutil.which('jackhmmer'),
-                    'Path to the JackHMMER executable.')
+flags.DEFINE_string('hmmsearch_binary_path', shutil.which('hmmsearch'),
+                    'Path to the hmmsearch  executable.')
+flags.DEFINE_string('hmmbuild_binary_path', shutil.which('hmmbuild'),
+                    'Path to the hmmbuild executable.')
 
-def run_jackhmmer(
+def run_hhblits(
     input_fasta_path: str,
-    database_path: str,
-    n_cpu: int,
-    max_sto_sequences: int,
+    database_paths: Sequence[str],
     output_dir: str): 
-    """Runs jackhmeer and saves results to a file."""
+    """Runs hhblits and saves results to a file."""
 
-    runner = jackhmmer.Jackhmmer(
-        binary_path=FLAGS.jackhmmer_binary_path,
-        database_path=database_path,
-        n_cpu=n_cpu,
+    runner = hmmsearch.Hmmsearch(
+        binary_path=FLAGS.hhblits_binary_path,
+        hmmbuild_binary_path=FLAGS.hmmbuild_binary_path
+        databases=database_paths,
     )
 
     with open(input_fasta_path) as f:
@@ -84,7 +84,6 @@ def run_jackhmmer(
         input_fasta_path=input_fasta_path,
         msa_out_path=msa_out_path,
         msa_format=_DEFAULT_MSA_FORMAT,
-        max_sto_sequences=max_sto_sequences,
         use_precomputed_msas=False
     )
 
@@ -93,11 +92,10 @@ def run_jackhmmer(
 
 def _main(argv):
 
-    result = run_jackhmmer(
+    result = run_hhblits(
         input_fasta_path=FLAGS.fasta_path,
-        database_path=FLAGS.database_path,
+        database_paths=FLAGS.database_paths,
         n_cpu=FLAGS.n_cpu,
-        max_sto_sequences=FLAGS.max_sto_sequences,
         output_dir=FLAGS.output_dir
     ) 
 
@@ -105,7 +103,7 @@ def _main(argv):
 if __name__=='__main__':
     flags.mark_flags_as_required([
         'fasta_path',
-        'database_path',
+        'database_paths',
         'output_dir'
     ])
     app.run(_main)
