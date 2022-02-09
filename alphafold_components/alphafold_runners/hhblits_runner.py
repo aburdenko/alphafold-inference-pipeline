@@ -29,7 +29,7 @@ from alphafold.data import templates
 from alphafold.data.tools import hhblits
 
 
-_OUTPUT_FILE_NAME = 'output.a3m'
+_OUTPUT_FILE_NAME = 'output_hhblits.a3m'
 _DEFAULT_MSA_FORMAT = 'a3m'
 
 FASTA_PATH = os.environ['FASTA_PATH']

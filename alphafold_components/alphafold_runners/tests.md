@@ -5,13 +5,14 @@
 docker run -it --rm --entrypoint /bin/bash \
 -v /mnt/disks/alphafold-datasets:/data \
 -v /home/jupyter/alphafold-inference-pipeline:/src \
+-v /home/jupyter/output:/output \
 gcr.io/jk-mlops-dev/alphafold
 ```
 
 ```
 export PYTHONPATH=/app/alphafold
 export FASTA_PATH=/src/fasta/T1050.fasta
-export OUTPUT_DIR=/src/msas 
+export OUTPUT_DIR=/output/msas 
 export DATABASE_PATH=/data/uniref90/uniref90.fasta
 export N_CPU=4
 export MAX_STO_SEQUENCES=500
@@ -22,17 +23,12 @@ python jackhmmer_runner.py
 
 ### Testing hhblits runner
 
-```
-docker run -it --rm --entrypoint /bin/bash \
--v /mnt/disks/alphafold-datasets:/data \
--v /home/jupyter/alphafold-inference-pipeline:/src \
-gcr.io/jk-mlops-dev/alphafold
-```
+
 
 ```
 export PYTHONPATH=/app/alphafold
 export FASTA_PATH=/src/fasta/T1050.fasta
-export OUTPUT_DIR=/src/msas 
+export OUTPUT_DIR=/output/msas
 export DATABASE_PATHS=/data/uniclust30/uniclust30_2018_08/uniclust30_2018_08,/data/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt
 export N_CPU=4
 
@@ -41,12 +37,7 @@ python hhblits_runner.py
 
 ### Testing hhsearch runner
 
-```
-docker run -it --rm --entrypoint /bin/bash \
--v /mnt/disks/alphafold-datasets:/data \
--v /home/jupyter/alphafold-inference-pipeline:/src \
-gcr.io/jk-mlops-dev/alphafold
-```
+
 
 ```
 export PYTHONPATH=/app/alphafold
