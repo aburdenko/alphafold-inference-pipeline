@@ -12,8 +12,9 @@ gcr.io/jk-mlops-dev/alphafold
 ```
 export PYTHONPATH=/app/alphafold
 export FASTA_PATH=/src/fasta/T1050.fasta
-export OUTPUT_DIR=/output/msas 
-export DATABASE_PATH=/data/uniref90/uniref90.fasta
+export OUTPUT_DIR=/output/msas
+export DATABASE_ROOT=/data 
+export DATABASE_PATH=uniref90/uniref90.fasta
 export N_CPU=4
 export MAX_STO_SEQUENCES=500
 
@@ -77,7 +78,7 @@ python hhsearch_runner.py
 
 ```
 export PYTHONPATH=/app/alphafold
-export MSA_PATH=/output/msas/output_jackhmmer.sto
+export MSA_PATH=/output/msas/OUTPUT.sto
 export OUTPUT_DIR=/output/msas 
 export DATABASE_PATHS=/data/pdb70/pdb70 
 export MAXSEQ=1_000_000

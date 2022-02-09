@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +36,7 @@ _OUTPUT_FILE_PREFIX = 'OUTPUT'
 MSA_TOOL = os.environ['MSA_TOOL']
 FASTA_PATH = os.environ['FASTA_PATH']
 OUTPUT_DIR = os.environ['OUTPUT_DIR']
+DATABASES_ROOT = os.environ['DATABASES_ROOT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 N_CPU = int(os.getenv('N_CPU', '2'))
 MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES', 501))
@@ -136,12 +138,16 @@ if __name__=='__main__':
                         level=logging.INFO, 
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
+    
+    database_paths = [
+            os.path.join(DATABASES_ROOT, database_path) 
+            for database_path in DATABASE_PATHS.split(',')]
 
     if MSA_TOOL == 'jackhmmer':
-        database_path = DATABASE_PATHS.split(',')[0]
+     
         run_jackhmmer(
             input_fasta_path=FASTA_PATH,
-            database_path=database_path,
+            database_path=database_paths[0],
             n_cpu=N_CPU,
             max_sto_sequences=MAX_STO_SEQEUNCES,
             output_dir=OUTPUT_DIR
@@ -149,7 +155,7 @@ if __name__=='__main__':
     elif MSA_TOOL == 'hhblits':
         run_hhblits(
             input_fasta_path=FASTA_PATH,
-            database_paths=DATABASE_PATHS.split(','),
+            database_paths=database_paths,
             n_cpu=N_CPU,
             output_dir=OUTPUT_DIR
         )

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM google/cloud-sdk
+FROM gcr.io/ml-pipeline/google-cloud-pipeline-components:latest
 
 RUN pip3 install -U dsub
 

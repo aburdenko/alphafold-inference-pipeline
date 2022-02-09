@@ -73,8 +73,8 @@ class DsubJob(object):
                 disk_mounts: dict,
                 wait: bool=True)-> str:
 
-        inputs = self._convert_to_parameter_list(inputs, '--inputs')
-        outputs = self._convert_to_parameter_list(outputs, '--outputs')
+        inputs = self._convert_to_parameter_list(inputs, '--input')
+        outputs = self._convert_to_parameter_list(outputs, '--output-recursive')
         env_vars = self._convert_to_parameter_list(env_vars, '--env')
         disk_mounts = self._convert_to_parameter_list(disk_mounts, '--mount')
         script = ['--script', script]
@@ -84,7 +84,6 @@ class DsubJob(object):
             dsub_cmd.append('--wait')
 
         logging.info(f'Executing: {dsub_cmd}')
-        print(dsub_cmd)
         
         result = subprocess.run(
             dsub_cmd,

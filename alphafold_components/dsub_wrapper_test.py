@@ -20,42 +20,110 @@ import shutil
 
 from dsub_wrapper import DsubJob
 
+
+
+import base64
+import datetime
+import logging
+import json
+import mock
+import pytest
+import time
+import sys
+
 _dsub_binary_path = shutil.which('dsub')
 _project='jk-mlops-dev'
 _region = 'us-central1'
 _logging = 'gs://jk-dsub-staging/logging'
 _provider = 'google-cls-v2'
 _boot_disk_size = 100
-_log_interval = '30s'
-_image = 'gcr.io/jk-mlops-dev/alphafold'
-_machine_type = 'n1-standard-4' 
+_base_bucket = 'gs://jk-alphafold-datasets-archive'
 
-dsub = DsubJob(binary_path=_dsub_binary_path,
-               project=_project,
-               image=_image,
-               region=_region,
-               logging=_logging,
-               provider=_provider,
-               machine_type=_machine_type,
-               boot_disk_size=_boot_disk_size,
-               log_interval=_log_interval)
+logging.basicConfig(format='%(asctime)s - %(message)s',
+                        level=logging.INFO, 
+                        datefmt='%d-%m-%y %H:%M:%S',
+                        stream=sys.stdout)
 
-_script = './alphafold_runners/runner_test.py'
-_inputs = {'FASTA_PATH': 'gs://jk1-', 'N_CPU': '2'}
-_inputs = {}
-_outputs = {}
-_env_vars = {'PYTHONPATH': '/app/alphafold'}
-_disk_mounts = {'DB': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
-result = dsub.run_job(script=_script,
-             inputs=_inputs,
-             outputs=_outputs,
-             env_vars=_env_vars,
-             disk_mounts=_disk_mounts)
+def test_jackhmmer_job():
+    
+    _log_interval = '30s'
+    _image = 'gcr.io/jk-mlops-dev/alphafold'
+    _machine_type = 'n1-standard-4' 
 
-print(result.returncode)
-print(result.stderr)
-print(result.stdout)
+    dsub = DsubJob(binary_path=_dsub_binary_path,
+                project=_project,
+                image=_image,
+                region=_region,
+                logging=_logging,
+                provider=_provider,
+                machine_type=_machine_type,
+                boot_disk_size=_boot_disk_size,
+                log_interval=_log_interval)
 
+    _script = './alphafold_runners/msa_runner.py'
+    _inputs = {
+        'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
+        }
+    _outputs = {
+        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+    }
+    _env_vars = {
+        'PYTHONPATH': '/app/alphafold',
+        'DATABASE_PATHS': 'uniref90/uniref90.fasta',
+        'MSA_TOOL': 'jackhmmer',
+        'N_CPU': '4',
+        }
+    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    print('Starting jackhmmer job')
+    result = dsub.run_job(script=_script,
+                inputs=_inputs,
+                outputs=_outputs,
+                env_vars=_env_vars,
+                disk_mounts=_disk_mounts)
 
+    print(result.returncode)
+    print(result.stderr)
+    print(result.stdout)
+
+def test_hhblits_job():
+    
+    _log_interval = '30s'
+    _image = 'gcr.io/jk-mlops-dev/alphafold'
+    _machine_type = 'n1-standard-4' 
+
+    dsub = DsubJob(binary_path=_dsub_binary_path,
+                project=_project,
+                image=_image,
+                region=_region,
+                logging=_logging,
+                provider=_provider,
+                machine_type=_machine_type,
+                boot_disk_size=_boot_disk_size,
+                log_interval=_log_interval)
+
+    _script = './alphafold_runners/msa_runner.py'
+    _inputs = {
+        'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
+        }
+    _outputs = {
+        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+    }
+    _env_vars = {
+        'PYTHONPATH': '/app/alphafold',
+        'DATABASE_PATHS': '/data/uniclust30/uniclust30_2018_08/uniclust30_2018_08,/data/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt',
+        'MSA_TOOL': 'hhblits',
+        'N_CPU': '4',
+        }
+    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    print('Starting jackhmmer job')
+    result = dsub.run_job(script=_script,
+                inputs=_inputs,
+                outputs=_outputs,
+                env_vars=_env_vars,
+                disk_mounts=_disk_mounts)
+
+    print(result.returncode)
+    print(result.stderr)
+    print(result.stdout)
 
 

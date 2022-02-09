@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,9 +31,10 @@ from alphafold.data import templates
 from alphafold.data.tools import hhsearch 
 
 
-_OUTPUT_FILE_NAME = 'output.hhr'
+_OUTPUT_FILE_PREFIX = 'OUTPUT'
 MSA_PATH = os.environ['MSA_PATH']
 OUTPUT_DIR = os.environ['OUTPUT_DIR']
+DATABASES_ROOT = os.environ['DATABASES_ROOT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 HHBLITS_BINARY_PATH = shutil.which('hhsearch')
 MAXSEQ = int(os.getenv('MAXSEQ', '1_000_000'))
@@ -69,8 +71,9 @@ def run_hhsearch(
           f'File type not supported by HHSearch: {file_type}.')
 
     template_hits = runner.query(msa_for_templates)
-    
-    template_out_path = os.path.join(output_dir, _OUTPUT_FILE_NAME)
+
+    file_format = 'hhr' 
+    template_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
     with open(template_out_path, 'w') as f:
         f.write(template_hits)
     logging.info(f"Saved results to {template_out_path}")
@@ -82,7 +85,10 @@ if __name__=='__main__':
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
 
-    database_paths = DATABASE_PATHS.split(',') 
+    database_paths = [
+            os.path.join(DATABASES_ROOT, database_path) 
+            for database_path in DATABASE_PATHS.split(',')]
+
     if TEMPLATE_TOOL == 'hhsearch':
         database_path = DATABASE_PATHS.split(',')[0]
         run_hhsearch(
