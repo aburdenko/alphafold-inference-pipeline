@@ -36,8 +36,8 @@ MSA_TOOL = os.environ['MSA_TOOL']
 FASTA_PATH = os.environ['FASTA_PATH']
 OUTPUT_DIR = os.environ['OUTPUT_DIR']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
-N_CPU = int(os.getenv('N_CPU'), '2')
-MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES'), 501)
+N_CPU = int(os.getenv('N_CPU', '2'))
+MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES', 501))
 HHBLITS_BINARY_PATH = shutil.which('hhblits')
 JACKHMMER_BINARY_PATH = shutil.which('jackhmmer')
 
@@ -96,7 +96,7 @@ def run_hhblits(
     msa_format = 'a3m'
     msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{msa_format}')
     result = _run_msa_tool(
-        runner=runner,
+        msa_runner=runner,
         input_fasta_path=input_fasta_path,
         msa_out_path=msa_out_path,
         msa_format=msa_format
@@ -123,7 +123,7 @@ def run_jackhmmer(
     msa_format = 'sto'
     msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{msa_format}')
     result = _run_msa_tool(
-        runner=runner,
+        msa_runner=runner,
         input_fasta_path=input_fasta_path,
         msa_out_path=msa_out_path,
         msa_format=msa_format
@@ -140,7 +140,7 @@ if __name__=='__main__':
         database_path = DATABASE_PATHS.split(',')[0]
         run_jackhmmer(
             input_fasta_path=FASTA_PATH,
-            database_path=database_path
+            database_path=database_path,
             n_cpu=N_CPU,
             max_sto_sequences=MAX_STO_SEQEUNCES,
             output_dir=OUTPUT_DIR
