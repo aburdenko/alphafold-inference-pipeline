@@ -77,6 +77,7 @@ def _read_and_check_fasta(fasta_path):
 
     return input_seqs, input_descs
 
+
 def run_hhblits(
     input_fasta_path: str,
     database_paths: Sequence[str],

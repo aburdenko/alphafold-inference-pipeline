@@ -68,9 +68,20 @@ python msa_runner.py
 ```
 export PYTHONPATH=/app/alphafold
 export MSA_PATH=/output/msas/output_jackhmmer.sto
-export OUTPUT_DIR=/src/msas 
+export OUTPUT_DIR=/output/msas 
 export DATABASE_PATHS=/data/pdb70/pdb70 
 export MAXSEQ=1_000_000
 
 python hhsearch_runner.py
+```
+
+```
+export PYTHONPATH=/app/alphafold
+export MSA_PATH=/output/msas/output_jackhmmer.sto
+export OUTPUT_DIR=/output/msas 
+export DATABASE_PATHS=/data/pdb70/pdb70 
+export MAXSEQ=1_000_000
+export TEMPLATE_TOOL=hhsearch
+
+python template_runner.py
 ```
