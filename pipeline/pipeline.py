@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import os
+import json
 from re import I
+
 
 from absl import flags
 from absl import app
@@ -22,6 +24,8 @@ from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
 from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
+
+import alphafold_components
 
 FLAGS = flags.FLAGS
 
@@ -32,16 +36,22 @@ flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path 
                     'database for use by JackHMMER.')
 
 
-jackhmmer_search_op = components.load_component_from_file("../components/jackhmmer_search/component.yaml")
 
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
+    dsub_logging_path: str,
     fasta_path: str,
+    databases_disk_image: str,
+    uniref90_database_path: list,
     project: str='jk-mlops-dev',
     region: str='us-central1'):
     """Runs AlphaFold inference."""
 
-    search_uniref90 = jackhmmer_search_op(project, region, fasta_path, FLAGS.uniref90_database_path) 
+    #database_paths = json.dumps([str(uniref90_database_path)])
+    search_uniref90 = alphafold_components.MSASearchOp(
+        search_tool='jackhmmer', 
+        database_paths=uniref90_database_path,
+        databases_disk_image=databases_disk_image) 
 
 
 def _main(argv):

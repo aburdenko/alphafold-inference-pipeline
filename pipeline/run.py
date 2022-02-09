@@ -28,12 +28,14 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_string('pipeline_spec', 'alphafold-inference.json', 'Path to pipeline spec')
 flags.DEFINE_string('pipeline_staging_location', 'gs://jk-vertex-staging/pipelines', 'Vertex AI staging bucket')
+flags.DEFINE_string('dsub_logging_path', 'gs://jk-dsub-staging/logging', 'dsub logging')
 flags.DEFINE_string('project', 'jk-mlops-dev', 'GCP Project')
 flags.DEFINE_string('region', 'us-central1', 'GCP Region')
 flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/T1050.fasta', 'A path to a sequence')
 flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Vertex SA')
 flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
-
+flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
+flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepopulated with databases')
 
 def _main(argv):
 
@@ -41,6 +43,9 @@ def _main(argv):
         'fasta_path': FLAGS.fasta_path,
         'project': FLAGS.project,
         'region': FLAGS.region,
+        'dsub_logging_path': FLAGS.dsub_logging_path,
+        'databases_disk_image': FLAGS.databases_disk_image,
+        'uniref90_database_path': [FLAGS.uniref90_database_path],
     }
 
     pipeline_job = aip.PipelineJob(

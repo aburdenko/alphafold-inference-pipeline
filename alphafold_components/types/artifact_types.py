@@ -26,3 +26,30 @@ class MSA(dsl.Artifact):
                uri: Optional[str] = None,
                metadata: Optional[Dict] = None):
     super().__init__(uri=uri, name=name, metadata=metadata)
+    
+    @property
+    def format(self) -> str:
+      return self._get_format()
+
+    def _get_format(self) -> str:
+      return self.metadata.get('format')
+
+    @format.setter
+    def format(self, format:str):
+      self._set_format(str)
+
+    def _set_format(self, format:str):
+      self.metadata['format'] = format
+
+
+class Template(dsl.Artifact):
+  """An artifact representing a protein template."""
+  TYPE_NAME = 'alphafold.Template'
+
+  def __init__(self,
+               name: Optional[str] = None,
+               uri: Optional[str] = None,
+               metadata: Optional[Dict] = None):
+    super().__init__(uri=uri, name=name, metadata=metadata)
+    
+    

@@ -1,39 +1,17 @@
 {
   "pipelineSpec": {
     "components": {
-      "comp-jackhmmer-search": {
-        "executorLabel": "exec-jackhmmer-search",
+      "comp-msa-search": {
+        "executorLabel": "exec-msa-search",
         "inputDefinitions": {
           "parameters": {
-            "alpha-fold-databases-disk-size": {
-              "type": "INT"
-            },
-            "alpha-fold-databases-image": {
+            "database_paths": {
               "type": "STRING"
             },
-            "boot_disk_size": {
-              "type": "INT"
-            },
-            "database_path": {
+            "databases_disk_image": {
               "type": "STRING"
             },
-            "fasta_path": {
-              "type": "STRING"
-            },
-            "location": {
-              "type": "STRING"
-            },
-            "machine_type": {
-              "type": "STRING"
-            },
-            "project": {
-              "type": "STRING"
-            }
-          }
-        },
-        "outputDefinitions": {
-          "parameters": {
-            "output_dir": {
+            "search_tool": {
               "type": "STRING"
             }
           }
@@ -42,35 +20,24 @@
     },
     "deploymentSpec": {
       "executors": {
-        "exec-jackhmmer-search": {
+        "exec-msa-search": {
           "container": {
             "args": [
-              "--image",
-              "gcr.io/jk-mlops-dev/alphafold-inference",
-              "--project",
-              "{{$.inputs.parameters['project']}}",
-              "--regions",
-              "{{$.inputs.parameters['location']}}",
-              "--machine-type",
-              "{{$.inputs.parameters['machine_type']}}",
-              "--boot-disk-size",
-              "{{$.inputs.parameters['boot_disk_size']}}",
-              "--mount",
-              "DB={{$.inputs.parameters['alpha-fold-databases-image']}}{{$.inputs.parameters['alpha-fold-databases-disk-size']}}",
-              "--input",
-              "FASTA_PATH={{$.inputs.parameters['fasta_path']}}",
-              "--oputput-recursive",
-              "OUTPUT_PATH={{$.outputs.parameters['output_dir'].output_file}}",
-              "--command",
-              "'python /scripts/jackhmmer_runner.py --fasta_path ${FASTA_PATH} --output_dir ${OUTPUT_PATH} --database_path ${DB}{{$.inputs.parameters['database_path']}}'",
-              "--wait"
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "msa_search"
             ],
             "command": [
-              "dsub",
-              "--provider",
-              "google-cls-v2"
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    search_tool: str,\n    databases_disk_image: str, \n    database_paths: list,\n):\n    print(database_paths)\n    print(type(database_paths))\n\n"
             ],
-            "image": "gcr.io/jk-mlops-dev/dsub:latest"
+            "image": "gcr.io/jk-mlops-dev/dsub"
           }
         }
       }
@@ -81,69 +48,44 @@
     "root": {
       "dag": {
         "tasks": {
-          "jackhmmer-search": {
+          "msa-search": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-jackhmmer-search"
+              "name": "comp-msa-search"
             },
             "inputs": {
               "parameters": {
-                "alpha-fold-databases-disk-size": {
+                "database_paths": {
+                  "componentInputParameter": "uniref90_database_path"
+                },
+                "databases_disk_image": {
+                  "componentInputParameter": "databases_disk_image"
+                },
+                "search_tool": {
                   "runtimeValue": {
                     "constantValue": {
-                      "intValue": "3000"
+                      "stringValue": "jackhmmer"
                     }
                   }
-                },
-                "alpha-fold-databases-image": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022"
-                    }
-                  }
-                },
-                "boot_disk_size": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "intValue": "100"
-                    }
-                  }
-                },
-                "database_path": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "/uniref90/uniref90.fasta"
-                    }
-                  }
-                },
-                "fasta_path": {
-                  "componentInputParameter": "fasta_path"
-                },
-                "location": {
-                  "componentInputParameter": "region"
-                },
-                "machine_type": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "n1-standard-8"
-                    }
-                  }
-                },
-                "project": {
-                  "componentInputParameter": "project"
                 }
               }
             },
             "taskInfo": {
-              "name": "jackhmmer-search"
+              "name": "msa-search"
             }
           }
         }
       },
       "inputDefinitions": {
         "parameters": {
+          "databases_disk_image": {
+            "type": "STRING"
+          },
+          "dsub_logging_path": {
+            "type": "STRING"
+          },
           "fasta_path": {
             "type": "STRING"
           },
@@ -151,6 +93,9 @@
             "type": "STRING"
           },
           "region": {
+            "type": "STRING"
+          },
+          "uniref90_database_path": {
             "type": "STRING"
           }
         }

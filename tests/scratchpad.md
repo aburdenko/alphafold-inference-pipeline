@@ -105,3 +105,30 @@ dsub --provider google-cls-v2 \
 --output-recursive OUTPUT_PATH=gs://jk-dsub-staging/output/hhr \
 --command 'python /scripts/hhsearch_runner.py  --msa_path ${MSA_PATH}  --output_dir $OUTPUT_PATH --database_paths ${DB}/pdb70/pdb70' \
 --wait
+
+
+
+# Misc
+
+dsub \
+    --provider google-cls-v2 \
+    --project jk-mlops-dev \
+    --regions us-central1 \
+    --logging gs://jk-dsub-staging/logging/ \
+    --output OUT=gs://jk-dsub-staging/output/out.txt \
+    --command 'echo "Hello World" > "${OUT}"' \
+    --wait
+
+
+dsub \
+--image gcr.io/jk-mlops-dev/alphafold-inference \
+--provider google-cls-v2 \
+--machine-type n1-standard-8 \
+--boot-disk-size 100 \
+--project jk-mlops-dev \
+--regions us-central1 \
+--logging gs://jk-dsub-staging/logging \
+--log-interval 10s \
+--script ./alphafold_runners/runner_test.py \
+--wait
+

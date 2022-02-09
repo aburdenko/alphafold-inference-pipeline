@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gcr.io/jk-mlops-dev/alphafold
+FROM google/cloud-sdk
+
+RUN pip3 install -U dsub
 
 WORKDIR /scripts
 
-ADD jackhmmer_runner.py .
-ADD hhblits_runner.py .
-ADD hhsearch_runner.py .
-ADD runner_utils.py .
+ADD alphafold_runners/ .
 
-ENV PYTHONPATH=/app/alphafold
-
-ENTRYPOINT ["/bin/bash", "-c"]
+ENTRYPOINT ["/bin/bash"]

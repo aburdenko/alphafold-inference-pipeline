@@ -13,3 +13,5 @@
 # limitations under the License.
 """AlphaFold inference components."""
 from .version import __version__
+
+from alphafold_components.search_uniref90 import search_uniref90 as SearchUniref90Op
