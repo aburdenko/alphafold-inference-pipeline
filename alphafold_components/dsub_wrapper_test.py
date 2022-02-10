@@ -74,6 +74,7 @@ def test_jackhmmer_job():
         'DATABASE_PATHS': _databases,
         'MSA_TOOL': 'jackhmmer',
         'N_CPU': '4',
+        'MAX_STO_SEQUENCES': '10000',
         }
     _disk_mounts = {'DATABASES_ROOT': _alphafold_datasets}
     print('Starting jackhmmer job')
@@ -92,7 +93,8 @@ def test_hhblits_job():
     
     _log_interval = '30s'
     _image = 'gcr.io/jk-mlops-dev/alphafold'
-    _machine_type = 'n1-standard-4'
+    _machine_type = 'c2-standard-8'
+    _boot_disk_size = 500
     _databases =  'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
 
     dsub = DsubJob(binary_path=_dsub_binary_path,
@@ -134,8 +136,9 @@ def test_hhsearch_job():
     
     _log_interval = '30s'
     _image = 'gcr.io/jk-mlops-dev/alphafold'
-    _machine_type = 'n1-standard-4'
+    _machine_type = 'c2-standard-8'
     _databases =  'pdb70/pdb70'
+    _boot_disk_size = 500
 
     dsub = DsubJob(binary_path=_dsub_binary_path,
                 project=_project,

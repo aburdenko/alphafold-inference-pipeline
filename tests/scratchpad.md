@@ -132,3 +132,16 @@ dsub \
 --script ./alphafold_runners/runner_test.py \
 --wait
 
+
+dsub \
+--image gcr.io/jk-mlops-dev/alphafold \
+--provider google-cls-v2 \
+--machine-type n1-standard-4 \
+--boot-disk-size 100 \
+--project jk-mlops-dev \
+--regions us-central1 \
+--logging gs://jk-dsub-staging/logging \
+--log-interval 10s \
+--command 'hhsearch' \
+--wait
+
