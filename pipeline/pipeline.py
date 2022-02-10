@@ -37,6 +37,9 @@ flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path 
 
 _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
 _UNIREF_PATH = 'uniref90/uniref90.fasta'
+_MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
+_BFD__UNICLUST_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
+_PDB_PATH = 'pdb70/pdb70'
 _JACKHMMER = 'jackhmmer'
 _HHSEARCH = 'hhsearch'
 _HHBLITS = 'hhblits'
@@ -56,7 +59,36 @@ def pipeline(
         database_paths=_UNIREF_PATH,
         input_path=fasta_path,
         search_tool=_JACKHMMER
+    )
+
+    search_mgnify = alphafold_components.DBSearchOp(
+        project=project,
+        region=region,
+        datasets_disk_image=datasets_disk_image,
+        database_paths=_MGNIFY_PATH,
+        input_path=fasta_path,
+        search_tool=_JACKHMMER
+    )
+
+    search_bfd_uniclust = alphafold_components.DBSearchOp(
+        project=project,
+        region=region,
+        datasets_disk_image=datasets_disk_image,
+        database_paths=_BFD__UNICLUST_PATH,
+        input_path=fasta_path,
+        search_tool=_HHBLITS
+    )
+
+    search_pdb = alphafold_components.DBSearchOp(
+        project=project,
+        region=region,
+        datasets_disk_image=datasets_disk_image,
+        database_paths=_PDB_PATH,
+        input_path=search_uniref.outputs['Output'],
+        search_tool=_HHSEARCH
     ) 
+
+    
 
 
 def _main(argv):

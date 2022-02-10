@@ -65,14 +65,14 @@ def db_search(
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 6,
-           'FILE_FORMAT': 'a3m'
+           'FILE_FORMAT': 'a3m',
            'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
        },
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'MAXSEQ': '1_000_000',
-           'FILE_FORMAT': 'hhr'
+           'FILE_FORMAT': 'hhr',
            'SCRIPT': '/scripts/alphafold_components/alphafold_runners/template_runner.py' 
        }
     }
