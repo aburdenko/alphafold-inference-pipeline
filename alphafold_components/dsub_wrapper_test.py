@@ -49,7 +49,8 @@ def test_jackhmmer_job():
     
     _log_interval = '30s'
     _image = 'gcr.io/jk-mlops-dev/alphafold'
-    _machine_type = 'n1-standard-4' 
+    _machine_type = 'n1-standard-4'
+    _databases =  'uniref90/uniref90.fasta'
 
     dsub = DsubJob(binary_path=_dsub_binary_path,
                 project=_project,
@@ -70,7 +71,7 @@ def test_jackhmmer_job():
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': 'uniref90/uniref90.fasta',
+        'DATABASE_PATHS': _databases,
         'MSA_TOOL': 'jackhmmer',
         'N_CPU': '4',
         }
@@ -91,7 +92,8 @@ def test_hhblits_job():
     
     _log_interval = '30s'
     _image = 'gcr.io/jk-mlops-dev/alphafold'
-    _machine_type = 'n1-standard-4' 
+    _machine_type = 'n1-standard-4'
+    _databases =  'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
 
     dsub = DsubJob(binary_path=_dsub_binary_path,
                 project=_project,
@@ -112,7 +114,7 @@ def test_hhblits_job():
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': 'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt',
+        'DATABASE_PATHS': _databases,
         'MSA_TOOL': 'hhblits',
         'N_CPU': '4',
         }
@@ -132,7 +134,8 @@ def test_hhsearch_job():
     
     _log_interval = '30s'
     _image = 'gcr.io/jk-mlops-dev/alphafold'
-    _machine_type = 'n1-standard-4' 
+    _machine_type = 'n1-standard-4'
+    _databases =  'pdb70/pdb70'
 
     dsub = DsubJob(binary_path=_dsub_binary_path,
                 project=_project,
@@ -153,7 +156,7 @@ def test_hhsearch_job():
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': 'pdb70/pdb70',
+        'DATABASE_PATHS': _databases,
         'TEMPLATE_TOOL': 'hhsearch',
         'MAXSEQ': '1_000_000',
         }
