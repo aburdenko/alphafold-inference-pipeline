@@ -63,7 +63,7 @@ implementation:
       \n    # This is a temporary hack till we find a better option for dsub logging\
       \ location\n    # It would be great if we can access pipeline root directly\n\
       \    # If not we can always pass the location as a parameter \n    logging_gcs_path\
-      \ = output_msa.uri.split('/')[2:-2]\n    folders = '/'.join(logging_gcs_path)\n\
+      \ = output_msa.uri.split('/')[2:-1]\n    folders = '/'.join(logging_gcs_path)\n\
       \    logging_gcs_path = f'gs://{folders}/logging'\n    script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT')\
       \ \n\n    dsub_job = dsub_wrapper.DsubJob(\n        image=_IMAGE,\n        project=project,\n\
       \        region=region,\n        logging=logging_gcs_path,\n        provider=_DSUB_PROVIDER,\n\

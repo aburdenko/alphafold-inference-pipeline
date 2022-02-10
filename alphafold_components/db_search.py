@@ -91,7 +91,7 @@ def db_search(
     # This is a temporary hack till we find a better option for dsub logging location
     # It would be great if we can access pipeline root directly
     # If not we can always pass the location as a parameter 
-    logging_gcs_path = output_msa.uri.split('/')[2:-2]
+    logging_gcs_path = output_msa.uri.split('/')[2:-1]
     folders = '/'.join(logging_gcs_path)
     logging_gcs_path = f'gs://{folders}/logging'
     script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT') 
