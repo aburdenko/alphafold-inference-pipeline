@@ -88,7 +88,7 @@ def run_hhblits(
     output_path: str): 
     """Runs hhblits and saves results to a file."""
 
-    msa_format = pathlib.Path(output_path).suffix[1:0]
+    msa_format = pathlib.Path(output_path).suffix[1:]
     if msa_format != 'a3m':
         raise ValueError(f'hhblits does not support generating files in {msa_format} format') 
 
@@ -117,7 +117,7 @@ def run_jackhmmer(
     output_path: str): 
     """Runs jackhmeer and saves results to a file."""
 
-    msa_format = pathlib.Path(output_path).suffix[1:0]
+    msa_format = pathlib.Path(output_path).suffix[1:]
     if msa_format != 'sto':
         raise ValueError(f'jackhmmer does not support generating files in {msa_format} format') 
 
@@ -149,8 +149,10 @@ if __name__=='__main__':
             os.path.join(DATABASES_ROOT, database_path) 
             for database_path in DATABASE_PATHS.split(',')]
 
+    print('***** In msa_runner****')
+    print(OUTPUT_PATH)
+
     if MSA_TOOL == 'jackhmmer':
-     
         run_jackhmmer(
             input_path=INPUT_PATH,
             database_path=database_paths[0],
