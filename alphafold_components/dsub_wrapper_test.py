@@ -37,7 +37,7 @@ _region = 'us-central1'
 _logging = 'gs://jk-dsub-staging/logging'
 _provider = 'google-cls-v2'
 _boot_disk_size = 100
-_base_bucket = 'gs://jk-alphafold-datasets-archive'
+_base_bucket = 'gs://jk-dsub-staging'
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                         level=logging.INFO, 
@@ -65,7 +65,7 @@ def test_jackhmmer_job():
         'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
         }
     _outputs = {
-        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+        'OUTPUT_DIR': f'{_base_bucket}/output/jackhmmer/msas'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
@@ -84,6 +84,7 @@ def test_jackhmmer_job():
     print(result.returncode)
     print(result.stderr)
     print(result.stdout)
+
 
 def test_hhblits_job():
     
