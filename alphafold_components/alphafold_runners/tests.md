@@ -35,7 +35,7 @@ export INPUT_PATH=/src/fasta/T1050.fasta
 export OUTPUT_PATH=/output/testing/hhblits/output.a3m
 export DATABASES_ROOT=/data
 export DATABASE_PATHS=uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt
-export N_CPU=4
+export N_CPU=8
 export DB_TOOL=hhblits
 
 python db_search_runner.py

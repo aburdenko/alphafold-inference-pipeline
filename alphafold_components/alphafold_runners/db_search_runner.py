@@ -158,7 +158,7 @@ def run_hhsearch(
         raise ValueError(f'hhsearch does not support generating files in {template_format} format') 
 
     runner = hhsearch.HHSearch(
-        binary_path=HHBLITS_BINARY_PATH,
+        binary_path=HHSEARCH_BINARY_PATH,
         databases=database_paths,
         maxseq=maxseq,
     )
