@@ -18,10 +18,8 @@ RUN pip3 install -U dsub
 
 WORKDIR /scripts
 
-# ADD alphafold_components alphafold_components
+ADD alphafold_runners alphafold_runners
 
-ADD run.sh .
+ADD run_dsub_job.sh .
 
-ENV PYTHONPATH=/scripts
-
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./run_dsub_job.sh"]
