@@ -17,14 +17,15 @@
 import logging
 import os
 import subprocess 
+import shutil
 
 from typing import List
 
+_DSUB_BINARY_PATH = shutil.which('dsub')
 
 class DsubJob(object):
 
     def __init__(self,
-                 binary_path: str,
                  project: str,
                  region: str,
                  image: str,
@@ -32,6 +33,7 @@ class DsubJob(object):
                  machine_type: str,
                  boot_disk_size: int=100,
                  log_interval: str="1m",
+                 binary_path: str=_DSUB_BINARY_PATH,
                  provider: str='google-cls-v2'):
 
         self.binary_path=binary_path

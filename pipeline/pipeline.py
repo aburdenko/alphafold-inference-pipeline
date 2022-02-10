@@ -35,7 +35,7 @@ _PIPELINE_DESCRIPTION = 'Alphafold inference'
 flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path to the Uniref90 '
                     'database for use by JackHMMER.')
 
-_REFERENCE_DATASETS_IMAGE = '"https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"'
+_REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
 _UNIREF_PATH = 'uniref90/uniref90.fasta'
 _JACKHMMER = 'jackhmmer'
 _HHSEARCH = 'hhsearch'

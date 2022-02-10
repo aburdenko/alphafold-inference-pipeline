@@ -43,9 +43,6 @@ def _main(argv):
         'fasta_path': FLAGS.fasta_path,
         'project': FLAGS.project,
         'region': FLAGS.region,
-        'dsub_logging_path': FLAGS.dsub_logging_path,
-        'databases_disk_image': FLAGS.databases_disk_image,
-        'uniref90_database_path': [FLAGS.uniref90_database_path],
     }
 
     pipeline_job = aip.PipelineJob(

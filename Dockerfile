@@ -18,6 +18,8 @@ RUN pip3 install -U dsub
 
 WORKDIR /scripts
 
-ADD alphafold_runners/ .
+ADD alphafold_components alphafold_components
+
+ENV PYTHONPATH=/scripts
 
 ENTRYPOINT ["/bin/bash"]

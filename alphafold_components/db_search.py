@@ -17,8 +17,8 @@ import subprocess
 
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output
+from kfp.v2.dsl import Artifact 
 
-from alphafold_components.artifact_types import MSA
 
 
 @dsl.component(
@@ -32,7 +32,7 @@ def db_search(
     database_paths: str,
     fasta_path: str,
     search_tool: str,
-    output_msa: Output[MSA], 
+    output_msa: Output[Artifact], 
     tool_options: dict=None):
     """Searches sequence databases using the specified tool.
 
@@ -52,7 +52,7 @@ def db_search(
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
 
-    _REFERENCE_DATASETS_IMAGE = '"https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"'
+    _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
     _TOOL_TO_SETTINGS_MAPPING = {
        'jackhmmer': {
            'MACHINE_TYPE': 'n1-standard-8',
@@ -79,9 +79,10 @@ def db_search(
         raise ValueError(f'Unsupported tool: {search_tool}')
     # We should probably also do some checking whether a given tool, DB combination works
 
-    _DSUB_PROVIDER = 'google_cls_v2'
+    _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
     _SCRIPT = './msa_runner.py'
+    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
     
     
     # This is a temporary hack till we find a better option for dsub logging location
@@ -93,6 +94,7 @@ def db_search(
     file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT') 
     
     dsub_job = dsub_wrapper.DsubJob(
+        image=_IMAGE,
         project=project,
         region=region,
         logging=logging_gcs_path,
@@ -122,12 +124,12 @@ def db_search(
         'DATABASES_ROOT': datasets_disk_image 
     }
 
-    logging('Starting a dsub job')
+    logging.info('Starting a dsub job')
     # Right now this is a blocking call. In future we should implement
     # a polling loop to periodically retrieve logs, stdout and stderr
     # and push it Vertex
     result = dsub_job.run_job(
-        scripts=_SCRIPT,
+        script=_SCRIPT,
         inputs=inputs,
         outputs=outputs,
         env_vars=env_vars,
@@ -137,8 +139,11 @@ def db_search(
     logging.info('Job completed')
     logging.info(f'Completion status {result.returncode}')
     logging.info(f'Logs: {result.stdout}')
+    
+    if result.returncode != 0:
+        raise RuntimeError('dsub job failed')
 
-    output_msa.format[file_format]
+    output_msa.metadata['file_format']=file_format
     
 
     
