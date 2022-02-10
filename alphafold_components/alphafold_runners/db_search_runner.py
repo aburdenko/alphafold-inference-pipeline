@@ -153,9 +153,9 @@ def run_hhsearch(
     output_path: str): 
     """Runs hhblits and saves results to a file."""
 
-    template_format = pathlib.Path(input_path).suffix[1:]
+    template_format = pathlib.Path(output_path).suffix[1:]
     if template_format != 'hhr':
-        raise ValueError('hhsearch does not support generating files in {output_file_type} format') 
+        raise ValueError(f'hhsearch does not support generating files in {template_format} format') 
 
     runner = hhsearch.HHSearch(
         binary_path=HHBLITS_BINARY_PATH,
