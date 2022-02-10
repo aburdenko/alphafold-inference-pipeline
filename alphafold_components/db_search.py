@@ -28,7 +28,7 @@ def db_search(
     region: str,
     datasets_disk_image: str,
     database_paths: str,
-    fasta_path: str,
+    input_path: str,
     search_tool: str,
     output_msa: Output[Artifact], 
     tool_options: dict=None)-> str:
@@ -105,12 +105,12 @@ def db_search(
     )
 
     inputs = {
-        'FASTA_PATH': fasta_path, 
+        'INPUT_PATH': input_path, 
     }
     file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')
     output_path =  os.path.join(output_msa.uri, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
     outputs = {
-        'OUTPUT_PATH': output_path)
+        'OUTPUT_PATH': output_path
     }
     env_vars = {
         'PYTHONPATH': '/app/alphafold',

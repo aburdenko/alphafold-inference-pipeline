@@ -54,7 +54,7 @@ def pipeline(
         region=region,
         datasets_disk_image=datasets_disk_image,
         database_paths=_UNIREF_PATH,
-        fasta_path=fasta_path,
+        input_path=fasta_path,
         search_tool=_JACKHMMER
     ) 
 
