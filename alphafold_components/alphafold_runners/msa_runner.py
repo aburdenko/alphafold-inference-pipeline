@@ -40,7 +40,7 @@ OUTPUT_DIR = os.environ['OUTPUT_DIR']
 DATABASES_ROOT = os.environ['DATABASES_ROOT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 N_CPU = int(os.getenv('N_CPU', '2'))
-MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES', 501))
+MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES', 10000))
 HHBLITS_BINARY_PATH = shutil.which('hhblits')
 JACKHMMER_BINARY_PATH = shutil.which('jackhmmer')
 
@@ -130,7 +130,8 @@ def run_jackhmmer(
         msa_runner=runner,
         input_fasta_path=input_fasta_path,
         msa_out_path=msa_out_path,
-        msa_format=msa_format
+        msa_format=msa_format,
+        max_sto_sequences=max_sto_sequences
     )
 
 

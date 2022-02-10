@@ -17,7 +17,7 @@ export OUTPUT_DIR=/output/msas
 export DATABASES_ROOT=/data 
 export DATABASE_PATHS=uniref90/uniref90.fasta
 export N_CPU=4
-export MAX_STO_SEQUENCES=500
+export MAX_STO_SEQUENCES=10000
 export MSA_TOOL=jackhmmer
 
 python msa_runner.py
@@ -53,7 +53,7 @@ python msa_runner.py
 
 ```
 export PYTHONPATH=/app/alphafold
-export MSA_PATH=/output/msas/OUTPUT.sto
+export MSA_PATH=/output/msas/output_jackhmmer.sto
 export OUTPUT_DIR=/output/msas
 export DATABASES_ROOT=/data 
 export DATABASE_PATHS=pdb70/pdb70 
