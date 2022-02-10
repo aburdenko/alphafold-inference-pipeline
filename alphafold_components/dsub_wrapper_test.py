@@ -38,6 +38,7 @@ _logging = 'gs://jk-dsub-staging/logging'
 _provider = 'google-cls-v2'
 _boot_disk_size = 100
 _base_bucket = 'gs://jk-dsub-staging'
+_alphafold_datasets = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                         level=logging.INFO, 
@@ -73,7 +74,7 @@ def test_jackhmmer_job():
         'MSA_TOOL': 'jackhmmer',
         'N_CPU': '4',
         }
-    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    _disk_mounts = {'DATABASES_ROOT': _alphafold_datasets}
     print('Starting jackhmmer job')
     result = dsub.run_job(script=_script,
                 inputs=_inputs,
@@ -115,7 +116,7 @@ def test_hhblits_job():
         'MSA_TOOL': 'hhblits',
         'N_CPU': '4',
         }
-    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    _disk_mounts = {'DATABASES_ROOT': _alphafold_datasets}
     print('Starting hhblits job')
     result = dsub.run_job(script=_script,
                 inputs=_inputs,
@@ -156,7 +157,7 @@ def test_hhsearch_job():
         'TEMPLATE_TOOL': 'hhsearch',
         'MAXSEQ': '1_000_000',
         }
-    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    _disk_mounts = {'DATABASES_ROOT': _alphafold_datasets}
     print('Starting hhsearch job')
     result = dsub.run_job(script=_script,
                 inputs=_inputs,

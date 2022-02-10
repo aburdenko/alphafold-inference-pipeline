@@ -53,7 +53,7 @@ python msa_runner.py
 
 ```
 export PYTHONPATH=/app/alphafold
-export MSA_PATH=/output/msas/output_jackhmmer.sto
+export MSA_PATH=/output/msas/uniref90_results.sto
 export OUTPUT_DIR=/output/msas
 export DATABASES_ROOT=/data 
 export DATABASE_PATHS=pdb70/pdb70 
