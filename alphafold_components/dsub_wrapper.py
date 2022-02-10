@@ -76,7 +76,7 @@ class DsubJob(object):
                 wait: bool=True)-> str:
 
         inputs = self._convert_to_parameter_list(inputs, '--input')
-        outputs = self._convert_to_parameter_list(outputs, '--output-recursive')
+        outputs = self._convert_to_parameter_list(outputs, '--output')
         env_vars = self._convert_to_parameter_list(env_vars, '--env')
         disk_mounts = self._convert_to_parameter_list(disk_mounts, '--mount')
         script = ['--script', script]

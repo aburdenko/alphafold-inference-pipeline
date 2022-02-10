@@ -32,9 +32,8 @@ from alphafold.data import templates
 from alphafold.data.tools import hhsearch 
 
 
-_OUTPUT_FILE_PREFIX = 'OUTPUT'
-MSA_PATH = os.environ['MSA_PATH']
-OUTPUT_DIR = os.environ['OUTPUT_DIR']
+INPUT_PATH = os.environ['INPUT_PATH']
+OUTPUT_PATH = os.environ['OUTPUT_PATH']
 DATABASES_ROOT = os.environ['DATABASES_ROOT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 HHBLITS_BINARY_PATH = shutil.which('hhsearch')
@@ -43,11 +42,15 @@ TEMPLATE_TOOL = os.environ['TEMPLATE_TOOL']
 
 
 def run_hhsearch(
-    input_msa_path: str,
+    input_path: str,
     database_paths: Sequence[str],
     maxseq: int,
-    output_dir: str): 
+    output_path: str): 
     """Runs hhblits and saves results to a file."""
+
+    template_format = pathlib.Path(input_path).suffix[1:]
+    if template_format != 'hhr':
+        raise ValueError('hhsearch does not support generating files in {output_file_type} format') 
 
     runner = hhsearch.HHSearch(
         binary_path=HHBLITS_BINARY_PATH,
@@ -55,29 +58,27 @@ def run_hhsearch(
         maxseq=maxseq,
     )
 
-    with open(input_msa_path) as f:
+    with open(input_path) as f:
         input_msa_str = f.read()
 
-    file_type = pathlib.Path(input_msa_path).suffix
-    if  file_type == '.sto':
+    msa_format = pathlib.Path(input_path).suffix[1:]
+    if  msa_format == 'sto':
         msa_for_templates = parsers.deduplicate_stockholm_msa(input_msa_str)
         msa_for_templates = parsers.remove_empty_columns_from_stockholm_msa(msa_for_templates)
         msa_for_templates = parsers.convert_stockholm_to_a3m(msa_for_templates)
         print('sto')
-    elif file_type == '.a3m':
+    elif msa_format == 'a3m':
         # TBD - research what kind of preprocessing required for a3m - if any 
         print('a3m')
     else:
         raise ValueError(
-          f'File type not supported by HHSearch: {file_type}.')
+          f'File format not supported by HHSearch: {msa_format}.')
 
     template_hits = runner.query(msa_for_templates)
 
-    file_format = 'hhr' 
-    template_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_hhsearch_{time.strftime("%Y%m%d_%H%M%S")}.{file_format}')
-    with open(template_out_path, 'w') as f:
+    with open(output_path, 'w') as f:
         f.write(template_hits)
-    logging.info(f"Saved results to {template_out_path}")
+    logging.info(f"Saved results to {output_path}")
 
 
 if __name__=='__main__':

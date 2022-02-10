@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from re import I
-import subprocess
 
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output
@@ -33,7 +31,7 @@ def db_search(
     fasta_path: str,
     search_tool: str,
     output_msa: Output[Artifact], 
-    tool_options: dict=None):
+    tool_options: dict=None)-> str:
     """Searches sequence databases using the specified tool.
 
     This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
@@ -43,6 +41,7 @@ def db_search(
     """
 
     import logging
+    import os
 
     from alphafold_components import dsub_wrapper
 
@@ -75,6 +74,8 @@ def db_search(
        }
     }
 
+    _OUTPUT_FILE_PREFIX = 'output'
+
     if not search_tool in _TOOL_TO_SETTINGS_MAPPING.keys():
         raise ValueError(f'Unsupported tool: {search_tool}')
     # We should probably also do some checking whether a given tool, DB combination works
@@ -91,7 +92,6 @@ def db_search(
     logging_gcs_path = output_msa.uri.split('/')[2:-2]
     folders = '/'.join(logging_gcs_path)
     logging_gcs_path = f'gs://{folders}/logging'
-    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT') 
     
     dsub_job = dsub_wrapper.DsubJob(
         image=_IMAGE,
@@ -107,8 +107,10 @@ def db_search(
     inputs = {
         'FASTA_PATH': fasta_path, 
     }
+    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')
+    output_path =  os.path.join(output_msa.uri, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
     outputs = {
-        'OUTPUT_DIR': output_msa.uri,
+        'OUTPUT_PATH': output_path)
     }
     env_vars = {
         'PYTHONPATH': '/app/alphafold',
@@ -144,6 +146,8 @@ def db_search(
         raise RuntimeError('dsub job failed')
 
     output_msa.metadata['file_format']=file_format
+
+    return output_path
     
 
     

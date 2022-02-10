@@ -17,6 +17,7 @@
 
 import logging
 import os
+import pathlib
 import numpy as np
 import shutil
 import sys
@@ -32,11 +33,10 @@ from alphafold.data.tools import hhblits
 from alphafold.data.tools import jackhmmer
 
 
-_OUTPUT_FILE_PREFIX = 'OUTPUT'
 
 MSA_TOOL = os.environ['MSA_TOOL']
-FASTA_PATH = os.environ['FASTA_PATH']
-OUTPUT_DIR = os.environ['OUTPUT_DIR']
+INPUT_PATH = os.environ['INPUT_PATH']
+OUTPUT_PATH = os.environ['OUTPUT_PATH']
 DATABASES_ROOT = os.environ['DATABASES_ROOT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 N_CPU = int(os.getenv('N_CPU', '2'))
@@ -82,11 +82,15 @@ def _read_and_check_fasta(fasta_path):
 
 
 def run_hhblits(
-    input_fasta_path: str,
+    input_path: str,
     database_paths: Sequence[str],
     n_cpu: int,
-    output_dir: str): 
+    output_path: str): 
     """Runs hhblits and saves results to a file."""
+
+    msa_format = pathlib.Path(input_path).suffix[1:0]
+    if msa_format != 'a3m':
+        raise ValueError('hhblits does not support generating files in {msa_format} format') 
 
     runner = hhblits.HHBlits(
         binary_path=HHBLITS_BINARY_PATH,
@@ -94,26 +98,28 @@ def run_hhblits(
         n_cpu=n_cpu
     )
 
-    _, input_desc = _read_and_check_fasta(input_fasta_path)
+    _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
 
-    msa_format = 'a3m'
-    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_hhblits_{time.strftime("%Y%m%d_%H%M%S")}.{msa_format}')
     result = _run_msa_tool(
         msa_runner=runner,
-        input_fasta_path=input_fasta_path,
-        msa_out_path=msa_out_path,
+        input_fasta_path=input_path,
+        msa_out_path=output_path,
         msa_format=msa_format
     )
 
 
 def run_jackhmmer(
-    input_fasta_path: str,
+    input_path: str,
     database_path: str,
     n_cpu: int,
     max_sto_sequences: int,
-    output_dir: str): 
+    output_path: str): 
     """Runs jackhmeer and saves results to a file."""
+
+    msa_format = pathlib.Path(input_path).suffix[1:0]
+    if msa_format != 'sto':
+        raise ValueError('jackhmmer does not support generating files in {msa_format} format') 
 
     runner = jackhmmer.Jackhmmer(
         binary_path=JACKHMMER_BINARY_PATH,
@@ -121,15 +127,13 @@ def run_jackhmmer(
         n_cpu=n_cpu,
     )
 
-    _, input_desc = _read_and_check_fasta(input_fasta_path)
+    _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
 
-    msa_format = 'sto'
-    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_jackhmmer_{time.strftime("%Y%m%d_%H%M%S")}.{msa_format}')
     result = _run_msa_tool(
         msa_runner=runner,
-        input_fasta_path=input_fasta_path,
-        msa_out_path=msa_out_path,
+        input_fasta_path=input_path,
+        msa_out_path=output_path,
         msa_format=msa_format,
         max_sto_sequences=max_sto_sequences
     )
@@ -148,18 +152,18 @@ if __name__=='__main__':
     if MSA_TOOL == 'jackhmmer':
      
         run_jackhmmer(
-            input_fasta_path=FASTA_PATH,
+            input_path=INPUT_PATH,
             database_path=database_paths[0],
             n_cpu=N_CPU,
             max_sto_sequences=MAX_STO_SEQEUNCES,
-            output_dir=OUTPUT_DIR
+            output_path=OUTPUT_PATH
         )
     elif MSA_TOOL == 'hhblits':
         run_hhblits(
-            input_fasta_path=FASTA_PATH,
+            input_path=INPUT_PATH,
             database_paths=database_paths,
             n_cpu=N_CPU,
-            output_dir=OUTPUT_DIR
+            output_path=OUTPUT_PATH
         )
     else:
       raise ValueError(
