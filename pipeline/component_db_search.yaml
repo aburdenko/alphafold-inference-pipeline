@@ -55,12 +55,13 @@ implementation:
       \        raise ValueError(f'Unsupported tool: {search_tool}')\n    # We should\
       \ probably also do some checking whether a given tool, DB combination works\n\
       \n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _SCRIPT\
-      \ = './msa_runner.py'\n    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n\n  \
-      \  # This is a temporary hack till we find a better option for dsub logging\
-      \ location\n    # It would be great if we can access pipeline root directly\n\
-      \    # If not we can always pass the location as a parameter \n    logging_gcs_path\
-      \ = output_msa.uri.split('/')[2:-2]\n    folders = '/'.join(logging_gcs_path)\n\
-      \    logging_gcs_path = f'gs://{folders}/logging'\n    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')\
+      \ = '/scripts/alphafold_components/alphafold_runners/msa_runner.py'\n    _IMAGE\
+      \ = 'gcr.io/jk-mlops-dev/alphafold'\n\n\n    # This is a temporary hack till\
+      \ we find a better option for dsub logging location\n    # It would be great\
+      \ if we can access pipeline root directly\n    # If not we can always pass the\
+      \ location as a parameter \n    logging_gcs_path = output_msa.uri.split('/')[2:-2]\n\
+      \    folders = '/'.join(logging_gcs_path)\n    logging_gcs_path = f'gs://{folders}/logging'\n\
+      \    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')\
       \ \n\n    dsub_job = dsub_wrapper.DsubJob(\n        image=_IMAGE,\n        project=project,\n\
       \        region=region,\n        logging=logging_gcs_path,\n        provider=_DSUB_PROVIDER,\n\
       \        machine_type=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('MACHINE_TYPE'),\n\

@@ -81,7 +81,7 @@ def db_search(
 
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
-    _SCRIPT = './msa_runner.py'
+    _SCRIPT = '/scripts/alphafold_components/alphafold_runners/msa_runner.py'
     _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
     
     
