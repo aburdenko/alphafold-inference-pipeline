@@ -20,6 +20,7 @@ import os
 import numpy as np
 import shutil
 import sys
+import time
 
 from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
 
@@ -97,7 +98,7 @@ def run_hhblits(
     logging.info(f'Searching using input sequence: {input_desc}')
 
     msa_format = 'a3m'
-    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{msa_format}')
+    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_hhblits_{time.strftime("%Y%m%d_%H%M%S")}.{msa_format}')
     result = _run_msa_tool(
         msa_runner=runner,
         input_fasta_path=input_fasta_path,
@@ -124,7 +125,7 @@ def run_jackhmmer(
     logging.info(f'Searching using input sequence: {input_desc}')
 
     msa_format = 'sto'
-    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{msa_format}')
+    msa_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_jackhmmer_{time.strftime("%Y%m%d_%H%M%S")}.{msa_format}')
     result = _run_msa_tool(
         msa_runner=runner,
         input_fasta_path=input_fasta_path,

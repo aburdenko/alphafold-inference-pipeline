@@ -21,6 +21,7 @@ import numpy as np
 import pathlib
 import shutil
 import sys
+import time
 
 from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
 
@@ -73,7 +74,7 @@ def run_hhsearch(
     template_hits = runner.query(msa_for_templates)
 
     file_format = 'hhr' 
-    template_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
+    template_out_path = os.path.join(output_dir, f'{_OUTPUT_FILE_PREFIX}_hhsearch_{time.strftime("%Y%m%d_%H%M%S")}.{file_format}')
     with open(template_out_path, 'w') as f:
         f.write(template_hits)
     logging.info(f"Saved results to {template_out_path}")
