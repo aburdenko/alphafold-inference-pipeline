@@ -22,7 +22,8 @@ from alphafold_components.artifact_types import MSA
 
 
 @dsl.component(
-    base_image='gcr.io/jk-mlops-dev/alphafold-components'
+    base_image='gcr.io/jk-mlops-dev/alphafold-components',
+    output_component_file='component_db_search.yaml'
 )
 def db_search(
     project: str,
