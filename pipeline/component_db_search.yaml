@@ -46,27 +46,26 @@ implementation:
       \ pass them as tool_options dictionary\n\n    _REFERENCE_DATASETS_IMAGE = \"\
       https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets\
       \ 3000\"\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n       \
-      \    'MACHINE_TYPE': 'n1-standard-8',\n           'BOOT_DISK_SIZE': '200',\n\
-      \           'N_CPU': 6,\n           'MAX_STO_SEQUENCES': '10_000',\n       \
+      \    'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n\
+      \           'N_CPU': 4,\n           'MAX_STO_SEQUENCES': '10_000',\n       \
       \    'FILE_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py'\
-      \ \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-8',\n\
-      \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 6,\n           'FILE_FORMAT':\
+      \ \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
+      \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'FILE_FORMAT':\
       \ 'a3m',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py'\
-      \ \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-8',\n\
+      \ \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
       \           'BOOT_DISK_SIZE': '200',\n           'MAXSEQ': '1_000_000',\n  \
       \         'FILE_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/template_runner.py'\
       \ \n       }\n    }\n\n    _OUTPUT_FILE_PREFIX = 'output'\n\n    if not search_tool\
       \ in _TOOL_TO_SETTINGS_MAPPING.keys():\n        raise ValueError(f'Unsupported\
       \ tool: {search_tool}')\n    # We should probably also do some checking whether\
       \ a given tool, DB combination works\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n\
-      \    _LOG_INTERVAL = '30s'\n    _SCRIPT = '/scripts/alphafold_components/alphafold_runners/msa_runner.py'\n\
-      \    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n\n    # This is a temporary\
-      \ hack till we find a better option for dsub logging location\n    # It would\
-      \ be great if we can access pipeline root directly\n    # If not we can always\
-      \ pass the location as a parameter \n    logging_gcs_path = output_msa.uri.split('/')[2:-2]\n\
-      \    folders = '/'.join(logging_gcs_path)\n    logging_gcs_path = f'gs://{folders}/logging'\n\
-      \    script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT') \n\n    dsub_job\
-      \ = dsub_wrapper.DsubJob(\n        image=_IMAGE,\n        project=project,\n\
+      \    _LOG_INTERVAL = '30s'\n    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n\
+      \n    # This is a temporary hack till we find a better option for dsub logging\
+      \ location\n    # It would be great if we can access pipeline root directly\n\
+      \    # If not we can always pass the location as a parameter \n    logging_gcs_path\
+      \ = output_msa.uri.split('/')[2:-2]\n    folders = '/'.join(logging_gcs_path)\n\
+      \    logging_gcs_path = f'gs://{folders}/logging'\n    script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT')\
+      \ \n\n    dsub_job = dsub_wrapper.DsubJob(\n        image=_IMAGE,\n        project=project,\n\
       \        region=region,\n        logging=logging_gcs_path,\n        provider=_DSUB_PROVIDER,\n\
       \        machine_type=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('MACHINE_TYPE'),\n\
       \        boot_disk_size=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('BOOT_DISK_SIZE'),\n\

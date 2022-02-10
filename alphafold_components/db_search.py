@@ -54,22 +54,22 @@ def db_search(
     _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
     _TOOL_TO_SETTINGS_MAPPING = {
        'jackhmmer': {
-           'MACHINE_TYPE': 'n1-standard-8',
+           'MACHINE_TYPE': 'n1-standard-4',
            'BOOT_DISK_SIZE': '200',
-           'N_CPU': 6,
+           'N_CPU': 4,
            'MAX_STO_SEQUENCES': '10_000',
            'FILE_FORMAT': 'sto',
            'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
        },
        'hhblits': {
-           'MACHINE_TYPE': 'c2-standard-8',
+           'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
-           'N_CPU': 6,
+           'N_CPU': 4,
            'FILE_FORMAT': 'a3m',
            'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
        },
        'hhsearch': {
-           'MACHINE_TYPE': 'c2-standard-8',
+           'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
            'MAXSEQ': '1_000_000',
            'FILE_FORMAT': 'hhr',
@@ -85,7 +85,6 @@ def db_search(
 
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
-    _SCRIPT = '/scripts/alphafold_components/alphafold_runners/msa_runner.py'
     _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
     
     
