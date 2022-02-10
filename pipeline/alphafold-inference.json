@@ -290,7 +290,7 @@
               }
             },
             "taskInfo": {
-              "name": "db-search"
+              "name": "Search Uniref"
             }
           },
           "db-search-2": {
@@ -331,7 +331,7 @@
               }
             },
             "taskInfo": {
-              "name": "db-search-2"
+              "name": "Search Mgnify"
             }
           },
           "db-search-3": {
@@ -372,7 +372,7 @@
               }
             },
             "taskInfo": {
-              "name": "db-search-3"
+              "name": "Search Uniclust and BFD"
             }
           },
           "db-search-4": {
@@ -419,7 +419,7 @@
               }
             },
             "taskInfo": {
-              "name": "db-search-4"
+              "name": "Search Pdb"
             }
           }
         }

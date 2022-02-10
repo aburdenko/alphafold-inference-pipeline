@@ -60,6 +60,7 @@ def pipeline(
         input_path=fasta_path,
         search_tool=_JACKHMMER
     )
+    search_uniref.set_display_name('Search Uniref')
 
     search_mgnify = alphafold_components.DBSearchOp(
         project=project,
@@ -69,6 +70,7 @@ def pipeline(
         input_path=fasta_path,
         search_tool=_JACKHMMER
     )
+    search_mgnify.set_display_name('Search Mgnify')
 
     search_bfd_uniclust = alphafold_components.DBSearchOp(
         project=project,
@@ -78,6 +80,7 @@ def pipeline(
         input_path=fasta_path,
         search_tool=_HHBLITS
     )
+    search_bfd_uniclust.set_display_name('Search Uniclust and BFD')
 
     search_pdb = alphafold_components.DBSearchOp(
         project=project,
@@ -86,7 +89,8 @@ def pipeline(
         database_paths=_PDB_PATH,
         input_path=search_uniref.outputs['Output'],
         search_tool=_HHSEARCH
-    ) 
+    )
+    search_pdb.set_display_name('Search Pdb') 
 
     
 
