@@ -149,7 +149,7 @@ def test_hhsearch_job():
 
     _script = './alphafold_runners/template_runner.py'
     _inputs = {
-        'MSA_PATH': f'{_base_bucket}/output/msas/uniref90_results.sto', 
+        'MSA_PATH': f'{_base_bucket}/msas/uniref90_results.sto', 
         }
     _outputs = {
         'OUTPUT_DIR': f'{_base_bucket}/output/hhsearch'
