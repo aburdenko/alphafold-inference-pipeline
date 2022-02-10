@@ -67,7 +67,7 @@ def test_jackhmmer_job():
         'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
         }
     _outputs = {
-        'OUTPUT_DIR': f'{_base_bucket}/output/jackhmmer/msas'
+        'OUTPUT_DIR': f'{_base_bucket}/output/jackhmmer'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
@@ -110,7 +110,7 @@ def test_hhblits_job():
         'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
         }
     _outputs = {
-        'OUTPUT_DIR': f'{_base_bucket}/output/msas/hhblits'
+        'OUTPUT_DIR': f'{_base_bucket}/output/hhblits'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
@@ -149,10 +149,10 @@ def test_hhsearch_job():
 
     _script = './alphafold_runners/template_runner.py'
     _inputs = {
-        'MSA_PATH': f'{_base_bucket}/output/msas/OUTPUT.sto', 
+        'MSA_PATH': f'{_base_bucket}/output/msas/uniref90_results.sto', 
         }
     _outputs = {
-        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+        'OUTPUT_DIR': f'{_base_bucket}/output/hhsearch'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
