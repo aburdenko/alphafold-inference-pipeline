@@ -12,15 +12,15 @@ gcr.io/jk-mlops-dev/alphafold
 
 ```
 export PYTHONPATH=/app/alphafold
-export FASTA_PATH=/src/fasta/T1050.fasta
-export OUTPUT_DIR=/output/msas
+export INPUT_PATH=/src/fasta/T1050.fasta
+export OUTPUT_PATH=/output/testing/jackhmmer/output.sto
 export DATABASES_ROOT=/data 
 export DATABASE_PATHS=uniref90/uniref90.fasta
 export N_CPU=4
 export MAX_STO_SEQUENCES=10000
-export MSA_TOOL=jackhmmer
+export DB_TOOL=jackhmmer
 
-python msa_runner.py
+python db_search_runner.py
 ```
 
 
@@ -29,18 +29,16 @@ python msa_runner.py
 
 
 
-
-
 ```
 export PYTHONPATH=/app/alphafold
-export FASTA_PATH=/src/fasta/T1050.fasta
-export OUTPUT_DIR=/output/msas
+export INPUT_PATH=/src/fasta/T1050.fasta
+export OUTPUT_PATH=/output/testing/hhblits/output.a3m
 export DATABASES_ROOT=/data
 export DATABASE_PATHS=uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt
 export N_CPU=4
-export MSA_TOOL=hhblits
+export DB_TOOL=hhblits
 
-python msa_runner.py
+python db_search_runner.py
 ```
 
 
@@ -49,16 +47,14 @@ python msa_runner.py
 
 
 
-
-
 ```
 export PYTHONPATH=/app/alphafold
-export MSA_PATH=/output/msas/uniref90_results.sto
-export OUTPUT_DIR=/output/msas
+export INPUT_PATH=/output/msas/uniref90_results.sto
+export OUTPUT_PATH=/output/testing/hhsearch/output.hhr
 export DATABASES_ROOT=/data 
 export DATABASE_PATHS=pdb70/pdb70 
 export MAXSEQ=1_000_000
-export TEMPLATE_TOOL=hhsearch
+export DB_TOOL=hhsearch
 
-python template_runner.py
+python db_search_runner.py
 ```

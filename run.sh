@@ -1,10 +1,12 @@
-# Copyright 2021 Google LLC
+#!/bin/bash
+
+# Copyright 2022 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,16 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM gcr.io/ml-pipeline/google-cloud-pipeline-components:latest
+echo 0-${0}
+echo 1-${1}
+echo 2-${2}
+echo 3-${3}
+echo 4-${4}
+echo 5-${5}
 
-RUN pip3 install -U dsub
-
-WORKDIR /scripts
-
-# ADD alphafold_components alphafold_components
-
-ADD run.sh .
-
-ENV PYTHONPATH=/scripts
-
-ENTRYPOINT ["./run.sh"]
+mkdir -p `dirname ${3}` 
+echo 'hello' > ${3}

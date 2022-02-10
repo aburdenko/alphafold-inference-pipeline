@@ -39,6 +39,14 @@ def db_search(
     GCSFuse does not perform well with tools like hhsearch or hhblits.
 
     """
+    
+    print(output_msa)
+    print(output_msa.name)
+    print(output_msa.uri)
+    print(output_msa.metadata)
+
+
+
 
     import logging
     import os

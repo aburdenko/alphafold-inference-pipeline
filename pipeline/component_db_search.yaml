@@ -38,13 +38,14 @@ implementation:
       \ is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n\
       \    We are using CLS as KFP does not support attaching pre-populated disks\
       \ or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch\
-      \ or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n\n    from\
-      \ alphafold_components import dsub_wrapper\n\n    # For a prototype we are hardcoding\
-      \ some values. Whe productionizing\n    # we can make them compile time or runtime\
-      \ parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2\
-      \ instruction set\n    # Works better with AVX2. \n    # At runtime we could\
-      \ pass them as tool_options dictionary\n\n    _REFERENCE_DATASETS_IMAGE = \"\
-      https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets\
+      \ or hhblits.\n\n    \"\"\"\n\n    print(output_msa)\n    print(output_msa.name)\n\
+      \    print(output_msa.uri)\n    print(output_msa.metadata)\n\n\n\n\n    import\
+      \ logging\n    import os\n\n    from alphafold_components import dsub_wrapper\n\
+      \n    # For a prototype we are hardcoding some values. Whe productionizing\n\
+      \    # we can make them compile time or runtime parameters\n    # E.g. CPU type\
+      \ is important. HHBlits requires at least SSE2 instruction set\n    # Works\
+      \ better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n\
+      \n    _REFERENCE_DATASETS_IMAGE = \"https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets\
       \ 3000\"\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n       \
       \    'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n\
       \           'N_CPU': 4,\n           'MAX_STO_SEQUENCES': '10_000',\n       \
