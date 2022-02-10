@@ -106,7 +106,7 @@ def test_hhblits_job():
         'FASTA_PATH': f'{_base_bucket}/fasta/T1050.fasta', 
         }
     _outputs = {
-        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+        'OUTPUT_DIR': f'{_base_bucket}/output/msas/hhblits'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
@@ -144,14 +144,14 @@ def test_hhsearch_job():
 
     _script = './alphafold_runners/template_runner.py'
     _inputs = {
-        'MSA_PATH': f'{_base_bucket}/msas/OUTPUT.sto', 
+        'MSA_PATH': f'{_base_bucket}/output/msas/OUTPUT.sto', 
         }
     _outputs = {
         'OUTPUT_DIR': f'{_base_bucket}/output/msas'
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': '/data/pdb70/pdb70',
+        'DATABASE_PATHS': 'pdb70/pdb70',
         'TEMPLATE_TOOL': 'hhsearch',
         'MAXSEQ': '1_000_000',
         }
