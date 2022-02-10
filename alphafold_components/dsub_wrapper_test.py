@@ -115,7 +115,7 @@ def test_hhblits_job():
         'N_CPU': '4',
         }
     _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
-    print('Starting jackhmmer job')
+    print('Starting hhblits job')
     result = dsub.run_job(script=_script,
                 inputs=_inputs,
                 outputs=_outputs,
@@ -156,7 +156,7 @@ def test_hhsearch_job():
         'MAXSEQ': '1_000_000',
         }
     _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
-    print('Starting jackhmmer job')
+    print('Starting hhsearch job')
     result = dsub.run_job(script=_script,
                 inputs=_inputs,
                 outputs=_outputs,
