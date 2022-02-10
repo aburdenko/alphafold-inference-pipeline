@@ -58,17 +58,20 @@ def db_search(
            'MACHINE_TYPE': 'n1-standard-8',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 6,
-           'MAX_STO_SEQUENCES': '10_000'
+           'MAX_STO_SEQUENCES': '10_000',
+           'FILE_FORMAT': 'sto'
        },
        'hhblits': {
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 6,
+           'FILE_FORMAT': 'a3m'
        },
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
-           'MAXSEQ': '1_000_000'
+           'MAXSEQ': '1_000_000',
+           'FILE_FORMAT': 'hhr'
        }
     }
 
@@ -87,6 +90,7 @@ def db_search(
     logging_gcs_path = output_msa.uri.split('/')[2:-2]
     folders = '/'.join(logging_gcs_path)
     logging_gcs_path = f'gs://{folders}/logging'
+    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT') 
     
     dsub_job = dsub_wrapper.DsubJob(
         project=project,
@@ -133,6 +137,8 @@ def db_search(
     logging.info('Job completed')
     logging.info(f'Completion status {result.returncode}')
     logging.info(f'Logs: {result.stdout}')
+
+    output_msa.format[file_format]
     
 
     
