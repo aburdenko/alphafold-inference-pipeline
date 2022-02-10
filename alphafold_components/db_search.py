@@ -58,19 +58,22 @@ def db_search(
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 6,
            'MAX_STO_SEQUENCES': '10_000',
-           'FILE_FORMAT': 'sto'
+           'FILE_FORMAT': 'sto',
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
        },
        'hhblits': {
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 6,
            'FILE_FORMAT': 'a3m'
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
        },
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'MAXSEQ': '1_000_000',
            'FILE_FORMAT': 'hhr'
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/template_runner.py' 
        }
     }
 
@@ -92,6 +95,7 @@ def db_search(
     logging_gcs_path = output_msa.uri.split('/')[2:-2]
     folders = '/'.join(logging_gcs_path)
     logging_gcs_path = f'gs://{folders}/logging'
+    script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT') 
     
     dsub_job = dsub_wrapper.DsubJob(
         image=_IMAGE,
@@ -131,7 +135,7 @@ def db_search(
     # a polling loop to periodically retrieve logs, stdout and stderr
     # and push it Vertex
     result = dsub_job.run_job(
-        script=_SCRIPT,
+        script=script,
         inputs=inputs,
         outputs=outputs,
         env_vars=env_vars,
