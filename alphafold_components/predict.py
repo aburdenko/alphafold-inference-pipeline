@@ -11,7 +11,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""AlphaFold inference components."""
-from .version import __version__
-
-from alphafold_components.db_search import db_search as DBSearchOp
+"""Run inference on a JAX model."""

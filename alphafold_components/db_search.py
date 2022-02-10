@@ -92,8 +92,8 @@ def db_search(
         region=region,
         logging=logging_gcs_path,
         provider=_DSUB_PROVIDER,
-        machine_type=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('MACHINE_TYPE')
-        boot_disk_size=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('BOOT_DISK_SIZE')
+        machine_type=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('MACHINE_TYPE'),
+        boot_disk_size=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('BOOT_DISK_SIZE'),
         log_interval=_LOG_INTERVAL
     )
 

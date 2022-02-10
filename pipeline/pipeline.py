@@ -35,23 +35,28 @@ _PIPELINE_DESCRIPTION = 'Alphafold inference'
 flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path to the Uniref90 '
                     'database for use by JackHMMER.')
 
-
+_REFERENCE_DATASETS_IMAGE = '"https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"'
+_UNIREF_PATH = 'uniref90/uniref90.fasta'
+_JACKHMMER = 'jackhmmer'
+_HHSEARCH = 'hhsearch'
+_HHBLITS = 'hhblits'
 
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
-    dsub_logging_path: str,
     fasta_path: str,
-    databases_disk_image: str,
-    uniref90_database_path: list,
     project: str='jk-mlops-dev',
-    region: str='us-central1'):
+    region: str='us-central1',
+    datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE):
     """Runs AlphaFold inference."""
 
-    #database_paths = json.dumps([str(uniref90_database_path)])
-    search_uniref90 = alphafold_components.MSASearchOp(
-        search_tool='jackhmmer', 
-        database_paths=uniref90_database_path,
-        databases_disk_image=databases_disk_image) 
+    search_uniref = alphafold_components.DBSearchOp(
+        project=project,
+        region=region,
+        datasets_disk_image=datasets_disk_image,
+        database_paths=_UNIREF_PATH,
+        fasta_path=fasta_path,
+        search_tool=_JACKHMMER
+    ) 
 
 
 def _main(argv):
