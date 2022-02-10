@@ -110,9 +110,50 @@ def test_hhblits_job():
     }
     _env_vars = {
         'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': '/data/uniclust30/uniclust30_2018_08/uniclust30_2018_08,/data/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt',
+        'DATABASE_PATHS': 'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt',
         'MSA_TOOL': 'hhblits',
         'N_CPU': '4',
+        }
+    _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+    print('Starting jackhmmer job')
+    result = dsub.run_job(script=_script,
+                inputs=_inputs,
+                outputs=_outputs,
+                env_vars=_env_vars,
+                disk_mounts=_disk_mounts)
+
+    print(result.returncode)
+    print(result.stderr)
+    print(result.stdout)
+
+def test_hhsearch_job():
+    
+    _log_interval = '30s'
+    _image = 'gcr.io/jk-mlops-dev/alphafold'
+    _machine_type = 'n1-standard-4' 
+
+    dsub = DsubJob(binary_path=_dsub_binary_path,
+                project=_project,
+                image=_image,
+                region=_region,
+                logging=_logging,
+                provider=_provider,
+                machine_type=_machine_type,
+                boot_disk_size=_boot_disk_size,
+                log_interval=_log_interval)
+
+    _script = './alphafold_runners/template_runner.py'
+    _inputs = {
+        'MSA_PATH': f'{_base_bucket}/msas/OUTPUT.sto', 
+        }
+    _outputs = {
+        'OUTPUT_DIR': f'{_base_bucket}/output/msas'
+    }
+    _env_vars = {
+        'PYTHONPATH': '/app/alphafold',
+        'DATABASE_PATHS': '/data/pdb70/pdb70',
+        'TEMPLATE_TOOL': 'hhsearch',
+        'MAXSEQ': '1_000_000',
         }
     _disk_mounts = {'DATABASES_ROOT': "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
     print('Starting jackhmmer job')

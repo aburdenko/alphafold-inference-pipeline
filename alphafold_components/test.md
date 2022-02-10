@@ -7,3 +7,7 @@ export PYTHONPATH=/src/alphafold_components
 
 pytest -s dsub_wrapper_test.py::test_jackhmmer_job
 
+pytest -s dsub_wrapper_test.py::test_hhblits_job
+
+pytest -s dsub_wrapper_test.py::test_hhsearch_job 
+
