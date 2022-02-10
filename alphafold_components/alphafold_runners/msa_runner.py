@@ -88,9 +88,9 @@ def run_hhblits(
     output_path: str): 
     """Runs hhblits and saves results to a file."""
 
-    msa_format = pathlib.Path(input_path).suffix[1:0]
+    msa_format = pathlib.Path(output_path).suffix[1:0]
     if msa_format != 'a3m':
-        raise ValueError('hhblits does not support generating files in {msa_format} format') 
+        raise ValueError(f'hhblits does not support generating files in {msa_format} format') 
 
     runner = hhblits.HHBlits(
         binary_path=HHBLITS_BINARY_PATH,
@@ -117,9 +117,9 @@ def run_jackhmmer(
     output_path: str): 
     """Runs jackhmeer and saves results to a file."""
 
-    msa_format = pathlib.Path(input_path).suffix[1:0]
+    msa_format = pathlib.Path(output_path).suffix[1:0]
     if msa_format != 'sto':
-        raise ValueError('jackhmmer does not support generating files in {msa_format} format') 
+        raise ValueError(f'jackhmmer does not support generating files in {msa_format} format') 
 
     runner = jackhmmer.Jackhmmer(
         binary_path=JACKHMMER_BINARY_PATH,
