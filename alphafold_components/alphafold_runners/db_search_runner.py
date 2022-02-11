@@ -138,7 +138,7 @@ def run_hhsearch(
     """Runs hhsearch and saves results to a file."""
 
     
-    if input_format != 'sto' or input_format != 'a3m':
+    if not (input_format == 'sto' or input_format == 'a3m'):
         raise ValueError(f'hhsearch does not support inputs in {input_format} format')
     if output_format != 'hhr':
         raise ValueError(f'hhsearch does not support outputs in {output_format} format')  
