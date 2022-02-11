@@ -54,7 +54,9 @@ JACKHMMER_BINARY_PATH = shutil.which('jackhmmer')
 HHSEARCH_BINARY_PATH = shutil.which('hhsearch')
 
 
-def _save_results(results: str, output_path: str):
+def _save_results(results: str, output_path: str, output_format: str):
+    """Save results. output_format may be used in future to add a
+    proper file name if required."""
     logging.info(f'Saving results to: {output_path}')
     with open(output_path, 'w') as f: 
         f.write(results)
@@ -96,7 +98,7 @@ def run_hhblits(
     _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
     results = runner.query(input_path)
-    _save_results(results[0], output_path)
+    _save_results(results[0][output_format], output_path, output_format)
 
 
 def run_jackhmmer(
@@ -123,7 +125,7 @@ def run_jackhmmer(
     _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
     results = runner.query(input_path, maxseq)
-    _save_results(results[0], output_path)
+    _save_results(results[0][output_format], output_path, output_format)
 
 
 def run_hhsearch(
@@ -162,7 +164,7 @@ def run_hhsearch(
         pass
 
     results = runner.query(msa_for_templates)
-    _save_results(results[0], output_path)
+    _save_results(results, output_path, output_format)
  
 
 if __name__=='__main__':
