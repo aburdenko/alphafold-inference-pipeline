@@ -40,12 +40,13 @@ INPUT_DATA = os.environ['INPUT_DATA']
 INPUT_DATA_FORMAT = os.environ['INPUT_DATA_FORMAT']
 OUTPUT_DATA = os.environ['OUTPUT_DATA']
 OUTPUT_DATA_FORMAT = os.environ['OUTPUT_DATA_FORMAT']
-DATABASE_PATHS = os.environ['DATABASE_PATHS']
 
-# Tools specific inputs
+DB_ROOT = os.environ['DB_ROOT']
+DB_PATHS = os.environ['DB_PATHS']
+
+# Optional inputs 
 N_CPU = int(os.getenv('N_CPU'))
-MAX_STO_SEQEUNCES = int(os.getenv('MAX_STO_SEQUENCES', '10_000'))
-MAXSEQ = int(os.getenv('MAXSEQ', '1_000_000'))
+MAXSEQ = int(os.getenv('MAXSEQ', '10_000'))
 
 # Paths to tool binaries
 HHBLITS_BINARY_PATH = shutil.which('hhblits')
@@ -53,33 +54,8 @@ JACKHMMER_BINARY_PATH = shutil.which('jackhmmer')
 HHSEARCH_BINARY_PATH = shutil.which('hhsearch')
 
 
-def _run_msa_tool(msa_runner, input_fasta_path: str, msa_out_path: str,
-                 msa_format: str, use_precomputed_msas: bool=False,
-                 max_sto_sequences: Optional[int] = None
-                 ) -> Mapping[str, Any]:
-    """Runs an MSA tool, checking if output already exists first."""
-    if not use_precomputed_msas or not os.path.exists(msa_out_path):
-        if msa_format == 'sto' and max_sto_sequences is not None:
-            result = msa_runner.query(input_fasta_path, max_sto_sequences)[0]  # pytype: disable=wrong-arg-count
-        else:
-            result = msa_runner.query(input_fasta_path)[0]
-        logging.info(f"Saving results to {msa_out_path}")
-        with open(msa_out_path, 'w') as f:
-            f.write(result[msa_format])
-    else:
-        logging.warning('Reading MSA from file %s', msa_out_path)
-        if msa_format == 'sto' and max_sto_sequences is not None:
-            precomputed_msa = parsers.truncate_stockholm_msa(
-                    msa_out_path, max_sto_sequences)
-            result = {'sto': precomputed_msa}
-        else:
-            with open(msa_out_path, 'r') as f:
-                result = {msa_format: f.read()}
-    return result
-
-
 def _save_results(results: str, output_path: str):
-    logging.info(f'Saving results to: {output_path'})
+    logging.info(f'Saving results to: {output_path}')
     with open(output_path, 'w') as f: 
         f.write(results)
 
@@ -101,7 +77,8 @@ def run_hhblits(
     output_path: str,
     output_format: str,
     database_paths: Sequence[str],
-    n_cpu: int): 
+    n_cpu: int,
+    maxseq: int): 
     """Runs hhblits and saves results to a file."""
 
     if input_format != 'fasta':
@@ -112,7 +89,8 @@ def run_hhblits(
     runner = hhblits.HHBlits(
         binary_path=HHBLITS_BINARY_PATH,
         databases=database_paths,
-        n_cpu=n_cpu
+        n_cpu=n_cpu,
+        maxseq=maxseq,
     )
 
     _, input_desc = _read_and_check_fasta(input_path)
@@ -127,8 +105,8 @@ def run_jackhmmer(
     output_path: str,
     output_format: str,
     database_path: str,
-    n_cpu: int,
-    max_sto_sequences: int):
+    maxseq: int,
+    n_cpu: int):
     """Runs jackhmeer and saves results to a file."""
 
     if input_format != 'fasta':
@@ -144,7 +122,7 @@ def run_jackhmmer(
 
     _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
-    results = runner.query(input_path, max_sto_sequences)
+    results = runner.query(input_path, maxseq)
     _save_results(results[0], output_path)
 
 
@@ -179,7 +157,7 @@ def run_hhsearch(
         msa_for_templates = parsers.deduplicate_stockholm_msa(input_msa_str)
         msa_for_templates = parsers.remove_empty_columns_from_stockholm_msa(msa_for_templates)
         msa_for_templates = parsers.convert_stockholm_to_a3m(msa_for_templates)
-    else input_format == 'a3m':
+    elif input_format == 'a3m':
         # TBD - research what kind of preprocessing required for a3m - if any 
         pass
 
@@ -193,33 +171,36 @@ if __name__=='__main__':
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
 
-    database_paths = DATABASE_PATHS.split(',') 
+    database_paths = [
+            os.path.join(DB_ROOT, database_path) 
+            for database_path in DB_PATHS.split(',')] 
 
     if DB_TOOL == 'jackhmmer':
         run_jackhmmer(
             input_path=INPUT_DATA,
-            input_data_format=INPUT_DATA_FORMAT,
+            input_format=INPUT_DATA_FORMAT,
             output_path=OUTPUT_DATA,
-            output_data_format=OUTPUT_DATA_FORMAT,
+            output_format=OUTPUT_DATA_FORMAT,
             database_path=database_paths[0],
+            maxseq=MAXSEQ,
             n_cpu=N_CPU,
-            max_sto_sequences=MAX_STO_SEQEUNCES,
         )
     elif DB_TOOL == 'hhblits':
         run_hhblits(
             input_path=INPUT_DATA,
-            input_data_format=INPUT_DATA_FORMAT,
+            input_format=INPUT_DATA_FORMAT,
             output_path=OUTPUT_DATA,
-            output_data_format=OUTPUT_DATA_FORMAT,
+            output_format=OUTPUT_DATA_FORMAT,
             database_paths=database_paths,
+            maxseq=MAXSEQ,
             n_cpu=N_CPU,
         )
     elif DB_TOOL == 'hhsearch':
         run_hhsearch(
             input_path=INPUT_DATA,
-            input_data_format=INPUT_DATA_FORMAT,
+            input_format=INPUT_DATA_FORMAT,
             output_path=OUTPUT_DATA,
-            output_data_format=OUTPUT_DATA_FORMAT,
+            output_format=OUTPUT_DATA_FORMAT,
             database_paths=database_paths,
             maxseq=MAXSEQ,
         )
