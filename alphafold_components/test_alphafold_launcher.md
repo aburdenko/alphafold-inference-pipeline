@@ -40,6 +40,12 @@
 
 
 ./run_dsub.sh \
---command 'sleep 2m' \
---logging /tmp/logging
+--command 'sleep 30s' \
+--logging gs://jk-dsub-staging/logging \
+--project jk-mlops-dev 
 
+
+docker run -it --rm gcr.io/jk-mlops-dev/alphafold-components \
+--project jk-mlops-dev \
+--logging /tmp/logging \
+--command 'sleep 1m'

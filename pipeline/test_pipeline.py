@@ -23,10 +23,8 @@ from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
 
 from kfp.v2 import dsl
 from kfp.v2 import compiler
-#from kfp.v2.components import load_component_from_file
-from kfp.components import load_component_from_file
 
-import alphafold_components
+from alphafold_components import DbSearchOp
 
 FLAGS = flags.FLAGS
 
@@ -46,7 +44,21 @@ _HHSEARCH = 'hhsearch'
 _HHBLITS = 'hhblits'
 
 
-test_op = load_component_from_file('component.yaml') 
+@dsl.component(output_component_file='test_op.yaml')
+def test_op(
+    input1: dsl.Input[dsl.Dataset],
+    output1: dsl.Output[dsl.Dataset],
+    output2: dsl.Output[dsl.Dataset]
+):
+    #output1.metadata['a1'] = '1'
+    #output1.metadata['a2'] = '2'
+    #output2.metadata['a3'] = '3'
+    #output2.metadata['a4'] = '4'
+    print('In component')
+
+    
+
+
 
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
@@ -56,10 +68,15 @@ def pipeline(
     datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE):
     """Runs AlphaFold inference."""
 
-    test = test_op(
-        project=project,
-        region=region 
-    ) 
+    input_data = dsl.importer(
+        artifact_uri=fasta_path,
+        artifact_class=dsl.Dataset,
+    )
+
+    test_task = test_op(
+        input1=input_data.output
+    )
+
 
 
 

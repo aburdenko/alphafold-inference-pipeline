@@ -18,8 +18,33 @@
 # The next step would be to retrieve status and logs on a more regular
 # basis so we can push it back to Vertex Pipelines
 
-DSUB_PROVIDER=local
-POLLING_INTERVAL=10s
+set -o errexit
+set -o nounset
+
+
+readonly DSUB_PROVIDER=google-cls-v2
+readonly POLLING_INTERVAL=30s
+
+PROJECT=
+ARGS=( "$@" )
+for i in "${!ARGS[@]}"
+do
+    if [[ "${ARGS[i]}" == "--project" ]]; then
+        PROJECT="${ARGS[i+1]}"
+    fi
+     if [[ "${ARGS[i]}" == "--executor_input" ]]; then
+        EXECUTOR_INPUT="${ARGS[i+1]}"
+    fi
+done
+
+echo "$EXECUTOR_INPUT"
+
+exit 0
+
+if [[ -z "$PROJECT" ]]; then
+    echo 'No GPC project ID passed'
+    exit 2
+fi
 
 JOB_ID=$(dsub --provider "$DSUB_PROVIDER" "$@" 2> /dev/null)
 
@@ -29,11 +54,12 @@ JOB_STATUS=" "
 PREVIOUS_JOB_STATUS=
 while ! [[ -z "$JOB_STATUS" ]]
 do
-    JOB_STATUS=$(dstat --provider "$DSUB_PROVIDER" --jobs "$JOB_ID" | head -n 3 | tail -1)
-    if [[ "$JOB_STATUS" != "$PREVIOUS_JOB_STATS" ]]
+    JOB_STATUS=$(dstat --provider "$DSUB_PROVIDER" --jobs "$JOB_ID" --project "$PROJECT" | head -n 3 | tail -1)
+    if [[ $JOB_STATUS != $PREVIOUS_JOB_STATUS ]]
     then
         echo "$JOB_STATUS" 
         PREVIOUS_JOB_STATUS="$JOB_STATUS"
     fi
-    sleep "$POLLING_INTERVAL" 
+    sleep "$POLLING_INTERVAL"
+    # We should add periodic retrieval of logs to update status in KFP 
 done

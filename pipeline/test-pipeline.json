@@ -1,30 +1,51 @@
 {
   "pipelineSpec": {
     "components": {
-      "comp-db-search": {
-        "executorLabel": "exec-db-search",
+      "comp-importer": {
+        "executorLabel": "exec-importer",
         "inputDefinitions": {
           "parameters": {
-            "project": {
-              "type": "STRING"
-            },
-            "region": {
+            "uri": {
               "type": "STRING"
             }
           }
         },
         "outputDefinitions": {
           "artifacts": {
-            "output_msa": {
+            "artifact": {
               "artifactType": {
-                "schemaTitle": "system.Artifact",
+                "schemaTitle": "system.Dataset",
                 "schemaVersion": "0.0.1"
               }
             }
-          },
-          "parameters": {
-            "output_file": {
-              "type": "STRING"
+          }
+        }
+      },
+      "comp-test-op": {
+        "executorLabel": "exec-test-op",
+        "inputDefinitions": {
+          "artifacts": {
+            "input1": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "output1": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output2": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
             }
           }
         }
@@ -32,16 +53,35 @@
     },
     "deploymentSpec": {
       "executors": {
-        "exec-db-search": {
+        "exec-importer": {
+          "importer": {
+            "artifactUri": {
+              "runtimeParameter": "uri"
+            },
+            "typeSchema": {
+              "schemaTitle": "system.Dataset",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        },
+        "exec-test-op": {
           "container": {
             "args": [
-              "{{$.inputs.parameters['project']}}",
-              "{{$.inputs.parameters['region']}}",
-              "{{$.outputs.parameters['output_file'].output_file}}",
-              "{{$.outputs.artifacts['output_msa'].path}}",
-              "{{$.outputs.artifacts['output_msa'].uri}}"
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "test_op"
             ],
-            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef test_op(\n    input1: dsl.Input[dsl.Dataset],\n    output1: dsl.Output[dsl.Dataset],\n    output2: dsl.Output[dsl.Dataset]\n):\n    #output1.metadata['a1'] = '1'\n    #output1.metadata['a2'] = '2'\n    #output2.metadata['a3'] = '3'\n    #output2.metadata['a4'] = '4'\n    print('In component')\n\n"
+            ],
+            "image": "python:3.7"
           }
         }
       }
@@ -52,25 +92,46 @@
     "root": {
       "dag": {
         "tasks": {
-          "db-search": {
+          "importer": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-db-search"
+              "name": "comp-importer"
             },
             "inputs": {
               "parameters": {
-                "project": {
-                  "componentInputParameter": "project"
-                },
-                "region": {
-                  "componentInputParameter": "region"
+                "uri": {
+                  "componentInputParameter": "fasta_path"
                 }
               }
             },
             "taskInfo": {
-              "name": "db-search"
+              "name": "importer"
+            }
+          },
+          "test-op": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-test-op"
+            },
+            "dependentTasks": [
+              "importer"
+            ],
+            "inputs": {
+              "artifacts": {
+                "input1": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "test-op"
             }
           }
         }

@@ -28,26 +28,68 @@ description: |
 inputs:
 - {name: project, type: String}
 - {name: region, type: String, default: "us-central1"}
-- {name: input_path, type: String}
+- {name: db_tool, type: String}
+- {name: input_data, type: Dataset}
 - {name: database_paths, type: String}
+- {name: n_cpu, type: Integer, optional: True}
+- {name: max_sto_sequences, type: Integer, optional: True}
+- {name: maxseq, type: Integer, optional: True}
 - {name: machine_type, type: String, default: "n1-standard-8"}
 - {name: boot_disk_size, type: Integer, default: 100}
-- {name: alphafold-databases-image, type: String, default: "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+- {name: disk_image, type: String, default: "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/alphafold-datasets-jan-2022 3000"}
+- {name: runner_image, type: String, default: "gcr.io/jk-mlops-dev/alphafold"}
 outputs:
-- {name: output_path, type: String, }
-- {name: output_artifact, type: Artifact}
+- {name: output_data, type: Dataset}
+- {name: logging, type: Artifact}
 implementation:
   container:
     image: gcr.io/jk-mlops-dev/alphafold-components
-    args: [
-      --project, {inputValue: project},
-      --region, {inputValue: region},
-      --input-path, {inputValue: input_path}
-      --machine-type, {inputValue: machine_type},
-      --boot-disk-size, {inputValue: boot_disk_size},
-      --alphafold-databases-image, {inputValue: alpha-fold-databases-image},
-      --output-path_uri, {outputUri: output_path},
-      --output-path, {outputPath: output_path},
-      --output-artifact_uri, {outputUri: output_artifact},
-      --output-artifact, {outputPath, output_artifact}
-    ]
+    args: 
+      - --project
+      - {inputValue: project}
+      - --regions
+      - {inputValue: region}
+      - --machine-type
+      - {inputValue: machine_type}
+      - --boot-disk-size
+      - {inputValue: boot_disk_size}
+      - --logging
+      - {outputUri: logging}
+      - --mount
+      - concat: [
+            'DATABASES_ROOT=', {inputValue: disk_image}
+        ]
+      - --input
+      - concat: [
+            'INPUT_PATH=', {inputUri: input_data}
+        ] 
+      - --output
+      - concat: [
+            'OUTPUT_PATH=', {outputUri: output_data}
+        ]
+      - if:
+          cond: {isPresent: n_cpu}
+          then:
+          - --env 
+          - concat: [
+              'N_CPU=', {inputValue: n_cpu}
+          ]
+      - if:
+          cond: {isPresent: max_sto_sequences}
+          then:
+          - --env 
+          - concat: [
+              'MAX_STO_SEQUNCES=', {inputValue: max_sto_sequences}
+          ]
+      - if:
+          cond: {isPresent: maxseq}
+          then:
+          - --env 
+          - concat: [
+              'MAXSEQ=', {inputValue: maxseq}
+          ]
+      - --executor_input
+      - "{{$}}"
+          
+      
+    

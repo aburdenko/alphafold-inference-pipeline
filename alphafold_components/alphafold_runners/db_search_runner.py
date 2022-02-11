@@ -36,9 +36,10 @@ from alphafold.data.tools import hhsearch
 
 # Required inputs
 DB_TOOL = os.environ['DB_TOOL']
-INPUT_PATH = os.environ['INPUT_PATH']
-OUTPUT_PATH = os.environ['OUTPUT_PATH']
-DATABASES_ROOT = os.environ['DATABASES_ROOT']
+INPUT_DATA = os.environ['INPUT_DATA']
+INPUT_DATA_FORMAT = os.environ['INPUT_DATA_FORMAT']
+OUTPUT_DATA = os.environ['OUTPUT_DATA']
+OUTPUT_DATA_FORMAT = os.environ['OUTPUT_DATA_FORMAT']
 DATABASE_PATHS = os.environ['DATABASE_PATHS']
 
 # Tools specific inputs
@@ -77,6 +78,12 @@ def _run_msa_tool(msa_runner, input_fasta_path: str, msa_out_path: str,
     return result
 
 
+def _save_results(results: str, output_path: str):
+    logging.info(f'Saving results to: {output_path'})
+    with open(output_path, 'w') as f: 
+        f.write(results)
+
+
 def _read_and_check_fasta(fasta_path):
     with open(fasta_path) as f:
         input_fasta_str = f.read()
@@ -90,14 +97,17 @@ def _read_and_check_fasta(fasta_path):
 
 def run_hhblits(
     input_path: str,
+    input_format: str,
+    output_path: str,
+    output_format: str,
     database_paths: Sequence[str],
-    n_cpu: int,
-    output_path: str): 
+    n_cpu: int): 
     """Runs hhblits and saves results to a file."""
 
-    msa_format = pathlib.Path(output_path).suffix[1:]
-    if msa_format != 'a3m':
-        raise ValueError(f'hhblits does not support generating files in {msa_format} format') 
+    if input_format != 'fasta':
+        raise ValueError(f'hhblits does not support inputs in {input_format} format')
+    if output_format != 'a3m':
+        raise ValueError(f'hhblits does not support outputs in {output_format} format')  
 
     runner = hhblits.HHBlits(
         binary_path=HHBLITS_BINARY_PATH,
@@ -107,26 +117,24 @@ def run_hhblits(
 
     _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
-
-    result = _run_msa_tool(
-        msa_runner=runner,
-        input_fasta_path=input_path,
-        msa_out_path=output_path,
-        msa_format=msa_format
-    )
+    results = runner.query(input_path)
+    _save_results(results[0], output_path)
 
 
 def run_jackhmmer(
     input_path: str,
+    input_format: str,
+    output_path: str,
+    output_format: str,
     database_path: str,
     n_cpu: int,
-    max_sto_sequences: int,
-    output_path: str): 
+    max_sto_sequences: int):
     """Runs jackhmeer and saves results to a file."""
 
-    msa_format = pathlib.Path(output_path).suffix[1:]
-    if msa_format != 'sto':
-        raise ValueError(f'jackhmmer does not support generating files in {msa_format} format') 
+    if input_format != 'fasta':
+        raise ValueError(f'jackhmmer does not support inputs in {input_format} format')
+    if output_format != 'sto':
+        raise ValueError(f'jackhmmer does not support outputs in {output_format} format')  
 
     runner = jackhmmer.Jackhmmer(
         binary_path=JACKHMMER_BINARY_PATH,
@@ -136,26 +144,27 @@ def run_jackhmmer(
 
     _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
-
-    result = _run_msa_tool(
-        msa_runner=runner,
-        input_fasta_path=input_path,
-        msa_out_path=output_path,
-        msa_format=msa_format,
-        max_sto_sequences=max_sto_sequences
-    )
+    results = runner.query(input_path, max_sto_sequences)
+    _save_results(results[0], output_path)
 
 
 def run_hhsearch(
     input_path: str,
+    input_format: str,
+    output_path: str,
+    output_format: str,
     database_paths: Sequence[str],
-    maxseq: int,
-    output_path: str): 
-    """Runs hhblits and saves results to a file."""
+    maxseq: int):
+    """Runs hhsearch and saves results to a file."""
 
     template_format = pathlib.Path(output_path).suffix[1:]
     if template_format != 'hhr':
         raise ValueError(f'hhsearch does not support generating files in {template_format} format') 
+    
+    if input_format != 'sto' or input_format != 'a3m':
+        raise ValueError(f'hhsearch does not support inputs in {input_format} format')
+    if output_format != 'hhr':
+        raise ValueError(f'hhsearch does not support outputs in {output_format} format')  
 
     runner = hhsearch.HHSearch(
         binary_path=HHSEARCH_BINARY_PATH,
@@ -166,58 +175,53 @@ def run_hhsearch(
     with open(input_path) as f:
         input_msa_str = f.read()
 
-    msa_format = pathlib.Path(input_path).suffix[1:]
-    if  msa_format == 'sto':
+    if  input_format == 'sto':
         msa_for_templates = parsers.deduplicate_stockholm_msa(input_msa_str)
         msa_for_templates = parsers.remove_empty_columns_from_stockholm_msa(msa_for_templates)
         msa_for_templates = parsers.convert_stockholm_to_a3m(msa_for_templates)
-        print('sto')
-    elif msa_format == 'a3m':
+    else input_format == 'a3m':
         # TBD - research what kind of preprocessing required for a3m - if any 
-        print('a3m')
-    else:
-        raise ValueError(
-          f'File format not supported by HHSearch: {msa_format}.')
+        pass
 
-    template_hits = runner.query(msa_for_templates)
-
-    with open(output_path, 'w') as f:
-        f.write(template_hits)
-    logging.info(f"Saved results to {output_path}")
-
+    results = runner.query(msa_for_templates)
+    _save_results(results[0], output_path)
+ 
 
 if __name__=='__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         level=logging.INFO, 
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
-    
-    database_paths = [
-            os.path.join(DATABASES_ROOT, database_path) 
-            for database_path in DATABASE_PATHS.split(',')]
 
+    database_paths = DATABASE_PATHS.split(',') 
 
     if DB_TOOL == 'jackhmmer':
         run_jackhmmer(
-            input_path=INPUT_PATH,
+            input_path=INPUT_DATA,
+            input_data_format=INPUT_DATA_FORMAT,
+            output_path=OUTPUT_DATA,
+            output_data_format=OUTPUT_DATA_FORMAT,
             database_path=database_paths[0],
             n_cpu=N_CPU,
             max_sto_sequences=MAX_STO_SEQEUNCES,
-            output_path=OUTPUT_PATH
         )
     elif DB_TOOL == 'hhblits':
         run_hhblits(
-            input_path=INPUT_PATH,
+            input_path=INPUT_DATA,
+            input_data_format=INPUT_DATA_FORMAT,
+            output_path=OUTPUT_DATA,
+            output_data_format=OUTPUT_DATA_FORMAT,
             database_paths=database_paths,
             n_cpu=N_CPU,
-            output_path=OUTPUT_PATH
         )
     elif DB_TOOL == 'hhsearch':
         run_hhsearch(
-            input_path=INPUT_PATH,
+            input_path=INPUT_DATA,
+            input_data_format=INPUT_DATA_FORMAT,
+            output_path=OUTPUT_DATA,
+            output_data_format=OUTPUT_DATA_FORMAT,
             database_paths=database_paths,
             maxseq=MAXSEQ,
-            output_path=OUTPUT_PATH
         )
     else:
       raise ValueError(

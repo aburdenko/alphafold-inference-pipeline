@@ -25,7 +25,7 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-import alphafold_components
+from alphafold_components import DbSearchOp
 
 FLAGS = flags.FLAGS
 
@@ -52,43 +52,48 @@ def pipeline(
     datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE):
     """Runs AlphaFold inference."""
 
-    search_uniref = alphafold_components.DBSearchOp(
+    input_data = dsl.importer(
+        artifact_uri=fasta_path,
+        artifact_class=dsl.Dataset,
+    )
+
+    search_uniref = DbSearchOp(
         project=project,
         region=region,
-        datasets_disk_image=datasets_disk_image,
+        disk_image=datasets_disk_image,
         database_paths=_UNIREF_PATH,
-        input_path=fasta_path,
-        search_tool=_JACKHMMER
+        input_data=input_data.output,
+        db_tool=_JACKHMMER
     )
     search_uniref.set_display_name('Search Uniref')
 
-    search_mgnify = alphafold_components.DBSearchOp(
+    search_mgnify = DbSearchOp(
         project=project,
         region=region,
-        datasets_disk_image=datasets_disk_image,
+        disk_image=datasets_disk_image,
         database_paths=_MGNIFY_PATH,
-        input_path=fasta_path,
-        search_tool=_JACKHMMER
+        input_data=input_data.output,
+        db_tool=_JACKHMMER
     )
     search_mgnify.set_display_name('Search Mgnify')
 
-    search_bfd_uniclust = alphafold_components.DBSearchOp(
+    search_bfd_uniclust = DbSearchOp(
         project=project,
         region=region,
-        datasets_disk_image=datasets_disk_image,
+        disk_image=datasets_disk_image,
         database_paths=_BFD__UNICLUST_PATH,
-        input_path=fasta_path,
-        search_tool=_HHBLITS
+        input_data=input_data.output,
+        db_tool=_HHBLITS
     )
     search_bfd_uniclust.set_display_name('Search Uniclust and BFD')
 
-    search_pdb = alphafold_components.DBSearchOp(
+    search_pdb = DbSearchOp(
         project=project,
         region=region,
-        datasets_disk_image=datasets_disk_image,
+        disk_image=datasets_disk_image,
         database_paths=_PDB_PATH,
-        input_path=search_uniref.outputs['Output'],
-        search_tool=_HHSEARCH
+        input_data=search_uniref.outputs['output_data'],
+        db_tool=_HHSEARCH
     )
     search_pdb.set_display_name('Search Pdb') 
 
