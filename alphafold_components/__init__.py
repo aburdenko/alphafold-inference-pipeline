@@ -23,3 +23,5 @@
 #    os.path.join(
 #        os.path.dirname(__file__),
 #        'db_search/component.yaml'))
+
+from alphafold_components.db_search import db_search as DBSearchOp

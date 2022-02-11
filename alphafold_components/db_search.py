@@ -13,25 +13,30 @@
 # limitations under the License.
 
 
-from kfp.v2 import dsl
-from kfp.v2.dsl import Output
-from kfp.v2.dsl import Artifact 
+import os
 
+from kfp.v2 import dsl
+from kfp.v2.dsl import Output, Input, Artifact, Dataset
+
+
+_ALPHAFOLD_RUNNER_IMAGE = os.getenv('ALPHAFOLD_RUNNER_IAMGE', 'gcr.io/jk-mlops-dev/alphafold')
+_COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold-components')
 
 
 @dsl.component(
-    base_image='gcr.io/jk-mlops-dev/alphafold-components',
+    base_image=_COMPONENTS_IMAGE,
     output_component_file='component_db_search.yaml'
 )
 def db_search(
     project: str,
     region: str,
-    datasets_disk_image: str,
+    disk_image: str,
     database_paths: str,
-    input_path: str,
-    search_tool: str,
-    output_msa: Output[Artifact], 
-    tool_options: dict=None)-> str:
+    db_tool: str,
+    input_data: Input[Dataset],
+    output_data: Output[Dataset],
+    cls_logging: Output[Artifact] 
+    ):
     """Searches sequence databases using the specified tool.
 
     This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
@@ -40,18 +45,11 @@ def db_search(
 
     """
     
-    print(output_msa)
-    print(output_msa.name)
-    print(output_msa.uri)
-    print(output_msa.metadata)
-
-
-
 
     import logging
     import os
 
-    from alphafold_components import dsub_wrapper
+    from dsub_wrapper import run_dsub_job
 
     # For a prototype we are hardcoding some values. Whe productionizing
     # we can make them compile time or runtime parameters
@@ -59,106 +57,91 @@ def db_search(
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
 
-    _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
     _TOOL_TO_SETTINGS_MAPPING = {
        'jackhmmer': {
            'MACHINE_TYPE': 'n1-standard-4',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 4,
-           'MAX_STO_SEQUENCES': '10_000',
-           'FILE_FORMAT': 'sto',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
+           'MAXSEQ': '10_000',
+           'INPUT_DATA_FORMAT': 'fasta',
+           'OUTPUT_DATA_FORMAT': 'sto',
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
        },
        'hhblits': {
            'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
            'N_CPU': 4,
-           'FILE_FORMAT': 'a3m',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/msa_runner.py' 
+           'MAXSEQ': '1_000_000',
+           'INPUT_DATA_FORMAT': 'fasta',
+           'OUTPUT_DATA_FORMAT': 'a3m',
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
        },
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
            'MAXSEQ': '1_000_000',
-           'FILE_FORMAT': 'hhr',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/template_runner.py' 
+           'INPUT_DATA_FORMAT': 'sto',
+           'OUTPUT_DATA_FORMAT': 'hhr',
+           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
        }
     }
 
-    _OUTPUT_FILE_PREFIX = 'output'
-
-    if not search_tool in _TOOL_TO_SETTINGS_MAPPING.keys():
-        raise ValueError(f'Unsupported tool: {search_tool}')
+    if not db_tool in _TOOL_TO_SETTINGS_MAPPING.keys():
+        raise ValueError(f'Unsupported tool: {db_tool}')
     # We should probably also do some checking whether a given tool, DB combination works
 
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
     _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
+
+    output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
     
     
-    # This is a temporary hack till we find a better option for dsub logging location
-    # It would be great if we can access pipeline root directly
-    # If not we can always pass the location as a parameter 
-    logging_gcs_path = output_msa.uri.split('/')[2:-1]
-    folders = '/'.join(logging_gcs_path)
-    logging_gcs_path = f'gs://{folders}/logging'
-    script = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('SCRIPT') 
+
+    #inputs = {
+    #    'INPUT_PATH': input_path, 
+    #}
+    #file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')
+    #output_path =  os.path.join(output_msa.uri, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
+    #outputs = {
+    #    'OUTPUT_PATH': output_path
+    #}
+    #env_vars = {
+    #    'PYTHONPATH': '/app/alphafold',
+    #    'DATABASE_PATHS': database_paths,
+    #    'MSA_TOOL': search_tool,
+    #}
+    #env_vars.update(_TOOL_TO_SETTINGS_MAPPING[search_tool])
+
+    #if not datasets_disk_image:
+    #    datasets_disk_image = _REFERENCE_DATASETS_IMAGE
+
+    #disk_mounts = {
+    #    'DATABASES_ROOT': datasets_disk_image 
+    #}
+
+    #logging.info('Starting a dsub job')
+    ## Right now this is a blocking call. In future we should implement
+    ## a polling loop to periodically retrieve logs, stdout and stderr
+    ## and push it Vertex
+    #result = dsub_job.run_job(
+    #    script=script,
+    #    inputs=inputs,
+    #    outputs=outputs,
+    #    env_vars=env_vars,
+    #    disk_mounts=disk_mounts
+    #)
     
-    dsub_job = dsub_wrapper.DsubJob(
-        image=_IMAGE,
-        project=project,
-        region=region,
-        logging=logging_gcs_path,
-        provider=_DSUB_PROVIDER,
-        machine_type=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('MACHINE_TYPE'),
-        boot_disk_size=_TOOL_TO_SETTINGS_MAPPING[search_tool].pop('BOOT_DISK_SIZE'),
-        log_interval=_LOG_INTERVAL
-    )
-
-    inputs = {
-        'INPUT_PATH': input_path, 
-    }
-    file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')
-    output_path =  os.path.join(output_msa.uri, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
-    outputs = {
-        'OUTPUT_PATH': output_path
-    }
-    env_vars = {
-        'PYTHONPATH': '/app/alphafold',
-        'DATABASE_PATHS': database_paths,
-        'MSA_TOOL': search_tool,
-    }
-    env_vars.update(_TOOL_TO_SETTINGS_MAPPING[search_tool])
-
-    if not datasets_disk_image:
-        datasets_disk_image = _REFERENCE_DATASETS_IMAGE
-
-    disk_mounts = {
-        'DATABASES_ROOT': datasets_disk_image 
-    }
-
-    logging.info('Starting a dsub job')
-    # Right now this is a blocking call. In future we should implement
-    # a polling loop to periodically retrieve logs, stdout and stderr
-    # and push it Vertex
-    result = dsub_job.run_job(
-        script=script,
-        inputs=inputs,
-        outputs=outputs,
-        env_vars=env_vars,
-        disk_mounts=disk_mounts
-    )
+    #logging.info('Job completed')
+    #logging.info(f'Completion status {result.returncode}')
+    #logging.info(f'Logs: {result.stdout}')
     
-    logging.info('Job completed')
-    logging.info(f'Completion status {result.returncode}')
-    logging.info(f'Logs: {result.stdout}')
-    
-    if result.returncode != 0:
-        raise RuntimeError('dsub job failed')
+    #if result.returncode != 0:
+    #    raise RuntimeError('dsub job failed')
 
-    output_msa.metadata['file_format']=file_format
+    #output_msa.metadata['file_format']=file_format
 
-    return output_path
+    #return output_path
     
 
     

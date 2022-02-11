@@ -25,7 +25,7 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-from alphafold_components import DbSearchOp
+from alphafold_components import DBSearchOp
 
 FLAGS = flags.FLAGS
 
@@ -57,7 +57,7 @@ def pipeline(
         artifact_class=dsl.Dataset,
     )
 
-    search_uniref = DbSearchOp(
+    search_uniref = DBSearchOp(
         project=project,
         region=region,
         disk_image=datasets_disk_image,
@@ -67,7 +67,7 @@ def pipeline(
     )
     search_uniref.set_display_name('Search Uniref')
 
-    search_mgnify = DbSearchOp(
+    search_mgnify = DBSearchOp(
         project=project,
         region=region,
         disk_image=datasets_disk_image,
@@ -77,7 +77,7 @@ def pipeline(
     )
     search_mgnify.set_display_name('Search Mgnify')
 
-    search_bfd_uniclust = DbSearchOp(
+    search_bfd_uniclust = DBSearchOp(
         project=project,
         region=region,
         disk_image=datasets_disk_image,
@@ -87,7 +87,7 @@ def pipeline(
     )
     search_bfd_uniclust.set_display_name('Search Uniclust and BFD')
 
-    search_pdb = DbSearchOp(
+    search_pdb = DBSearchOp(
         project=project,
         region=region,
         disk_image=datasets_disk_image,
@@ -96,8 +96,6 @@ def pipeline(
         db_tool=_HHSEARCH
     )
     search_pdb.set_display_name('Search Pdb') 
-
-    
 
 
 def _main(argv):

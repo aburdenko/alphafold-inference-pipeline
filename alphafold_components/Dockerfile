@@ -20,6 +20,5 @@ WORKDIR /scripts
 
 ADD alphafold_runners alphafold_runners
 
-ADD run_dsub.sh .
+ADD dsub_wrapper.py .
 
-ENTRYPOINT ["./run_dsub.sh"]
