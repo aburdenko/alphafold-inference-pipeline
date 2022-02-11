@@ -79,6 +79,7 @@ def db_search(
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
+           'N_CPU': 0, # Not setable for hhsearch
            'MAXSEQ': '1_000_000',
            'INPUT_DATA_FORMAT': 'sto',
            'OUTPUT_DATA_FORMAT': 'hhr',
@@ -96,52 +97,31 @@ def db_search(
 
     output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
     
-    
+    job_params = [
+        '--db_tool', db_tool,
+        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],
+        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],
+        '--logging', cls_logging.uri,
+        '--mount', f'DB_ROOT={disk_image}',
+        '--input', f'INPUT_DATA={input_data.uri}',
+        '--output', f'OUTPUT_DATA={output_data.uri}',
+        '--env', f'DB_PATHS={database_paths}',
+        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool]["N_CPU"]}',
+        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool]["INPUT_DATA_FORMAT"]}', 
+        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool]["OUTPUT_DATA_FORMAT"]}', 
+        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool]["MAXSEQ"]}', 
+        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] 
+    ]
 
-    #inputs = {
-    #    'INPUT_PATH': input_path, 
-    #}
-    #file_format = _TOOL_TO_SETTINGS_MAPPING[search_tool].pop('FILE_FORMAT')
-    #output_path =  os.path.join(output_msa.uri, f'{_OUTPUT_FILE_PREFIX}.{file_format}')
-    #outputs = {
-    #    'OUTPUT_PATH': output_path
-    #}
-    #env_vars = {
-    #    'PYTHONPATH': '/app/alphafold',
-    #    'DATABASE_PATHS': database_paths,
-    #    'MSA_TOOL': search_tool,
-    #}
-    #env_vars.update(_TOOL_TO_SETTINGS_MAPPING[search_tool])
+    return
 
-    #if not datasets_disk_image:
-    #    datasets_disk_image = _REFERENCE_DATASETS_IMAGE
+    result = run_dsub_job(
+        provider='google-cls-v2',
+        project=project,
+        regions=region,
+        params=job_params,
+    ) 
 
-    #disk_mounts = {
-    #    'DATABASES_ROOT': datasets_disk_image 
-    #}
-
-    #logging.info('Starting a dsub job')
-    ## Right now this is a blocking call. In future we should implement
-    ## a polling loop to periodically retrieve logs, stdout and stderr
-    ## and push it Vertex
-    #result = dsub_job.run_job(
-    #    script=script,
-    #    inputs=inputs,
-    #    outputs=outputs,
-    #    env_vars=env_vars,
-    #    disk_mounts=disk_mounts
-    #)
-    
-    #logging.info('Job completed')
-    #logging.info(f'Completion status {result.returncode}')
-    #logging.info(f'Logs: {result.stdout}')
-    
-    #if result.returncode != 0:
-    #    raise RuntimeError('dsub job failed')
-
-    #output_msa.metadata['file_format']=file_format
-
-    #return output_path
     
 
     
