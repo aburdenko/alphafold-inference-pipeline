@@ -137,9 +137,6 @@ def run_hhsearch(
     maxseq: int):
     """Runs hhsearch and saves results to a file."""
 
-    template_format = pathlib.Path(output_path).suffix[1:]
-    if template_format != 'hhr':
-        raise ValueError(f'hhsearch does not support generating files in {template_format} format') 
     
     if input_format != 'sto' or input_format != 'a3m':
         raise ValueError(f'hhsearch does not support inputs in {input_format} format')
