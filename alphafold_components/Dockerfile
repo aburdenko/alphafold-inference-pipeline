@@ -20,6 +20,6 @@ WORKDIR /scripts
 
 ADD alphafold_runners alphafold_runners
 
-ADD run_dsub_job.sh .
+ADD run_dsub.sh .
 
-ENTRYPOINT ["./run_dsub_job.sh"]
+ENTRYPOINT ["./run_dsub.sh"]
