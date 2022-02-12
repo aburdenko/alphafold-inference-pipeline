@@ -119,8 +119,8 @@ def run_hhsearch(
         query_sequence=input_sequence,
         hits=template_hits
     )
-    
-    with open(output_template_features_path, 'w') as f:
+
+    with open(output_template_features_path, 'wb') as f:
         pickle.dump(templates_result.features, f, protocol=4)
 
     
