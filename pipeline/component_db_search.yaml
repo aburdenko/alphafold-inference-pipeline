@@ -42,37 +42,38 @@ implementation:
       \ we are hardcoding some values. Whe productionizing\n    # we can make them\
       \ compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits\
       \ requires at least SSE2 instruction set\n    # Works better with AVX2. \n \
-      \   # At runtime we could pass them as tool_options dictionary\n\n    logging.basicConfig(format='%(asctime)s\
+      \   # At runtime we could pass them as tool_options dictionary\n    _ALPHAFOLD_RUNNER_IMAGE\
+      \ = 'gcr.io/jk-mlops-dev/alphafold'\n\n    logging.basicConfig(format='%(asctime)s\
       \ - %(message)s',\n                      level=logging.INFO, \n            \
       \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
       \n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE':\
       \ 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU':\
       \ 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n\
-      \           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py'\
+      \           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py'\
       \ \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
       \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ':\
       \ '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT':\
-      \ 'a3m',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py'\
+      \ 'a3m',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py'\
       \ \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
       \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 0, # Not setable for\
       \ hhsearch\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT':\
-      \ 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py'\
+      \ 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py'\
       \ \n       }\n    }\n\n    if not db_tool in _TOOL_TO_SETTINGS_MAPPING.keys():\n\
       \        raise ValueError(f'Unsupported tool: {db_tool}')\n    # We should probably\
       \ also do some checking whether a given tool, DB combination works\n\n    _DSUB_PROVIDER\
       \ = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\
       \n    output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n\
-      \n    job_params = [\n        '--db_tool', db_tool,\n        '--machine-type',\
-      \ _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size',\
-      \ _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging',\
-      \ cls_logging.uri,\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input',\
-      \ f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_data.uri}',\n\
+      \n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n\
+      \        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n\
+      \        '--logging', cls_logging.uri,\n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n\
+      \        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n\
+      \        '--output', f'OUTPUT_DATA={output_data.uri}',\n        '--env', f'DB_TOOL={db_tool}',\n\
       \        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       OUTPUT_DATA_FORMAT\"]}', \n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT']\
-      \ \n    ]\n\n    return\n\n    result = run_dsub_job(\n        provider='google-cls-v2',\n\
+      \ \n    ]\n\n    result = run_dsub_job(\n        provider='google-cls-v2',\n\
       \        project=project,\n        regions=region,\n        params=job_params,\n\
       \    ) \n\n"
     args:

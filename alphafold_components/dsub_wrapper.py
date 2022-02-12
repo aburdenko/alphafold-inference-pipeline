@@ -59,7 +59,9 @@ def run_dsub_job(params: List[str],
         stdout=subprocess.PIPE
     )
     if result.returncode != 0:
-        raise RuntimeError('dsub failed to launch the job. Retcode: {result.retcode}')
+        logging.info(result.stderr)
+        logging.info(result.stdout)
+        raise RuntimeError(f'dsub failed to launch the job. Retcode: {result.returncode}')
         
     dstat_cmd += ['--jobs', result.stdout.decode('UTF-8').strip()]
     result = subprocess.run(
@@ -68,18 +70,23 @@ def run_dsub_job(params: List[str],
         stdout=subprocess.PIPE
     )
 
-    while True:
-        result = subprocess.run(
-            dstat_cmd,
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE)
+    dstat_cmd.append('--wait')
+    result = subprocess.run(
+        dstat_cmd,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE)
+    #while True:
+    #    result = subprocess.run(
+    #        dstat_cmd,
+    #        stderr=subprocess.PIPE,
+    #        stdout=subprocess.PIPE)
 
-        if result.stdout.decode('UTF-8').strip() == "":
-            break
+    #    if result.stdout.decode('UTF-8').strip() == "":
+    #        break
 
-        # Logging must dramatically improve :)
-        logging.info(result.stdout) 
-        time.sleep(_POLLING_INTERVAL)
+    #    # Logging must dramatically improve :)
+    #    logging.info(result.stdout) 
+    #    time.sleep(_POLLING_INTERVAL)
 
 
     return result

@@ -19,7 +19,7 @@ from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
 
-_ALPHAFOLD_RUNNER_IMAGE = os.getenv('ALPHAFOLD_RUNNER_IAMGE', 'gcr.io/jk-mlops-dev/alphafold')
+
 _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold-components')
 
 
@@ -57,6 +57,7 @@ def db_search(
     # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
 
     logging.basicConfig(format='%(asctime)s - %(message)s',
                       level=logging.INFO, 
@@ -71,7 +72,7 @@ def db_search(
            'MAXSEQ': '10_000',
            'INPUT_DATA_FORMAT': 'fasta',
            'OUTPUT_DATA_FORMAT': 'sto',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
+           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
        },
        'hhblits': {
            'MACHINE_TYPE': 'c2-standard-4',
@@ -80,7 +81,7 @@ def db_search(
            'MAXSEQ': '1_000_000',
            'INPUT_DATA_FORMAT': 'fasta',
            'OUTPUT_DATA_FORMAT': 'a3m',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
+           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
        },
        'hhsearch': {
            'MACHINE_TYPE': 'c2-standard-4',
@@ -89,7 +90,7 @@ def db_search(
            'MAXSEQ': '1_000_000',
            'INPUT_DATA_FORMAT': 'sto',
            'OUTPUT_DATA_FORMAT': 'hhr',
-           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py' 
+           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
        }
     }
 
@@ -104,13 +105,14 @@ def db_search(
     output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
     
     job_params = [
-        '--db_tool', db_tool,
         '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],
         '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],
         '--logging', cls_logging.uri,
+        '--image', _ALPHAFOLD_RUNNER_IMAGE,
         '--mount', f'DB_ROOT={disk_image}',
         '--input', f'INPUT_DATA={input_data.uri}',
         '--output', f'OUTPUT_DATA={output_data.uri}',
+        '--env', f'DB_TOOL={db_tool}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool]["N_CPU"]}',
         '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool]["INPUT_DATA_FORMAT"]}', 
@@ -118,8 +120,6 @@ def db_search(
         '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool]["MAXSEQ"]}', 
         '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] 
     ]
-
-    return
 
     result = run_dsub_job(
         provider='google-cls-v2',
