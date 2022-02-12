@@ -62,19 +62,16 @@ def run_dsub_job(params: List[str],
         logging.info(result.stderr)
         logging.info(result.stdout)
         raise RuntimeError(f'dsub failed to launch the job. Retcode: {result.returncode}')
-        
+
+    logging.info('Waiting for the job to complete') 
     dstat_cmd += ['--jobs', result.stdout.decode('UTF-8').strip()]
+    dstat_cmd.append('--wait')
     result = subprocess.run(
         dstat_cmd,
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE
     )
 
-    dstat_cmd.append('--wait')
-    result = subprocess.run(
-        dstat_cmd,
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE)
     #while True:
     #    result = subprocess.run(
     #        dstat_cmd,
