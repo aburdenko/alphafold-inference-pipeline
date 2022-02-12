@@ -71,7 +71,7 @@ def run_jackhmmer(
         n_cpu=n_cpu,
     )
 
-    _, input_desc = _read_and_check_fasta(input_sequence)
+    _, input_desc = _read_and_check_fasta(input_path)
     logging.info(f'Searching using input sequence: {input_desc}')
     results = runner.query(input_path, maxseq)
     with open(output_path, 'w') as f: 

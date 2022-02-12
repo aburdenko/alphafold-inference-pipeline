@@ -80,6 +80,7 @@ def run_hhsearch(
 
 
     input_sequence, _ = _read_and_check_fasta(input_sequence_path)
+    input_sequence = input_sequence[0]
 
     template_searcher = hhsearch.HHSearch(
         binary_path=HHSEARCH_BINARY_PATH,
@@ -107,7 +108,7 @@ def run_hhsearch(
         # TBD - research what kind of preprocessing required for a3m - if any 
         pass
 
-    templates_result = template_searcher(msa_for_templates)
+    templates_result = template_searcher.query(msa_for_templates)
     with open(output_template_hits_path, 'w') as f:
         f.write(templates_result)
 
