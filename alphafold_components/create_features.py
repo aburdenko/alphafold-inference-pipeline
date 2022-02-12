@@ -48,6 +48,7 @@ def create_features(
     msa_input2: Optional[Input[Dataset]],
     msa_input3: Optional[Input[Dataset]],
     template_input: Input[Dataset],
+    reference_databases: Input[Dataset],
     features: Output[Dataset]):
     """ Creates features from results of searches against sequence databases.
     
@@ -134,9 +135,9 @@ def create_features(
         sequence_path = sequence_dataset.path
         sequence_format = sequence_dataset.metadata['data_format']
 
-        if sequence_format != 'fasts':
+        if sequence_format != 'fasta':
             raise RuntimeError(f'Unsupported sequence format {sequence_format}')
-
+        
         with open(sequence_path) as f:
             sequence_str = f.read()
         sequences, sequence_descs = parsers.parse_fasta(sequence_str)
@@ -144,15 +145,14 @@ def create_features(
             raise ValueError(
                 f'More than one input sequence found in {sequence_path}.')
 
-        return sequences[0], sequence_descs[0], len(sequences[0]
+        return sequences[0], sequence_descs[0], len(sequences[0])
 
     # Create sequence features
-   seq, seq_desc, num_res = _read_sequence(sequence_input) 
-   sequence_features = _make_sequence_features(
-       sequence=seq,
-       description=seq_desc,
-       num_res=num_res
-   )
+    seq, seq_desc, num_res = _read_sequence(sequence_input) 
+    sequence_features = _make_sequence_features(
+        sequence=seq,
+        description=seq_desc,
+        num_res=num_res)
 
     # Create MSA features
     msas = []
@@ -162,6 +162,13 @@ def create_features(
     if not msas:
         raise RuntimeError('No MSAs passed to the component')
     msa_features = _make_msa_features(msas=msas)
+
+    # Create template features
+    
+
+
+
+    
 
 
 
