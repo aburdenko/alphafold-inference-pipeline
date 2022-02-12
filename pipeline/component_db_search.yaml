@@ -42,17 +42,18 @@ implementation:
       \    _PDB70 = 'pdb70'\n    _PDB_MMCIF = 'pdb_mmcif'\n    _PDB_OBSOLETE = 'pdb_obsolete'\n\
       \    _PDB_SEQRES = 'pdb_seqres'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER\
       \ = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE\
-      \ = 'gcr.io/jk-mlops-dev/alphafold'\n\n    # For a prototype we are hardcoding\
-      \ some values. Whe productionizing\n    # we can make them compile time or runtime\
-      \ parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2\
-      \ instruction set\n    # Works better with AVX2. \n    # At runtime we could\
-      \ pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s\
-      \ - %(message)s',\n                      level=logging.INFO, \n            \
-      \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
-      \n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE':\
-      \ 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU':\
-      \ 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n\
-      \           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py'\
+      \ = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\
+      \n    # For a prototype we are hardcoding some values. Whe productionizing\n\
+      \    # we can make them compile time or runtime parameters\n    # E.g. CPU type\
+      \ is important. HHBlits requires at least SSE2 instruction set\n    # Works\
+      \ better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n\
+      \    logging.basicConfig(format='%(asctime)s - %(message)s',\n             \
+      \         level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n\
+      \                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING =\
+      \ {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n  \
+      \         'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ':\
+      \ '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT':\
+      \ 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py'\
       \ \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
       \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ':\
       \ '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT':\
@@ -75,13 +76,14 @@ implementation:
       \ supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n\
       \    database_paths = [reference_databases.metadata[database]\n            \
       \          for database in database_list]\n    database_paths = ','.join(database_paths)\n\
-      \n    output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n\
-      \n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n\
+      \n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n\
+      \    output_data.metadata['data_format'] = output_data_format\n    output_path\
+      \ = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n\
       \        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n\
       \        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL,\
       \ \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n\
       \        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n\
-      \        '--output', f'OUTPUT_DATA={output_data.uri}',\n        '--env', f'DB_TOOL={db_tool}',\n\
+      \        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n\
       \        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\
       INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"\

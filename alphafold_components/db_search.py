@@ -65,6 +65,8 @@ def db_search(
     _LOG_INTERVAL = '30s'
     _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
 
+    _DEFAULT_FILE_PREFIX = 'datafile'
+
     # For a prototype we are hardcoding some values. Whe productionizing
     # we can make them compile time or runtime parameters
     # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set
@@ -132,7 +134,9 @@ def db_search(
                       for database in database_list]
     database_paths = ','.join(database_paths)
 
-    output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
+    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
+    output_data.metadata['data_format'] = output_data_format
+    output_path = output_data.uri
     
     job_params = [
         '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],
@@ -143,7 +147,7 @@ def db_search(
         '--env', f'PYTHONPATH=/app/alphafold',
         '--mount', f'DB_ROOT={disk_image}',
         '--input', f'INPUT_DATA={input_data.uri}',
-        '--output', f'OUTPUT_DATA={output_data.uri}',
+        '--output', f'OUTPUT_DATA={output_path}',
         '--env', f'DB_TOOL={db_tool}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool]["N_CPU"]}',

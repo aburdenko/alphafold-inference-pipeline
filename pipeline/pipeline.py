@@ -39,7 +39,7 @@ _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-m
 _REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
 _UNIREF90_PATH = 'uniref90/uniref90.fasta'
 _MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
-_BFD_PATH = 'bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
+_BFD_PATH = 'bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
 _UNICLUST30_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08'
 _UNIPROT_PATH = 'uniprot/uniprot.fasta'
 _PDB70_PATH = 'pdb70/pdb70'
@@ -66,7 +66,6 @@ def pipeline(
     fasta_path: str,
     project: str='jk-mlops-dev',
     region: str='us-central1',
-    datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE,
     datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
