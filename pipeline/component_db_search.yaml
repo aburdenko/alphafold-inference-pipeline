@@ -37,16 +37,18 @@ implementation:
       \  This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n\
       \    We are using CLS as KFP does not support attaching pre-populated disks\
       \ or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch\
-      \ or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n\n    from\
-      \ dsub_wrapper import run_dsub_job\n\n    # For a prototype we are hardcoding\
-      \ some values. Whe productionizing\n    # we can make them compile time or runtime\
-      \ parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2\
-      \ instruction set\n    # Works better with AVX2. \n    # At runtime we could\
-      \ pass them as tool_options dictionary\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n\
-      \       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n      \
-      \     'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ':\
-      \ '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT':\
-      \ 'sto',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py'\
+      \ or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import\
+      \ sys\n\n    from dsub_wrapper import run_dsub_job\n\n    # For a prototype\
+      \ we are hardcoding some values. Whe productionizing\n    # we can make them\
+      \ compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits\
+      \ requires at least SSE2 instruction set\n    # Works better with AVX2. \n \
+      \   # At runtime we could pass them as tool_options dictionary\n\n    logging.basicConfig(format='%(asctime)s\
+      \ - %(message)s',\n                      level=logging.INFO, \n            \
+      \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
+      \n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE':\
+      \ 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU':\
+      \ 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n\
+      \           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_components/alphafold_runners/db_search_runner.py'\
       \ \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n\
       \           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ':\
       \ '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT':\

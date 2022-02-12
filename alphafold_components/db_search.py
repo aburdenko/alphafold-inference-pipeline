@@ -48,6 +48,7 @@ def db_search(
 
     import logging
     import os
+    import sys
 
     from dsub_wrapper import run_dsub_job
 
@@ -56,6 +57,11 @@ def db_search(
     # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
+
+    logging.basicConfig(format='%(asctime)s - %(message)s',
+                      level=logging.INFO, 
+                      datefmt='%d-%m-%y %H:%M:%S',
+                      stream=sys.stdout)
 
     _TOOL_TO_SETTINGS_MAPPING = {
        'jackhmmer': {

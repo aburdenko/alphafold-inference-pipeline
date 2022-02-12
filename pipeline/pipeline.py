@@ -55,6 +55,7 @@ def pipeline(
     input_data = dsl.importer(
         artifact_uri=fasta_path,
         artifact_class=dsl.Dataset,
+        metadata={'data_format': 'fasta'}
     )
 
     search_uniref = DBSearchOp(
