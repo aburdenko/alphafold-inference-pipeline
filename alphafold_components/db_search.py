@@ -14,10 +14,10 @@
 
 
 import os
+from re import I
 
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
-
 
 
 _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold-components')
@@ -30,9 +30,8 @@ _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold
 def db_search(
     project: str,
     region: str,
-    disk_image: str,
-    database_paths: str,
-    db_tool: str,
+    database_list: list,
+    reference_databases: Input[Dataset],
     input_data: Input[Dataset],
     output_data: Output[Dataset],
     cls_logging: Output[Artifact] 
@@ -52,13 +51,25 @@ def db_search(
 
     from dsub_wrapper import run_dsub_job
 
+    _UNIREF90 = 'uniref90'
+    _MGNIFY = 'mgnify'
+    _BFD = 'bfd'
+    _UNICLUST30 = 'uniclust30'
+    _PDB70 = 'pdb70'
+    _PDB_MMCIF = 'pdb_mmcif'
+    _PDB_OBSOLETE = 'pdb_obsolete'
+    _PDB_SEQRES = 'pdb_seqres'
+    _UNIPROT = 'uniprot'
+
+    _DSUB_PROVIDER = 'google-cls-v2'
+    _LOG_INTERVAL = '30s'
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
+
     # For a prototype we are hardcoding some values. Whe productionizing
     # we can make them compile time or runtime parameters
     # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
-    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
-
     logging.basicConfig(format='%(asctime)s - %(message)s',
                       level=logging.INFO, 
                       datefmt='%d-%m-%y %H:%M:%S',
@@ -93,14 +104,33 @@ def db_search(
            'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
        }
     }
+     
+    # This is a temporary crude solution to map a the list of databases to search
+    # to a search tool. In the prototype we assume that the provided databases list 
+    # can be searched with a single tool
+    _DATABASE_TO_TOOL_MAPPING = {
+        _UNIREF90: 'jackhmmer',
+        _MGNIFY: 'jackhmmer',
+        _BFD: 'hhblits',
+        _UNICLUST30: 'hhsearch', 
+        _PDB70 : 'hhsearch',
+        _PDB_MMCIF: None, # to be determined
+        _PDB_OBSOLETE: None, # to be determined
+        _PDB_SEQRES: None, # to be determined
+        _UNIPROT: None, # to be determined
+    }
+    
+    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list
+              if _DATABASE_TO_TOOL_MAPPING[db]]
 
-    if not db_tool in _TOOL_TO_SETTINGS_MAPPING.keys():
-        raise ValueError(f'Unsupported tool: {db_tool}')
-    # We should probably also do some checking whether a given tool, DB combination works
+    if (not tools) or (len(tools) > 1):
+        raise RuntimeError(f'The database list {database_list} not supported')
+    db_tool = tools[0]
 
-    _DSUB_PROVIDER = 'google-cls-v2'
-    _LOG_INTERVAL = '30s'
-    _IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
+    disk_image = reference_databases.metadata['disk_image']
+    database_paths = [reference_databases.metadata[database]
+                      for database in database_list]
+    database_paths = ','.join(database_paths)
 
     output_data.metadata['data_format'] = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
     
@@ -108,7 +138,9 @@ def db_search(
         '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],
         '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],
         '--logging', cls_logging.uri,
+        '--log-interval', _LOG_INTERVAL, 
         '--image', _ALPHAFOLD_RUNNER_IMAGE,
+        '--env', f'PYTHONPATH=/app/alphafold',
         '--mount', f'DB_ROOT={disk_image}',
         '--input', f'INPUT_DATA={input_data.uri}',
         '--output', f'OUTPUT_DATA={output_data.uri}',
@@ -122,7 +154,7 @@ def db_search(
     ]
 
     result = run_dsub_job(
-        provider='google-cls-v2',
+        provider=_DSUB_PROVIDER,
         project=project,
         regions=region,
         params=job_params,

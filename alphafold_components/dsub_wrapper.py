@@ -43,15 +43,9 @@ def run_dsub_job(params: List[str],
     dsub_cmd = [
         _DSUB_BINARY_PATH,
         '--provider', provider] + params
-    dstat_cmd = [
-        _DSTAT_BINARY_PATH,
-        '--provider', provider]
+ 
     if provider == 'google-cls-v2':
-        google_provider_params = [
-        '--project', project,
-        '--regions', regions]
-        dsub_cmd += google_provider_params
-        dstat_cmd += google_provider_params
+        dsub_cmd += ['--project', project, '--regions', regions]
         
     result = subprocess.run(
         dsub_cmd,
@@ -63,27 +57,37 @@ def run_dsub_job(params: List[str],
         logging.info(result.stdout)
         raise RuntimeError(f'dsub failed to launch the job. Retcode: {result.returncode}')
 
-    logging.info('Waiting for the job to complete') 
-    dstat_cmd += ['--jobs', result.stdout.decode('UTF-8').strip()]
-    dstat_cmd.append('--wait')
-    result = subprocess.run(
-        dstat_cmd,
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE
-    )
+    job_id = result.stdout.decode('UTF-8').strip()
+    logging.info(f'Waiting for the job {job_id} to complete') 
+    dstat_cmd = [
+        _DSTAT_BINARY_PATH,
+        '--provider', provider,
+        '--jobs', job_id,
+        '--user', 'root',
+        #'--wait'
+        ]
+    if provider == 'google-cls-v2':
+        dstat_cmd += ['--project', project] 
 
-    #while True:
-    #    result = subprocess.run(
-    #        dstat_cmd,
-    #        stderr=subprocess.PIPE,
-    #        stdout=subprocess.PIPE)
+    #result = subprocess.run(
+    #    dstat_cmd,
+    #    stderr=subprocess.PIPE,
+    #    stdout=subprocess.PIPE
+    #)
 
-    #    if result.stdout.decode('UTF-8').strip() == "":
-    #        break
+    while True:
+        result = subprocess.run(
+            dstat_cmd,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE)
 
-    #    # Logging must dramatically improve :)
-    #    logging.info(result.stdout) 
-    #    time.sleep(_POLLING_INTERVAL)
+        if result.stdout.decode('UTF-8').strip() == "":
+            break
+
+        # Logging must dramatically improve :)
+        logging.info(result.stderr)
+        logging.info(result.stdout) 
+        time.sleep(_POLLING_INTERVAL)
 
 
     return result

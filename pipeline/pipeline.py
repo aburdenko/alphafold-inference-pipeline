@@ -36,10 +36,27 @@ flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path 
                     'database for use by JackHMMER.')
 
 _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
-_UNIREF_PATH = 'uniref90/uniref90.fasta'
+_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
+_UNIREF90_PATH = 'uniref90/uniref90.fasta'
 _MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
-_BFD__UNICLUST_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
-_PDB_PATH = 'pdb70/pdb70'
+_BFD_PATH = 'bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
+_UNICLUST30_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08'
+_UNIPROT_PATH = 'uniprot/uniprot.fasta'
+_PDB70_PATH = 'pdb70/pdb70'
+_PDB_MMCIF = 'pdb_mmcif/mmcif_files'
+_PDB_OBSOLETE_PATH = 'pdb_mmcif/obsolete.dat'
+_PDB_SEQRES_PATH = 'pdb_seqres/pdb_seqres.txt'
+
+_UNIREF90 = 'uniref90'
+_MGNIFY = 'mgnify'
+_BFD = 'bfd'
+_UNICLUST30 = 'uniclust30'
+_PDB70 = 'pdb70'
+_PDB_MMCIF = 'pdb_mmcif'
+_PDB_OBSOLETE = 'pdb_obsolete'
+_PDB_SEQRES = 'pdb_seqres'
+_UNIPROT = 'uniprot'
+
 _JACKHMMER = 'jackhmmer'
 _HHSEARCH = 'hhsearch'
 _HHBLITS = 'hhblits'
@@ -49,54 +66,73 @@ def pipeline(
     fasta_path: str,
     project: str='jk-mlops-dev',
     region: str='us-central1',
-    datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE):
+    datasets_disk_image: str=_REFERENCE_DATASETS_IMAGE,
+    datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
-    input_data = dsl.importer(
+    input_sequence = dsl.importer(
         artifact_uri=fasta_path,
         artifact_class=dsl.Dataset,
+        reimport=False,
         metadata={'data_format': 'fasta'}
     )
+    input_sequence.set_display_name('Input sequence')
+
+    reference_databases = dsl.importer(
+        artifact_uri=datasets_gcs_location,
+        artifact_class=dsl.Dataset,
+        reimport=False,
+        metadata={
+            'disk_image': _REFERENCE_DATASETS_IMAGE,
+            _UNIREF90: _UNIREF90_PATH,
+            _MGNIFY: _MGNIFY_PATH,
+            _BFD: _BFD_PATH,
+            _UNICLUST30: _UNICLUST30_PATH,
+            _PDB70: _PDB70_PATH,
+            _PDB_MMCIF: _PDB_MMCIF,
+            _PDB_OBSOLETE: _PDB_OBSOLETE_PATH,
+            _PDB_SEQRES: _PDB_SEQRES_PATH,
+            _UNIPROT: _UNIPROT_PATH,
+            }    
+    )
+    reference_databases.set_display_name('Reference databases')
+
 
     search_uniref = DBSearchOp(
         project=project,
         region=region,
-        disk_image=datasets_disk_image,
-        database_paths=_UNIREF_PATH,
-        input_data=input_data.output,
-        db_tool=_JACKHMMER
+        database_list=[_UNIREF90],
+        reference_databases=reference_databases.output,
+        input_data=input_sequence.output,
     )
-    search_uniref.set_display_name('Search Uniref')
+    search_uniref.set_display_name('Search Uniref').set_caching_options(enable_caching=True)
 
     search_mgnify = DBSearchOp(
         project=project,
         region=region,
-        disk_image=datasets_disk_image,
-        database_paths=_MGNIFY_PATH,
-        input_data=input_data.output,
-        db_tool=_JACKHMMER
+        database_list=[_MGNIFY],
+        reference_databases=reference_databases.output,
+        input_data=input_sequence.output,
     )
-    search_mgnify.set_display_name('Search Mgnify')
+    search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
 
     search_bfd_uniclust = DBSearchOp(
         project=project,
         region=region,
-        disk_image=datasets_disk_image,
-        database_paths=_BFD__UNICLUST_PATH,
-        input_data=input_data.output,
-        db_tool=_HHBLITS
+        database_list=[_BFD],
+        reference_databases=reference_databases.output,
+        input_data=input_sequence.output,
     )
-    search_bfd_uniclust.set_display_name('Search Uniclust and BFD')
+    search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
 
     search_pdb = DBSearchOp(
         project=project,
         region=region,
-        disk_image=datasets_disk_image,
-        database_paths=_PDB_PATH,
+        database_list=[_PDB70, _UNICLUST30],
+        reference_databases=reference_databases.output,
         input_data=search_uniref.outputs['output_data'],
-        db_tool=_HHSEARCH
     )
-    search_pdb.set_display_name('Search Pdb') 
+    search_pdb.set_display_name('Search Pdb').set_caching_options(enable_caching=True)
 
 
 def _main(argv):
