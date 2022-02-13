@@ -27,7 +27,7 @@ BFD_PATH = 'bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
 UNICLUST30_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08'
 UNIPROT_PATH = 'uniprot/uniprot.fasta'
 PDB70_PATH = 'pdb70/pdb70'
-PDB_MMCIF = 'pdb_mmcif/mmcif_files'
+PDB_MMCIF_PATH = 'pdb_mmcif/mmcif_files'
 PDB_OBSOLETE_PATH = 'pdb_mmcif/obsolete.dat'
 PDB_SEQRES_PATH = 'pdb_seqres/pdb_seqres.txt'
 

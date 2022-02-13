@@ -69,7 +69,7 @@ implementation:
       \    '--env', f'DB_PATHS={database_paths}',\n        '--env', f'MMCIF_PATH={reference_databases.metadata[mmcif_db]}',\n\
       \        '--env', f'OBSOLETE_PATH={reference_databases.metadata[obsolete_db]}',\n\
       \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
-      \        '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',\n        '--evn',\
+      \        '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',\n        '--env',\
       \ f'MAX_TEMPLATE_DATE={max_template_date}', \n        '--script', _SCRIPT, \n\
       \    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n   \
       \     project=project,\n        regions=region,\n        params=job_params,\n\

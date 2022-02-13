@@ -68,7 +68,7 @@ def pipeline(
             config.BFD: config.BFD_PATH,
             config.UNICLUST30: config.UNICLUST30_PATH,
             config.PDB70: config.PDB70_PATH,
-            config.PDB_MMCIF: config.PDB_MMCIF,
+            config.PDB_MMCIF: config.PDB_MMCIF_PATH,
             config.PDB_OBSOLETE: config.PDB_OBSOLETE_PATH,
             config.PDB_SEQRES: config.PDB_SEQRES_PATH,
             config.UNIPROT: config.UNIPROT_PATH,
