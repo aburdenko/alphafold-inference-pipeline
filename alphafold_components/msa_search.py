@@ -104,6 +104,7 @@ def msa_search(
     
     tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs
               if _DATABASE_TO_TOOL_MAPPING[db]]
+    tools = set(tools)
 
     if (not tools) or (len(tools) > 1):
         raise RuntimeError(f'The database list {msa_dbs} not supported')
