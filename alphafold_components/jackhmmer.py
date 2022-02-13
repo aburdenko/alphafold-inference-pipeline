@@ -65,7 +65,7 @@ def jackhmmer(
                       datefmt='%d-%m-%y %H:%M:%S',
                       stream=sys.stdout)
 
-    if not (database in _SUPPORTED_DATABASES):
+    if not (str(database) in _SUPPORTED_DATABASES):
         raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')
 
     job_params = [

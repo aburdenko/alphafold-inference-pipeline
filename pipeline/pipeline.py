@@ -66,7 +66,7 @@ def pipeline(
             'uniref90': config.UNIREF90_PATH,
             'mgnify': config.MGNIFY_PATH,
             'bfd': config.BFD_PATH,
-            'uniclus30': config.UNICLUST30_PATH,
+            'uniclust30': config.UNICLUST30_PATH,
             'pdb70': config.PDB70_PATH,
             'pdb_mmcif': config.PDB_MMCIF,
             'pdb_obsolete': config.PDB_OBSOLETE_PATH,
