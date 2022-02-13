@@ -39,7 +39,12 @@ def template_search(
     msa: Input[Dataset],
     template_hits: Output[Dataset],
     template_features: Output[Dataset],
-    cls_logging: Output[Artifact] 
+    cls_logging: Output[Artifact],
+    machine_type:str='c2-standard-8',
+    n_cpu:int=8,
+    boot_disk_size:int=200,
+    maxseq:int=1_000_000,
+    max_template_hits:int=20, 
     ):
     """Searches for protein templates 
 
@@ -52,13 +57,11 @@ def template_search(
 
     """
     
-
     import logging
     import os
     import sys
 
     from dsub_wrapper import run_dsub_job
-
 
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
@@ -71,11 +74,6 @@ def template_search(
     # Works better with AVX2. 
     # At runtime we could pass them as tool_options dictionary
 
-    _MACHINE_TYPE = 'c2-standard-8'
-    _BOOT_DISK_SIZE = '200'
-    _N_CPU = '8'
-    _MAXSEQ = '1_000_000'
-    _MAX_TEMPLATE_HITS = '20'hh
 
     logging.basicConfig(format='%(asctime)s - %(message)s',
                       level=logging.INFO, 
@@ -97,8 +95,8 @@ def template_search(
     template_features.metadata['data_format'] = 'pkl'
 
     job_params = [
-        '--machine-type', _MACHINE_TYPE,
-        '--boot-disk-size', _BOOT_DISK_SIZE,
+        '--machine-type', machine_type,
+        '--boot-disk-size', str(boot_disk_size),
         '--logging', cls_logging.uri,
         '--log-interval', _LOG_INTERVAL, 
         '--image', _ALPHAFOLD_RUNNER_IMAGE,
@@ -112,9 +110,9 @@ def template_search(
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'MMCIF_PATH={mmcif_path}',
         '--env', f'OBSOLETE_PATH={obsolete_path}',
-        '--env', f'N_CPU={_N_CPU}',
-        '--env', f'MAXSEQ={_MAXSEQ}', 
-        '--env', f'MAX_TEMPLATE_HITS={_MAX_TEMPLATE_HITS}',
+        '--env', f'N_CPU={n_cpu}',
+        '--env', f'MAXSEQ={maxseq}', 
+        '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',
         '--evn', f'MAX_TEMPLATE_DATE={max_template_date}', 
         '--script', _SCRIPT, 
     ]

@@ -50,12 +50,12 @@ implementation:
       \    logging.basicConfig(format='%(asctime)s - %(message)s',\n             \
       \         level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n\
       \                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING =\
-      \ {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n  \
+      \ {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-8',\n  \
       \         'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n\
-      \           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT':\
+      \           'N_CPU': '8',\n           'MAXSEQ': '10_000',\n           'SCRIPT':\
       \ '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits':\
-      \ {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE':\
-      \ '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n\
+      \ {\n           'MACHINE_TYPE': 'c2-standard-8',\n           'BOOT_DISK_SIZE':\
+      \ '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': '8',\n\
       \           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py'\
       \ \n       },\n    }\n\n    # This is a temporary crude solution to map a the\
       \ list of databases to search\n    # to a search tool. In the prototype we assume\
