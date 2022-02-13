@@ -25,7 +25,7 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-from alphafold_components import DBSearchOp
+from alphafold_components import MSASearchOp, TemplateSearchOp
 
 FLAGS = flags.FLAGS
 
@@ -66,6 +66,7 @@ def pipeline(
     fasta_path: str,
     project: str='jk-mlops-dev',
     region: str='us-central1',
+    max_template_date: str='2020-05-14',
     datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
@@ -97,39 +98,43 @@ def pipeline(
     reference_databases.set_display_name('Reference databases')
 
 
-    search_uniref = DBSearchOp(
+    search_uniref = MSASearchOp(
         project=project,
         region=region,
-        database_list=[_UNIREF90],
+        msa_dbs=[_UNIREF90],
         reference_databases=reference_databases.output,
         input_data=input_sequence.output,
     )
     search_uniref.set_display_name('Search Uniref').set_caching_options(enable_caching=True)
 
-    search_mgnify = DBSearchOp(
+    search_mgnify = MSASearchOp(
         project=project,
         region=region,
-        database_list=[_MGNIFY],
+        msa_dbs=[_MGNIFY],
         reference_databases=reference_databases.output,
         input_data=input_sequence.output,
     )
     search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
 
-    search_bfd_uniclust = DBSearchOp(
+    search_bfd_uniclust = MSASearchOp(
         project=project,
         region=region,
-        database_list=[_BFD],
+        msa_dbs=[_BFD, _UNICLUST30],
         reference_databases=reference_databases.output,
         input_data=input_sequence.output,
     )
     search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
 
-    search_pdb = DBSearchOp(
+    search_pdb = TemplateSearchOp(
         project=project,
         region=region,
-        database_list=[_PDB70, _UNICLUST30],
+        template_dbs=[_PDB70],
+        mmcif_db=_PDB_MMCIF,
+        obsolete_db=_PDB_OBSOLETE,
+        max_template_date=max_template_date,
         reference_databases=reference_databases.output,
-        input_data=search_uniref.outputs['output_data'],
+        input_sequence=input_sequence.output,
+        input_msa=search_uniref.outputs['output_data'],
     )
     search_pdb.set_display_name('Search Pdb').set_caching_options(enable_caching=True)
 

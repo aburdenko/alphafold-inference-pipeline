@@ -25,12 +25,12 @@ _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold
 
 @dsl.component(
     base_image=_COMPONENTS_IMAGE,
-    output_component_file='component_db_search.yaml'
+    output_component_file='component_msa_search.yaml'
 )
-def db_search(
+def msa_search(
     project: str,
     region: str,
-    database_list: list,
+    msa_dbs: list,
     reference_databases: Input[Dataset],
     input_data: Input[Dataset],
     output_data: Output[Dataset],
@@ -44,7 +44,6 @@ def db_search(
 
     """
     
-
     import logging
     import os
     import sys
@@ -55,10 +54,6 @@ def db_search(
     _MGNIFY = 'mgnify'
     _BFD = 'bfd'
     _UNICLUST30 = 'uniclust30'
-    _PDB70 = 'pdb70'
-    _PDB_MMCIF = 'pdb_mmcif'
-    _PDB_OBSOLETE = 'pdb_obsolete'
-    _PDB_SEQRES = 'pdb_seqres'
     _UNIPROT = 'uniprot'
 
     _DSUB_PROVIDER = 'google-cls-v2'
@@ -81,30 +76,19 @@ def db_search(
        'jackhmmer': {
            'MACHINE_TYPE': 'n1-standard-4',
            'BOOT_DISK_SIZE': '200',
+           'OUTPUT_DATA_FORMAT': 'sto',
            'N_CPU': 4,
            'MAXSEQ': '10_000',
-           'INPUT_DATA_FORMAT': 'fasta',
-           'OUTPUT_DATA_FORMAT': 'sto',
-           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
+           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' 
        },
        'hhblits': {
            'MACHINE_TYPE': 'c2-standard-4',
            'BOOT_DISK_SIZE': '200',
+           'OUTPUT_DATA_FORMAT': 'a3m',
            'N_CPU': 4,
            'MAXSEQ': '1_000_000',
-           'INPUT_DATA_FORMAT': 'fasta',
-           'OUTPUT_DATA_FORMAT': 'a3m',
-           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
+           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' 
        },
-       'hhsearch': {
-           'MACHINE_TYPE': 'c2-standard-4',
-           'BOOT_DISK_SIZE': '200',
-           'N_CPU': 0, # Not setable for hhsearch
-           'MAXSEQ': '1_000_000',
-           'INPUT_DATA_FORMAT': 'sto',
-           'OUTPUT_DATA_FORMAT': 'hhr',
-           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' 
-       }
     }
      
     # This is a temporary crude solution to map a the list of databases to search
@@ -114,24 +98,20 @@ def db_search(
         _UNIREF90: 'jackhmmer',
         _MGNIFY: 'jackhmmer',
         _BFD: 'hhblits',
-        _UNICLUST30: 'hhsearch', 
-        _PDB70 : 'hhsearch',
-        _PDB_MMCIF: None, # to be determined
-        _PDB_OBSOLETE: None, # to be determined
-        _PDB_SEQRES: None, # to be determined
+        _UNICLUST30: 'hhblits', 
         _UNIPROT: None, # to be determined
     }
     
-    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list
+    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs
               if _DATABASE_TO_TOOL_MAPPING[db]]
 
     if (not tools) or (len(tools) > 1):
-        raise RuntimeError(f'The database list {database_list} not supported')
+        raise RuntimeError(f'The database list {msa_dbs} not supported')
     db_tool = tools[0]
 
     disk_image = reference_databases.metadata['disk_image']
     database_paths = [reference_databases.metadata[database]
-                      for database in database_list]
+                      for database in msa_dbs]
     database_paths = ','.join(database_paths)
 
     output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
@@ -151,8 +131,6 @@ def db_search(
         '--env', f'DB_TOOL={db_tool}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool]["N_CPU"]}',
-        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool]["INPUT_DATA_FORMAT"]}', 
-        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool]["OUTPUT_DATA_FORMAT"]}', 
         '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool]["MAXSEQ"]}', 
         '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] 
     ]

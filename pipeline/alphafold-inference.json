@@ -1,190 +1,6 @@
 {
   "pipelineSpec": {
     "components": {
-      "comp-db-search": {
-        "executorLabel": "exec-db-search",
-        "inputDefinitions": {
-          "artifacts": {
-            "input_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "reference_databases": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          },
-          "parameters": {
-            "database_list": {
-              "type": "STRING"
-            },
-            "project": {
-              "type": "STRING"
-            },
-            "region": {
-              "type": "STRING"
-            }
-          }
-        },
-        "outputDefinitions": {
-          "artifacts": {
-            "cls_logging": {
-              "artifactType": {
-                "schemaTitle": "system.Artifact",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "output_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          }
-        }
-      },
-      "comp-db-search-2": {
-        "executorLabel": "exec-db-search-2",
-        "inputDefinitions": {
-          "artifacts": {
-            "input_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "reference_databases": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          },
-          "parameters": {
-            "database_list": {
-              "type": "STRING"
-            },
-            "project": {
-              "type": "STRING"
-            },
-            "region": {
-              "type": "STRING"
-            }
-          }
-        },
-        "outputDefinitions": {
-          "artifacts": {
-            "cls_logging": {
-              "artifactType": {
-                "schemaTitle": "system.Artifact",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "output_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          }
-        }
-      },
-      "comp-db-search-3": {
-        "executorLabel": "exec-db-search-3",
-        "inputDefinitions": {
-          "artifacts": {
-            "input_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "reference_databases": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          },
-          "parameters": {
-            "database_list": {
-              "type": "STRING"
-            },
-            "project": {
-              "type": "STRING"
-            },
-            "region": {
-              "type": "STRING"
-            }
-          }
-        },
-        "outputDefinitions": {
-          "artifacts": {
-            "cls_logging": {
-              "artifactType": {
-                "schemaTitle": "system.Artifact",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "output_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          }
-        }
-      },
-      "comp-db-search-4": {
-        "executorLabel": "exec-db-search-4",
-        "inputDefinitions": {
-          "artifacts": {
-            "input_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "reference_databases": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          },
-          "parameters": {
-            "database_list": {
-              "type": "STRING"
-            },
-            "project": {
-              "type": "STRING"
-            },
-            "region": {
-              "type": "STRING"
-            }
-          }
-        },
-        "outputDefinitions": {
-          "artifacts": {
-            "cls_logging": {
-              "artifactType": {
-                "schemaTitle": "system.Artifact",
-                "schemaVersion": "0.0.1"
-              }
-            },
-            "output_data": {
-              "artifactType": {
-                "schemaTitle": "system.Dataset",
-                "schemaVersion": "0.0.1"
-              }
-            }
-          }
-        }
-      },
       "comp-importer": {
         "executorLabel": "exec-importer",
         "inputDefinitions": {
@@ -224,90 +40,215 @@
             }
           }
         }
+      },
+      "comp-msa-search": {
+        "executorLabel": "exec-msa-search",
+        "inputDefinitions": {
+          "artifacts": {
+            "input_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-msa-search-2": {
+        "executorLabel": "exec-msa-search-2",
+        "inputDefinitions": {
+          "artifacts": {
+            "input_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-msa-search-3": {
+        "executorLabel": "exec-msa-search-3",
+        "inputDefinitions": {
+          "artifacts": {
+            "input_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output_data": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-template-search": {
+        "executorLabel": "exec-template-search",
+        "inputDefinitions": {
+          "artifacts": {
+            "input_msa": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "input_sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "max_template_date": {
+              "type": "STRING"
+            },
+            "mmcif_db": {
+              "type": "STRING"
+            },
+            "obsolete_db": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            },
+            "template_dbs": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output_template_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "output_template_hits": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
       }
     },
     "deploymentSpec": {
       "executors": {
-        "exec-db-search": {
-          "container": {
-            "args": [
-              "--executor_input",
-              "{{$}}",
-              "--function_to_execute",
-              "db_search"
-            ],
-            "command": [
-              "sh",
-              "-c",
-              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
-              "sh",
-              "-ec",
-              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef db_search(\n    project: str,\n    region: str,\n    database_list: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _PDB70 = 'pdb70'\n    _PDB_MMCIF = 'pdb_mmcif'\n    _PDB_OBSOLETE = 'pdb_obsolete'\n    _PDB_SEQRES = 'pdb_seqres'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 0, # Not setable for hhsearch\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       }\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhsearch', \n        _PDB70 : 'hhsearch',\n        _PDB_MMCIF: None, # to be determined\n        _PDB_OBSOLETE: None, # to be determined\n        _PDB_SEQRES: None, # to be determined\n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {database_list} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in database_list]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"OUTPUT_DATA_FORMAT\"]}', \n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
-            ],
-            "image": "gcr.io/jk-mlops-dev/alphafold-components"
-          }
-        },
-        "exec-db-search-2": {
-          "container": {
-            "args": [
-              "--executor_input",
-              "{{$}}",
-              "--function_to_execute",
-              "db_search"
-            ],
-            "command": [
-              "sh",
-              "-c",
-              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
-              "sh",
-              "-ec",
-              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef db_search(\n    project: str,\n    region: str,\n    database_list: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _PDB70 = 'pdb70'\n    _PDB_MMCIF = 'pdb_mmcif'\n    _PDB_OBSOLETE = 'pdb_obsolete'\n    _PDB_SEQRES = 'pdb_seqres'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 0, # Not setable for hhsearch\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       }\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhsearch', \n        _PDB70 : 'hhsearch',\n        _PDB_MMCIF: None, # to be determined\n        _PDB_OBSOLETE: None, # to be determined\n        _PDB_SEQRES: None, # to be determined\n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {database_list} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in database_list]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"OUTPUT_DATA_FORMAT\"]}', \n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
-            ],
-            "image": "gcr.io/jk-mlops-dev/alphafold-components"
-          }
-        },
-        "exec-db-search-3": {
-          "container": {
-            "args": [
-              "--executor_input",
-              "{{$}}",
-              "--function_to_execute",
-              "db_search"
-            ],
-            "command": [
-              "sh",
-              "-c",
-              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
-              "sh",
-              "-ec",
-              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef db_search(\n    project: str,\n    region: str,\n    database_list: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _PDB70 = 'pdb70'\n    _PDB_MMCIF = 'pdb_mmcif'\n    _PDB_OBSOLETE = 'pdb_obsolete'\n    _PDB_SEQRES = 'pdb_seqres'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 0, # Not setable for hhsearch\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       }\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhsearch', \n        _PDB70 : 'hhsearch',\n        _PDB_MMCIF: None, # to be determined\n        _PDB_OBSOLETE: None, # to be determined\n        _PDB_SEQRES: None, # to be determined\n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {database_list} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in database_list]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"OUTPUT_DATA_FORMAT\"]}', \n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
-            ],
-            "image": "gcr.io/jk-mlops-dev/alphafold-components"
-          }
-        },
-        "exec-db-search-4": {
-          "container": {
-            "args": [
-              "--executor_input",
-              "{{$}}",
-              "--function_to_execute",
-              "db_search"
-            ],
-            "command": [
-              "sh",
-              "-c",
-              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
-              "sh",
-              "-ec",
-              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef db_search(\n    project: str,\n    region: str,\n    database_list: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _PDB70 = 'pdb70'\n    _PDB_MMCIF = 'pdb_mmcif'\n    _PDB_OBSOLETE = 'pdb_obsolete'\n    _PDB_SEQRES = 'pdb_seqres'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'fasta',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       },\n       'hhsearch': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'N_CPU': 0, # Not setable for hhsearch\n           'MAXSEQ': '1_000_000',\n           'INPUT_DATA_FORMAT': 'sto',\n           'OUTPUT_DATA_FORMAT': 'hhr',\n           'SCRIPT': '/scripts/alphafold_runners/db_search_runner.py' \n       }\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhsearch', \n        _PDB70 : 'hhsearch',\n        _PDB_MMCIF: None, # to be determined\n        _PDB_OBSOLETE: None, # to be determined\n        _PDB_SEQRES: None, # to be determined\n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in database_list\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {database_list} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in database_list]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'INPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"INPUT_DATA_FORMAT\"]}', \n        '--env', f'OUTPUT_DATA_FORMAT={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"OUTPUT_DATA_FORMAT\"]}', \n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
-            ],
-            "image": "gcr.io/jk-mlops-dev/alphafold-components"
-          }
-        },
         "exec-importer": {
           "importer": {
             "artifactUri": {
@@ -344,6 +285,86 @@
               "schemaVersion": "0.0.1"
             }
           }
+        },
+        "exec-msa-search": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "msa_search"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-msa-search-2": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "msa_search"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-msa-search-3": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "msa_search"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    input_data: Input[Dataset],\n    output_data: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    output_data.metadata['data_format'] = output_data_format\n    output_path = output_data.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_DATA={input_data.uri}',\n        '--output', f'OUTPUT_DATA={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-template-search": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "template_search"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef template_search(\n    project: str,\n    region: str,\n    template_dbs: list,\n    mmcif_db: str,\n    obsolete_db: str,\n    max_template_date: str,\n    reference_databases: Input[Dataset],\n    input_sequence: Input[Dataset],\n    input_msa: Input[Dataset],\n    output_template_hits: Output[Dataset],\n    output_template_features: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches for protein templates \n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n\n    _MACHINE_TYPE = 'c2-standard-8'\n    _BOOT_DISK_SIZE = 200\n    _N_CPU = 8\n    _MAXSEQ = 1_000_000\n    _MAX_TEMPLATE_HITS = 20\n\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in template_dbs]\n    database_paths = ','.join(database_paths)\n    mmcif_path = reference_databases.metadata[mmcif_db]\n    obsolete_path = reference_databases.metadata[obsolete_db]\n\n    input_sequence_path = input_sequence.uri\n    input_msa_path = input_msa.uri\n    msa_data_format = input_msa.metadata['data_format']\n    output_template_hits_path = output_template_hits.uri\n    output_template_features_path = output_template_features.uri\n\n    job_params = [\n        '--machine-type', _MACHINE_TYPE,\n        '--boot-disk-size', _BOOT_DISK_SIZE,\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_SEQUENCE_PATH={input_sequence_path}',\n        '--input', f'INPUT_MSA_PATH={input_msa_path}',\n        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={output_template_hits_path}',\n        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={output_template_features_path}',\n        '--env', f'MSA_DATA_FORMAT={msa_data_format}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'MMCIF_PATH={mmcif_path}',\n        '--env', f'OBSOLETE_PATH={obsolete_path}',\n        '--env', f'N_CPU={_N_CPU}',\n        '--env', f'MAXSEQ={_MAXSEQ}', \n        '--env', f'MAX_TEMPLATE_HITS={_MAX_TEMPLATE_HITS}',\n        '--evn', f'MAX_TEMPLATE_DATE={max_template_date}', \n        '--script', _SCRIPT, \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
         }
       }
     },
@@ -353,190 +374,6 @@
     "root": {
       "dag": {
         "tasks": {
-          "db-search": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-db-search"
-            },
-            "dependentTasks": [
-              "importer",
-              "importer-2"
-            ],
-            "inputs": {
-              "artifacts": {
-                "input_data": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
-                  }
-                },
-                "reference_databases": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
-                  }
-                }
-              },
-              "parameters": {
-                "database_list": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "[\"uniref90\"]"
-                    }
-                  }
-                },
-                "project": {
-                  "componentInputParameter": "project"
-                },
-                "region": {
-                  "componentInputParameter": "region"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "Search Uniref"
-            }
-          },
-          "db-search-2": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-db-search-2"
-            },
-            "dependentTasks": [
-              "importer",
-              "importer-2"
-            ],
-            "inputs": {
-              "artifacts": {
-                "input_data": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
-                  }
-                },
-                "reference_databases": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
-                  }
-                }
-              },
-              "parameters": {
-                "database_list": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "[\"mgnify\"]"
-                    }
-                  }
-                },
-                "project": {
-                  "componentInputParameter": "project"
-                },
-                "region": {
-                  "componentInputParameter": "region"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "Search Mgnify"
-            }
-          },
-          "db-search-3": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-db-search-3"
-            },
-            "dependentTasks": [
-              "importer",
-              "importer-2"
-            ],
-            "inputs": {
-              "artifacts": {
-                "input_data": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
-                  }
-                },
-                "reference_databases": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
-                  }
-                }
-              },
-              "parameters": {
-                "database_list": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "[\"bfd\"]"
-                    }
-                  }
-                },
-                "project": {
-                  "componentInputParameter": "project"
-                },
-                "region": {
-                  "componentInputParameter": "region"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "Search Uniclust and BFD"
-            }
-          },
-          "db-search-4": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-db-search-4"
-            },
-            "dependentTasks": [
-              "db-search",
-              "importer-2"
-            ],
-            "inputs": {
-              "artifacts": {
-                "input_data": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "output_data",
-                    "producerTask": "db-search"
-                  }
-                },
-                "reference_databases": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
-                  }
-                }
-              },
-              "parameters": {
-                "database_list": {
-                  "runtimeValue": {
-                    "constantValue": {
-                      "stringValue": "[\"pdb70\", \"uniclust30\"]"
-                    }
-                  }
-                },
-                "project": {
-                  "componentInputParameter": "project"
-                },
-                "region": {
-                  "componentInputParameter": "region"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "Search Pdb"
-            }
-          },
           "importer": {
             "cachingOptions": {
               "enableCache": true
@@ -572,6 +409,214 @@
             "taskInfo": {
               "name": "Reference databases"
             }
+          },
+          "msa-search": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-msa-search"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "input_data": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                },
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"uniref90\"]"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Uniref"
+            }
+          },
+          "msa-search-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-msa-search-2"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "input_data": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                },
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"mgnify\"]"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Mgnify"
+            }
+          },
+          "msa-search-3": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-msa-search-3"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "input_data": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                },
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"bfd\", \"uniclust30\"]"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Uniclust and BFD"
+            }
+          },
+          "template-search": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-template-search"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-2",
+              "msa-search"
+            ],
+            "inputs": {
+              "artifacts": {
+                "input_msa": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "output_data",
+                    "producerTask": "msa-search"
+                  }
+                },
+                "input_sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                },
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "max_template_date": {
+                  "componentInputParameter": "max_template_date"
+                },
+                "mmcif_db": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "pdb_mmcif"
+                    }
+                  }
+                },
+                "obsolete_db": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "pdb_obsolete"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                },
+                "template_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"pdb70\"]"
+                    }
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Pdb"
+            }
           }
         }
       },
@@ -581,6 +626,9 @@
             "type": "STRING"
           },
           "fasta_path": {
+            "type": "STRING"
+          },
+          "max_template_date": {
             "type": "STRING"
           },
           "project": {
@@ -599,6 +647,9 @@
     "parameters": {
       "datasets_gcs_location": {
         "stringValue": "gs://jk-alphafold-datasets-archive/jan-22"
+      },
+      "max_template_date": {
+        "stringValue": "2020-05-14"
       },
       "project": {
         "stringValue": "jk-mlops-dev"

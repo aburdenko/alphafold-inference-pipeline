@@ -123,11 +123,6 @@ def run_hhsearch(
     with open(output_template_features_path, 'wb') as f:
         pickle.dump(templates_result.features, f, protocol=4)
 
-    
-
-    
-
-
 
 if __name__=='__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s',

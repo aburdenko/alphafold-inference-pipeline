@@ -36,11 +36,13 @@ flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.c
 flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
 flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepopulated with databases')
+flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 
 def _main(argv):
 
     params = {
         'fasta_path': FLAGS.fasta_path,
+        'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,
     }
