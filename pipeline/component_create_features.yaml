@@ -5,6 +5,7 @@ inputs:
 - {name: msa1, type: Dataset}
 - {name: msa2, type: Dataset}
 - {name: msa3, type: Dataset}
+- {name: msa4, type: Dataset}
 - {name: template_features, type: Dataset}
 outputs:
 - {name: model_features, type: Dataset}
@@ -30,19 +31,19 @@ implementation:
     - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
       \ import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1:\
       \ Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n\
-      \    template_features: Input[Dataset],\n    model_features: Output[Dataset]):\n\
-      \    \"\"\"Aggregates MSAs and template features to create model features \n\
-      \n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n\
-      \    inference pipeline from DeepMind. When it comes to productionizing we should\n\
-      \    consider \"dynamic\" at runtime or at least highly configurable at compile\
-      \ time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n\
-      \    import numpy as np\n    import pickle\n\n\n    from alphafold.common import\
-      \ residue_constants\n    from alphafold.data import msa_identifiers\n    from\
-      \ alphafold.data import parsers\n    from alphafold.data import templates\n\n\
-      \n\n    def _make_sequence_features(\n        sequence: str, description: str,\
-      \ num_res: int) -> FeatureDict:\n        \"\"\"Constructs a feature dict of\
-      \ sequence features.\"\"\"\n        features = {}\n        features['aatype']\
-      \ = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n\
+      \    msa4: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n\
+      \    model_features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template\
+      \ features to create model features \n\n    In the prototype, we assume a fixed\
+      \ number of inputs, mirroring the sample\n    inference pipeline from DeepMind.\
+      \ When it comes to productionizing we should\n    consider \"dynamic\" at runtime\
+      \ or at least highly configurable at compile time\n    component.\n\n    \"\"\
+      \"\n\n    import os\n    import logging\n    import numpy as np\n    import\
+      \ pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data\
+      \ import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data\
+      \ import templates\n\n\n\n    def _make_sequence_features(\n        sequence:\
+      \ str, description: str, num_res: int) -> FeatureDict:\n        \"\"\"Constructs\
+      \ a feature dict of sequence features.\"\"\"\n        features = {}\n      \
+      \  features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n\
       \            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n\
       \        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n\
       \        features['domain_name'] = np.array([description.encode('utf-8')],\n\
@@ -95,8 +96,8 @@ implementation:
       \ num_res = _read_sequence(sequence) \n    sequence_features = _make_sequence_features(\n\
       \        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\
       \n    # Create MSA features\n    msas = []\n    msas.append(_read_msa(msa1))\n\
-      \    msas.append(_read_msa(msa2))\n    msas.append(_read_msa(msa3))\n    if\
-      \ not msas:\n        raise RuntimeError('No MSAs passed to the component')\n\
+      \    msas.append(_read_msa(msa2))\n    msas.append(_read_msa(msa3))\n    msas.append(_read_msa(msa4))\n\
+      \    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n\
       \    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n\
       \    template_features = _read_template_features(template_features)\n\n    model_features\
       \ = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n\

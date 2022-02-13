@@ -95,14 +95,32 @@ def pipeline(
     )
     search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
 
-    search_bfd_uniclust = HHBlitsOp(
+    #search_bfd_uniclust = HHBlitsOp(
+    #    project=project,
+    #    region=region,
+    #    msa_dbs=[config.BFD, config.UNICLUST30],
+    #    reference_databases=reference_databases.output,
+    #    sequence=input_sequence.output,
+    #)
+    #search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
+
+    search_uniclust = HHBlitsOp(
         project=project,
         region=region,
-        msa_dbs=[config.BFD, config.UNICLUST30],
+        msa_dbs=[config.UNICLUST30],
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
-    search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
+    search_uniclust.set_display_name('Search Uniclust').set_caching_options(enable_caching=True)
+
+    search_bfd = HHBlitsOp(
+        project=project,
+        region=region,
+        msa_dbs=[config.BFD],
+        reference_databases=reference_databases.output,
+        sequence=input_sequence.output,
+    )
+    search_bfd.set_display_name('Search BFD').set_caching_options(enable_caching=True)
 
     search_pdb = HHSearchOp(
         project=project,
@@ -121,7 +139,8 @@ def pipeline(
         sequence=input_sequence.output,
         msa1=search_uniref.outputs['msa'],
         msa2=search_mgnify.outputs['msa'],
-        msa3=search_bfd_uniclust.outputs['msa'],
+        msa3=search_bfd.outputs['msa'],
+        msa4=search_uniclust.outputs['msa'],
         template_features=search_pdb.outputs['template_features'],
     )
     aggregate_features.set_display_name('Aggregate features').set_caching_options(enable_caching=True)

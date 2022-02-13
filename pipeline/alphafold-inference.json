@@ -23,6 +23,12 @@
                 "schemaVersion": "0.0.1"
               }
             },
+            "msa4": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
             "sequence": {
               "artifactType": {
                 "schemaTitle": "system.Dataset",
@@ -120,6 +126,64 @@
       },
       "comp-hhblits": {
         "executorLabel": "exec-hhblits",
+        "inputDefinitions": {
+          "artifacts": {
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "boot_disk_size": {
+              "type": "INT"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "maxseq": {
+              "type": "INT"
+            },
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "n_cpu": {
+              "type": "INT"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-hhblits-2": {
+        "executorLabel": "exec-hhblits-2",
         "inputDefinitions": {
           "artifacts": {
             "reference_databases": {
@@ -498,12 +562,32 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1: Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n    model_features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create model features \n\n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n    inference pipeline from DeepMind. When it comes to productionizing we should\n    consider \"dynamic\" at runtime or at least highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data import templates\n\n\n\n    def _make_sequence_features(\n        sequence: str, description: str, num_res: int) -> FeatureDict:\n        \"\"\"Constructs a feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n        features['domain_name'] = np.array([description.encode('utf-8')],\n                                        dtype=np.object_)\n        features['residue_index'] = np.array(range(num_res), dtype=np.int32)\n        features['seq_length'] = np.array([num_res] * num_res, dtype=np.int32)\n        features['sequence'] = np.array([sequence.encode('utf-8')], dtype=np.object_)\n        return features\n\n\n    def _make_msa_features(msas: Sequence[parsers.Msa]) -> FeatureDict:\n        \"\"\"Constructs a feature dict of MSA features.\"\"\"\n        if not msas:\n            raise ValueError('At least one MSA must be provided.')\n\n        int_msa = []\n        deletion_matrix = []\n        uniprot_accession_ids = []\n        species_ids = []\n        seen_sequences = set()\n        for msa_index, msa in enumerate(msas):\n            if not msa:\n                raise ValueError(f'MSA {msa_index} must contain at least one sequence.')\n            for sequence_index, sequence in enumerate(msa.sequences):\n                if sequence in seen_sequences:\n                    continue\n                seen_sequences.add(sequence)\n                int_msa.append(\n                    [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])\n                deletion_matrix.append(msa.deletion_matrix[sequence_index])\n                identifiers = msa_identifiers.get_identifiers(\n                    msa.descriptions[sequence_index])\n                uniprot_accession_ids.append(\n                    identifiers.uniprot_accession_id.encode('utf-8'))\n                species_ids.append(identifiers.species_id.encode('utf-8'))\n\n        num_res = len(msas[0].sequences[0])\n        num_alignments = len(int_msa)\n        features = {}\n        features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)\n        features['msa'] = np.array(int_msa, dtype=np.int32)\n        features['num_alignments'] = np.array(\n            [num_alignments] * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers'] = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n        features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n        return features\n\n\n    def _read_msa(msa: Input[Dataset]):\n        msa = None\n        msa_path = msa.path,\n        msa_format = msa.metadata['data_format']\n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n                msa = f.read()\n            if msa_format == 'sto':\n                msa = parsers.parse_stockholm(msa)\n            elif msa_format == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n                raise RuntimeError(f'Unsupported MSA format: {msa_format}') \n        return msa\n\n    def _read_sequence(sequence: Input[Dataset]):\n\n        sequence_path = sequence.path\n        sequence_format = sequence.metadata['data_format']\n\n        if sequence_format != 'fasta':\n            raise RuntimeError(f'Unsupported sequence format {sequence_format}')\n\n        with open(sequence_path) as f:\n            sequence_str = f.read()\n        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n            raise ValueError(\n                f'More than one input sequence found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_featurs: Input[Dataset]):\n        template_features_path = template_features.path\n        with open(template_features_path, 'rb') as f:\n            template_features = pickle.load(f)\n        return template_features\n\n\n    # Create sequence features\n    seq, seq_desc, num_res = _read_sequence(sequence) \n    sequence_features = _make_sequence_features(\n        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\n    # Create MSA features\n    msas = []\n    msas.append(_read_msa(msa1))\n    msas.append(_read_msa(msa2))\n    msas.append(_read_msa(msa3))\n    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n    template_features = _read_template_features(template_features)\n\n    model_features = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n    }\n\n    model_features_path = model_features.path\n    model_features.metadata['data_format'] = 'pkl'\n    with open(model_features_path, 'wb') as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1: Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n    msa4: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n    model_features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create model features \n\n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n    inference pipeline from DeepMind. When it comes to productionizing we should\n    consider \"dynamic\" at runtime or at least highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data import templates\n\n\n\n    def _make_sequence_features(\n        sequence: str, description: str, num_res: int) -> FeatureDict:\n        \"\"\"Constructs a feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n        features['domain_name'] = np.array([description.encode('utf-8')],\n                                        dtype=np.object_)\n        features['residue_index'] = np.array(range(num_res), dtype=np.int32)\n        features['seq_length'] = np.array([num_res] * num_res, dtype=np.int32)\n        features['sequence'] = np.array([sequence.encode('utf-8')], dtype=np.object_)\n        return features\n\n\n    def _make_msa_features(msas: Sequence[parsers.Msa]) -> FeatureDict:\n        \"\"\"Constructs a feature dict of MSA features.\"\"\"\n        if not msas:\n            raise ValueError('At least one MSA must be provided.')\n\n        int_msa = []\n        deletion_matrix = []\n        uniprot_accession_ids = []\n        species_ids = []\n        seen_sequences = set()\n        for msa_index, msa in enumerate(msas):\n            if not msa:\n                raise ValueError(f'MSA {msa_index} must contain at least one sequence.')\n            for sequence_index, sequence in enumerate(msa.sequences):\n                if sequence in seen_sequences:\n                    continue\n                seen_sequences.add(sequence)\n                int_msa.append(\n                    [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])\n                deletion_matrix.append(msa.deletion_matrix[sequence_index])\n                identifiers = msa_identifiers.get_identifiers(\n                    msa.descriptions[sequence_index])\n                uniprot_accession_ids.append(\n                    identifiers.uniprot_accession_id.encode('utf-8'))\n                species_ids.append(identifiers.species_id.encode('utf-8'))\n\n        num_res = len(msas[0].sequences[0])\n        num_alignments = len(int_msa)\n        features = {}\n        features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)\n        features['msa'] = np.array(int_msa, dtype=np.int32)\n        features['num_alignments'] = np.array(\n            [num_alignments] * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers'] = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n        features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n        return features\n\n\n    def _read_msa(msa: Input[Dataset]):\n        msa = None\n        msa_path = msa.path,\n        msa_format = msa.metadata['data_format']\n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n                msa = f.read()\n            if msa_format == 'sto':\n                msa = parsers.parse_stockholm(msa)\n            elif msa_format == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n                raise RuntimeError(f'Unsupported MSA format: {msa_format}') \n        return msa\n\n    def _read_sequence(sequence: Input[Dataset]):\n\n        sequence_path = sequence.path\n        sequence_format = sequence.metadata['data_format']\n\n        if sequence_format != 'fasta':\n            raise RuntimeError(f'Unsupported sequence format {sequence_format}')\n\n        with open(sequence_path) as f:\n            sequence_str = f.read()\n        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n            raise ValueError(\n                f'More than one input sequence found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_featurs: Input[Dataset]):\n        template_features_path = template_features.path\n        with open(template_features_path, 'rb') as f:\n            template_features = pickle.load(f)\n        return template_features\n\n\n    # Create sequence features\n    seq, seq_desc, num_res = _read_sequence(sequence) \n    sequence_features = _make_sequence_features(\n        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\n    # Create MSA features\n    msas = []\n    msas.append(_read_msa(msa1))\n    msas.append(_read_msa(msa2))\n    msas.append(_read_msa(msa3))\n    msas.append(_read_msa(msa4))\n    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n    template_features = _read_template_features(template_features)\n\n    model_features = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n    }\n\n    model_features_path = model_features.path\n    model_features.metadata['data_format'] = 'pkl'\n    with open(model_features_path, 'wb') as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold"
           }
         },
         "exec-hhblits": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "hhblits"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef hhblits(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=1_000_000,\n    machine_type:str='c2-standard-8',\n    boot_disk_size:int=100,\n    n_cpu:int=4, \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    The prototype also lacks job control. If a pipeline step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n            raise RuntimeError(f'HHBlits cannot be used with {database} database.')\n\n    database_paths = [reference_databases.metadata[database] for database in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    job_params = [\n        '--machine-type', machine_type,\n        '--boot-disk-size', str(boot_disk_size),\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={reference_databases.metadata[\"disk_image\"]}',\n        '--input', f'INPUT_PATH={sequence.uri}',\n        '--output', f'OUTPUT_PATH={msa.uri}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n        '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    )\n\n    msa.metadata['data_format'] = 'a3m'   \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-hhblits-2": {
           "container": {
             "args": [
               "--executor_input",
@@ -679,6 +763,7 @@
             },
             "dependentTasks": [
               "hhblits",
+              "hhblits-2",
               "hhsearch",
               "importer",
               "jackhmmer",
@@ -699,6 +784,12 @@
                   }
                 },
                 "msa3": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "hhblits-2"
+                  }
+                },
+                "msa4": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "msa",
                     "producerTask": "hhblits"
@@ -815,7 +906,7 @@
                 "msa_dbs": {
                   "runtimeValue": {
                     "constantValue": {
-                      "stringValue": "[\"bfd\", \"uniclust30\"]"
+                      "stringValue": "[\"uniclust30\"]"
                     }
                   }
                 },
@@ -835,7 +926,81 @@
               }
             },
             "taskInfo": {
-              "name": "Search Uniclust and BFD"
+              "name": "Search Uniclust"
+            }
+          },
+          "hhblits-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-hhblits-2"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-3"
+            ],
+            "inputs": {
+              "artifacts": {
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-3"
+                  }
+                },
+                "sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              },
+              "parameters": {
+                "boot_disk_size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "100"
+                    }
+                  }
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "c2-standard-8"
+                    }
+                  }
+                },
+                "maxseq": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1000000"
+                    }
+                  }
+                },
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"bfd\"]"
+                    }
+                  }
+                },
+                "n_cpu": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "4"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search BFD"
             }
           },
           "hhsearch": {

@@ -32,7 +32,6 @@ def aggregate_features(
     msa1: Input[Dataset],
     msa2: Optional[Input[Dataset]],
     msa3: Optional[Input[Dataset]],
-    msa4: Optional[Input[Dataset]],
     template_features: Input[Dataset],
     model_features: Output[Dataset]):
     """Aggregates MSAs and template features to create model features 
@@ -165,7 +164,6 @@ def aggregate_features(
     msas.append(_read_msa(msa1))
     msas.append(_read_msa(msa2))
     msas.append(_read_msa(msa3))
-    msas.append(_read_msa(msa4))
     if not msas:
         raise RuntimeError('No MSAs passed to the component')
     msa_features = _make_msa_features(msas=msas)
