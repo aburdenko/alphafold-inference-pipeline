@@ -63,15 +63,15 @@ def pipeline(
         reimport=False,
         metadata={
             'disk_image': config.REFERENCE_DATASETS_IMAGE,
-            'uniref90': config.UNIREF90_PATH,
-            'mgnify': config.MGNIFY_PATH,
-            'bfd': config.BFD_PATH,
-            'uniclust30': config.UNICLUST30_PATH,
-            'pdb70': config.PDB70_PATH,
-            'pdb_mmcif': config.PDB_MMCIF,
-            'pdb_obsolete': config.PDB_OBSOLETE_PATH,
-            'pdb_seqres': config.PDB_SEQRES_PATH,
-            'uniprot': config.UNIPROT_PATH,
+            config.UNIREF90: config.UNIREF90_PATH,
+            config.MGNIFY: config.MGNIFY_PATH,
+            config.BFD: config.BFD_PATH,
+            config.UNICLUST30: config.UNICLUST30_PATH,
+            config.PDB70: config.PDB70_PATH,
+            config.PDB_MMCIF: config.PDB_MMCIF,
+            config.PDB_OBSOLETE: config.PDB_OBSOLETE_PATH,
+            config.PDB_SEQRES: config.PDB_SEQRES_PATH,
+            config.UNIPROT: config.UNIPROT_PATH,
             }    
     )
     reference_databases.set_display_name('Reference databases')
@@ -80,7 +80,7 @@ def pipeline(
     search_uniref = JackhmmerOp(
         project=project,
         region=region,
-        database='uniref90',
+        database=config.UNIREF90,
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
@@ -89,7 +89,7 @@ def pipeline(
     search_mgnify = JackhmmerOp(
         project=project,
         region=region,
-        database='mgnify',
+        database=config.MGNIFY,
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
@@ -98,7 +98,7 @@ def pipeline(
     search_bfd_uniclust = HHBlitsOp(
         project=project,
         region=region,
-        msa_dbs=['bfd', 'uniclust30'],
+        msa_dbs=[config.MGNIFY, config.UNICLUST30],
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
@@ -107,9 +107,9 @@ def pipeline(
     search_pdb = HHSearchOp(
         project=project,
         region=region,
-        template_dbs=['pdb70'],
-        mmcif_db='pdb_mmcif',
-        obsolete_db='pdb_obsolete',
+        template_dbs=[config.PDB70],
+        mmcif_db=config.PDB_MMCIF,
+        obsolete_db=config.PDB_OBSOLETE,
         max_template_date=max_template_date,
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,

@@ -31,6 +31,16 @@ PDB_MMCIF = 'pdb_mmcif/mmcif_files'
 PDB_OBSOLETE_PATH = 'pdb_mmcif/obsolete.dat'
 PDB_SEQRES_PATH = 'pdb_seqres/pdb_seqres.txt'
 
+UNIREF90 = 'uniref90'
+MGNIFY = 'mgnify'
+BFD = 'bfd'
+UNICLUST30 = 'uniclust30'
+PDB70 = 'pdb70'
+PDB_MMCIF = 'pdb_mmcif'
+PDB_OBSOLETE = 'pdb_obsolete'
+PDB_SEQRES = 'pdb_seqres'
+UNIPROT = 'uniprot'
+
 MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
 CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
 GPU_LIMIT = os.getenv("GPU_LIMIT", "4")

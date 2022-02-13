@@ -581,7 +581,7 @@
               "disk_image": "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000",
               "mgnify": "mgnify/mgy_clusters_2018_12.fa",
               "pdb70": "pdb70/pdb70",
-              "pdb_mmcif": "pdb_mmcif/mmcif_files",
+              "pdb_mmcif": "pdb_mmcif",
               "pdb_obsolete": "pdb_mmcif/obsolete.dat",
               "pdb_seqres": "pdb_seqres/pdb_seqres.txt",
               "uniclust30": "uniclust30/uniclust30_2018_08/uniclust30_2018_08",
@@ -815,7 +815,7 @@
                 "msa_dbs": {
                   "runtimeValue": {
                     "constantValue": {
-                      "stringValue": "[\"bfd\", \"uniclust30\"]"
+                      "stringValue": "[\"mgnify\", \"uniclust30\"]"
                     }
                   }
                 },
