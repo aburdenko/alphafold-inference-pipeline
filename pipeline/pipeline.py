@@ -98,7 +98,7 @@ def pipeline(
     search_bfd_uniclust = HHBlitsOp(
         project=project,
         region=region,
-        msa_dbs=[config.MGNIFY, config.UNICLUST30],
+        msa_dbs=[config.BFD, config.UNICLUST30],
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )

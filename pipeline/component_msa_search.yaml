@@ -50,7 +50,7 @@ implementation:
       \ - %(message)s',\n                      level=logging.INFO, \n            \
       \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
       \n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n\
-      \            raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\
+      \            raise RuntimeError(f'HHBlits cannot be used with {database} database.')\n\
       \n    database_paths = [reference_databases.metadata[database] for database\
       \ in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    job_params\
       \ = [\n        '--machine-type', machine_type,\n        '--boot-disk-size',\

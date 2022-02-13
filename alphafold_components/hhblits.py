@@ -67,7 +67,7 @@ def hhblits(
 
     for database in msa_dbs:
         if not (database in _SUPPORTED_DATABASES):
-            raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')
+            raise RuntimeError(f'HHBlits cannot be used with {database} database.')
 
     database_paths = [reference_databases.metadata[database] for database in msa_dbs] 
     database_paths = ','.join(database_paths)
