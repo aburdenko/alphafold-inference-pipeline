@@ -36,8 +36,8 @@ flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path 
                     'database for use by JackHMMER.')
 
 _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
-_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22/params'
-_MODEL_PARAMS_GCS_LOCATION='gs://'
+_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
+_MODEL_PARAMS_GCS_LOCATION='gs://jk-alphafold-datasets-archive/jan-22/params'
 
 _UNIREF90_PATH = 'uniref90/uniref90.fasta'
 _MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
@@ -87,8 +87,10 @@ def pipeline(
     model_parameters = dsl.importer(
         artifact_uri=model_params_gcs_location,
         artifact_class=dsl.Artifact,
-        reimport=False,
+        reimport=True,
+        metadata={'Description': 'AlphaFold parameters - v2.2'}
     )
+    model_parameters.set_display_name('Model parameters')
 
     reference_databases = dsl.importer(
         artifact_uri=datasets_gcs_location,

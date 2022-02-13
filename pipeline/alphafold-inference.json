@@ -401,6 +401,9 @@
             "artifactUri": {
               "runtimeParameter": "uri"
             },
+            "metadata": {
+              "Description": "AlphaFold parameters - v2.2"
+            },
             "typeSchema": {
               "schemaTitle": "system.Artifact",
               "schemaVersion": "0.0.1"
@@ -623,7 +626,7 @@
               }
             },
             "taskInfo": {
-              "name": "importer-2"
+              "name": "Model parameters"
             }
           },
           "importer-3": {
@@ -934,7 +937,7 @@
   "runtimeConfig": {
     "parameters": {
       "datasets_gcs_location": {
-        "stringValue": "gs://jk-alphafold-datasets-archive/jan-22/params"
+        "stringValue": "gs://jk-alphafold-datasets-archive/jan-22"
       },
       "max_template_date": {
         "stringValue": "2020-05-14"
@@ -943,7 +946,7 @@
         "stringValue": "model_1"
       },
       "model_params_gcs_location": {
-        "stringValue": "gs://"
+        "stringValue": "gs://jk-alphafold-datasets-archive/jan-22/params"
       },
       "num_ensemble": {
         "intValue": "1"
