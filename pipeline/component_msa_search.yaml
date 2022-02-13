@@ -59,11 +59,11 @@ implementation:
       \ f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={reference_databases.metadata[\"\
       disk_image\"]}',\n        '--input', f'INPUT_PATH={sequence.uri}',\n       \
       \ '--output', f'OUTPUT_PATH={msa.uri}',\n        '--env', f'DB_PATHS={database_paths}',\n\
-      \        '--env', f'N_CPU={reference_databases.metadata[database]}',\n     \
-      \   '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n    \
-      \    '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n\
-      \        project=project,\n        regions=region,\n        params=job_params,\n\
-      \    )\n\n    msa.metadata['data_format'] = 'a3m'   \n\n"
+      \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
+      \        '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n       \
+      \ provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n\
+      \        params=job_params,\n    )\n\n    msa.metadata['data_format'] = 'a3m'\
+      \   \n\n"
     args:
     - --executor_input
     - {executorInput: null}

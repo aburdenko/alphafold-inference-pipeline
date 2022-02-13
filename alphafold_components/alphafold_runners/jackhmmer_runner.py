@@ -84,9 +84,10 @@ if __name__=='__main__':
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
 
+    database_path = os.path.join(DB_ROOT, DB_PATH)
     run_jackhmmer(
         input_path=INPUT_PATH,
         output_path=OUTPUT_PATH,
-        database_path=DB_PATH,
+        database_path=database_path,
         maxseq=MAXSEQ,
         n_cpu=N_CPU,)

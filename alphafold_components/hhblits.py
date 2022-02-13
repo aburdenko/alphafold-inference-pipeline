@@ -83,7 +83,6 @@ def hhblits(
         '--input', f'INPUT_PATH={sequence.uri}',
         '--output', f'OUTPUT_PATH={msa.uri}',
         '--env', f'DB_PATHS={database_paths}',
-        '--env', f'N_CPU={reference_databases.metadata[database]}',
         '--env', f'N_CPU={n_cpu}',
         '--env', f'MAXSEQ={maxseq}', 
         '--script', _SCRIPT 
