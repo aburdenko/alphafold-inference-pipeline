@@ -48,6 +48,76 @@
           }
         }
       },
+      "comp-for-loop-1": {
+        "dag": {
+          "tasks": {
+            "predict": {
+              "cachingOptions": {
+                "enableCache": true
+              },
+              "componentRef": {
+                "name": "comp-predict"
+              },
+              "inputs": {
+                "artifacts": {
+                  "model_features": {
+                    "componentInputArtifact": "pipelineparam--aggregate-features-model_features"
+                  },
+                  "model_params": {
+                    "componentInputArtifact": "pipelineparam--importer-2-artifact"
+                  }
+                },
+                "parameters": {
+                  "model_name": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "stringValue": "models-loop-item"
+                      }
+                    }
+                  },
+                  "num_ensemble": {
+                    "componentInputParameter": "pipelineparam--num_ensemble"
+                  },
+                  "random_seed": {
+                    "componentInputParameter": "pipelineparam--models-loop-item",
+                    "parameterExpressionSelector": "parseJson(string_value)[\"random_seed\"]"
+                  }
+                }
+              },
+              "taskInfo": {
+                "name": "Predict"
+              }
+            }
+          }
+        },
+        "inputDefinitions": {
+          "artifacts": {
+            "pipelineparam--aggregate-features-model_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "pipelineparam--importer-2-artifact": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "pipelineparam--models": {
+              "type": "STRING"
+            },
+            "pipelineparam--models-loop-item": {
+              "type": "STRING"
+            },
+            "pipelineparam--num_ensemble": {
+              "type": "INT"
+            }
+          }
+        }
+      },
       "comp-importer": {
         "executorLabel": "exec-importer",
         "inputDefinitions": {
@@ -593,6 +663,48 @@
               "name": "Aggregate features"
             }
           },
+          "for-loop-1": {
+            "componentRef": {
+              "name": "comp-for-loop-1"
+            },
+            "dependentTasks": [
+              "aggregate-features",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "pipelineparam--aggregate-features-model_features": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "model_features",
+                    "producerTask": "aggregate-features"
+                  }
+                },
+                "pipelineparam--importer-2-artifact": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "pipelineparam--models": {
+                  "componentInputParameter": "models"
+                },
+                "pipelineparam--num_ensemble": {
+                  "componentInputParameter": "num_ensemble"
+                }
+              }
+            },
+            "parameterIterator": {
+              "itemInput": "pipelineparam--models-loop-item",
+              "items": {
+                "inputParameter": "pipelineparam--models"
+              }
+            },
+            "taskInfo": {
+              "name": "for-loop-1"
+            }
+          },
           "importer": {
             "cachingOptions": {
               "enableCache": true
@@ -785,48 +897,6 @@
               "name": "Search Uniclust and BFD"
             }
           },
-          "predict": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-predict"
-            },
-            "dependentTasks": [
-              "aggregate-features",
-              "importer-2"
-            ],
-            "inputs": {
-              "artifacts": {
-                "model_features": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "model_features",
-                    "producerTask": "aggregate-features"
-                  }
-                },
-                "model_params": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
-                  }
-                }
-              },
-              "parameters": {
-                "model_name": {
-                  "componentInputParameter": "model_name"
-                },
-                "num_ensemble": {
-                  "componentInputParameter": "num_ensemble"
-                },
-                "random_seed": {
-                  "componentInputParameter": "random_seed"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "Predict"
-            }
-          },
           "template-search": {
             "cachingOptions": {
               "enableCache": true
@@ -910,10 +980,10 @@
           "max_template_date": {
             "type": "STRING"
           },
-          "model_name": {
+          "model_params_gcs_location": {
             "type": "STRING"
           },
-          "model_params_gcs_location": {
+          "models": {
             "type": "STRING"
           },
           "num_ensemble": {
@@ -921,9 +991,6 @@
           },
           "project": {
             "type": "STRING"
-          },
-          "random_seed": {
-            "type": "INT"
           },
           "region": {
             "type": "STRING"
@@ -942,11 +1009,11 @@
       "max_template_date": {
         "stringValue": "2020-05-14"
       },
-      "model_name": {
-        "stringValue": "model_1"
-      },
       "model_params_gcs_location": {
         "stringValue": "gs://jk-alphafold-datasets-archive/jan-22/params"
+      },
+      "models": {
+        "stringValue": "[{\"model_name\": \"model_1\"}, {\"random_seed\": 1}]"
       },
       "num_ensemble": {
         "intValue": "1"

@@ -15,6 +15,7 @@
 
 import os
 import random
+from re import I
 import sys
 
 from absl import flags
@@ -38,26 +39,34 @@ flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccou
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
 flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepopulated with databases')
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
-flags.DEFINE_string('model_name', 'model_1', 'Model name')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
 
 def _main(argv):
 
-    if FLAGS.random_seed is None:
-        # needs to be fixed when we switch to parallel loop
-        random_seed = random.randrange(sys.maxsize // 1)
-    else:
-        random_seed = FLAGS.random_seed
+    # Think about a better way of dealing with random seeds
+
+    models = [
+        {
+        'model_name': 'model_1', 'random_seed': 1,
+        },
+               {
+        'model_name': 'model_2', 'random_seed': 2,
+        },
+               {
+        'model_name': 'model_3', 'random_seed': 3,
+        },
+
+    ]
+    
 
     params = {
         'fasta_path': FLAGS.fasta_path,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,
-        'model_name': FLAGS.model_name,
+        'models': models,
         'num_ensemble': FLAGS.num_ensemble,
-        'random_seed': random_seed,
     }
 
     pipeline_job = aip.PipelineJob(

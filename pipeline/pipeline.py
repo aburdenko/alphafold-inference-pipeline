@@ -19,7 +19,7 @@ from re import I
 
 from absl import flags
 from absl import app
-from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
+from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union, List
 
 from kfp.v2 import dsl
 from kfp.v2 import compiler
@@ -66,11 +66,10 @@ _HHBLITS = 'hhblits'
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
     fasta_path: str,
-    random_seed: int,
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
-    model_name: str='model_1',
+    models: List[Mapping]=[{'model_name': 'model_1'}, {'random_seed': 1}],
     num_ensemble: int=1,
     datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION,
     model_params_gcs_location: str=_MODEL_PARAMS_GCS_LOCATION):
@@ -162,14 +161,15 @@ def pipeline(
     aggregate_features.set_display_name('Aggregate features').set_caching_options(enable_caching=True)
 
     # Think what to do with random seed when switch to Parallel loop
-    model_predict = ModelPredictOp(
-        model_features=aggregate_features.outputs['model_features'],
-        model_params=model_parameters.output,
-        model_name=model_name,
-        num_ensemble=num_ensemble,
-        random_seed=random_seed
-    )
-    model_predict.set_display_name('Predict')
+    with dsl.ParallelFor(models) as model:
+        model_predict = ModelPredictOp(
+            model_features=aggregate_features.outputs['model_features'],
+            model_params=model_parameters.output,
+            model_name=model.name,
+            num_ensemble=num_ensemble,
+            random_seed=model.random_seed
+        )
+        model_predict.set_display_name('Predict')
 
 
 def _main(argv):
