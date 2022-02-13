@@ -74,7 +74,7 @@ def hhblits(
 
     job_params = [
         '--machine-type', machine_type,
-        '--boot-disk-size', boot_disk_size,
+        '--boot-disk-size', str(boot_disk_size),
         '--logging', cls_logging.uri,
         '--log-interval', _LOG_INTERVAL, 
         '--image', _ALPHAFOLD_RUNNER_IMAGE,

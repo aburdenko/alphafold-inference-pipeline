@@ -80,7 +80,7 @@ def pipeline(
     search_uniref = JackhmmerOp(
         project=project,
         region=region,
-        database=['uniref90'],
+        database='uniref90',
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )

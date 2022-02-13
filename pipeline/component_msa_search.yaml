@@ -54,7 +54,7 @@ implementation:
       \n    database_paths = [reference_databases.metadata[database] for database\
       \ in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    job_params\
       \ = [\n        '--machine-type', machine_type,\n        '--boot-disk-size',\
-      \ boot_disk_size,\n        '--logging', cls_logging.uri,\n        '--log-interval',\
+      \ str(boot_disk_size),\n        '--logging', cls_logging.uri,\n        '--log-interval',\
       \ _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env',\
       \ f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={reference_databases.metadata[\"\
       disk_image\"]}',\n        '--input', f'INPUT_PATH={sequence.uri}',\n       \
