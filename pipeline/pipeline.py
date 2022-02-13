@@ -25,7 +25,7 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-from alphafold_components import MSASearchOp, TemplateSearchOp
+from alphafold_components import MSASearchOp, TemplateSearchOp, AggregateFeaturesOp
 
 FLAGS = flags.FLAGS
 
@@ -137,6 +137,15 @@ def pipeline(
         msa=search_uniref.outputs['msa'],
     )
     search_pdb.set_display_name('Search Pdb').set_caching_options(enable_caching=True)
+
+    aggregate_features = AggregateFeaturesOp(
+        sequence=input_sequence.output,
+        msa1=search_uniref.outputs['msa'],
+        msa2=search_mgnify.outputs['msa'],
+        msa3=search_bfd_uniclust.outputs['msa'],
+        template_features=search_pdb.outputs['template_features'],
+    )
+    aggregate_features.set_display_name('Aggregate features').set_caching_options(enable_caching=True)
 
 
 def _main(argv):

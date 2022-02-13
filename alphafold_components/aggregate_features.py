@@ -13,44 +13,28 @@
 # limitations under the License.
 """A encapsulating AlphaFold feature engineering"""
 
+
 import os
-import logging
-import numpy as np
+
 from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
-
-
-from alphafold.common import residue_constants
-from alphafold.data import msa_identifiers
-from alphafold.data import parsers
-from alphafold.data import templates
-from alphafold.data.tools import hhblits
-from alphafold.data.tools import hhsearch
-from alphafold.data.tools import hmmsearch
-from alphafold.data.tools import jackhmmer
-
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
-
-_COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold-components')
-
-FeatureDict = MutableMapping[str, np.ndarray]
-TemplateSearcher = Union[hhsearch.HHSearch, hmmsearch.Hmmsearch]
+_COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold')
 
 
 @dsl.component(
     base_image=_COMPONENTS_IMAGE,
     output_component_file='component_create_features.yaml'
 )
-def create_features(
-    sequence_input: Input[Dataset],
-    msa_input1: Input[Dataset],
-    msa_input2: Optional[Input[Dataset]],
-    msa_input3: Optional[Input[Dataset]],
-    template_input: Input[Dataset],
-    reference_databases: Input[Dataset],
-    features: Output[Dataset]):
-    """ Creates features from results of searches against sequence databases.
+def aggregate_features(
+    sequence: Input[Dataset],
+    msa1: Input[Dataset],
+    msa2: Optional[Input[Dataset]],
+    msa3: Optional[Input[Dataset]],
+    template_features: Input[Dataset],
+    model_features: Output[Dataset]):
+    """Aggregates MSAs and template features to create model features 
     
     In the prototype, we assume a fixed number of inputs, mirroring the sample
     inference pipeline from DeepMind. When it comes to productionizing we should
@@ -58,6 +42,19 @@ def create_features(
     component.
 
     """
+
+    import os
+    import logging
+    import numpy as np
+    import pickle
+
+    
+    from alphafold.common import residue_constants
+    from alphafold.data import msa_identifiers
+    from alphafold.data import parsers
+    from alphafold.data import templates
+
+
 
     def _make_sequence_features(
         sequence: str, description: str, num_res: int) -> FeatureDict:
@@ -115,10 +112,10 @@ def create_features(
         return features
 
 
-    def _read_msa(msa_dataset: Input[Dataset]):
+    def _read_msa(msa: Input[Dataset]):
         msa = None
-        msa_path = msa_dataset.path,
-        msa_format = msa_dataset.metadata['data_format']
+        msa_path = msa.path,
+        msa_format = msa.metadata['data_format']
         if os.path.exists(msa_path):
             with open(msa_path) as f:
                 msa = f.read()
@@ -130,10 +127,10 @@ def create_features(
                 raise RuntimeError(f'Unsupported MSA format: {msa_format}') 
         return msa
 
-    def _read_sequence(sequence_dataset: Input[Dataset])
+    def _read_sequence(sequence: Input[Dataset]):
 
-        sequence_path = sequence_dataset.path
-        sequence_format = sequence_dataset.metadata['data_format']
+        sequence_path = sequence.path
+        sequence_format = sequence.metadata['data_format']
 
         if sequence_format != 'fasta':
             raise RuntimeError(f'Unsupported sequence format {sequence_format}')
@@ -147,8 +144,16 @@ def create_features(
 
         return sequences[0], sequence_descs[0], len(sequences[0])
 
+
+    def _read_template_features(template_featurs: Input[Dataset]):
+        template_features_path = template_features.path
+        with open(template_features_path, 'rb') as f:
+            template_features = pickle.load(f)
+        return template_features
+
+
     # Create sequence features
-    seq, seq_desc, num_res = _read_sequence(sequence_input) 
+    seq, seq_desc, num_res = _read_sequence(sequence) 
     sequence_features = _make_sequence_features(
         sequence=seq,
         description=seq_desc,
@@ -156,14 +161,26 @@ def create_features(
 
     # Create MSA features
     msas = []
-    msas.append(_read_msa(msa_input1))
-    msas.append(_read_msa(msa_input2))
-    msas.append(_read_msa(msa_input3))
+    msas.append(_read_msa(msa1))
+    msas.append(_read_msa(msa2))
+    msas.append(_read_msa(msa3))
     if not msas:
         raise RuntimeError('No MSAs passed to the component')
     msa_features = _make_msa_features(msas=msas)
 
     # Create template features
+    template_features = _read_template_features(template_features)
+        
+    model_features = {
+        **sequence_features,
+        **msa_features,
+        **template_features
+    }
+
+    model_features_path = model_features.path
+    model_features.metadata['data_format'] = 'pkl'
+    with open(model_features_path, 'wb') as f:
+        pickle.dump(model_features, f, protocol=4)
     
 
 

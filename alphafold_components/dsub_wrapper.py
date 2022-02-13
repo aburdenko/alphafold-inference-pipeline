@@ -59,6 +59,8 @@ def run_dsub_job(params: List[str],
         logging.info(result.stdout)
         raise RuntimeError(f'dsub failed. Retcode: {result.returncode}')
 
+    # We need to add more sophisticated job monitoring so KFP GUI is more up to date.
+
     
 
 

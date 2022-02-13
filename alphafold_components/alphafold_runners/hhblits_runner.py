@@ -76,7 +76,7 @@ def run_hhblits(
     logging.info(f'Searching using input sequence: {input_desc}')
     results = runner.query(input_path)
     with open(output_path, 'w') as f: 
-        f.write(results)
+        f.write(results['a3m'])
 
 
 

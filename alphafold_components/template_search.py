@@ -47,6 +47,9 @@ def template_search(
     We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.
     GCSFuse does not perform well with tools like hhsearch or hhblits.
 
+    he prototype also lacks job control. If a pipeline step fails, the CLS job can get 
+    orphaned
+
     """
     
 
@@ -91,7 +94,9 @@ def template_search(
     msa_path = msa.uri
     msa_data_format = msa.metadata['data_format']
     template_hits_path = template_hits.uri
+    template_hits.metadata['data_format'] = 'hhr'
     template_features_path = template_features.uri
+    template_features.metadata['data_format'] = 'pkl'
 
     job_params = [
         '--machine-type', _MACHINE_TYPE,

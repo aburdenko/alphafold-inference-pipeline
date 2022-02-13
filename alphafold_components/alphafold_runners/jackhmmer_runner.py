@@ -75,7 +75,7 @@ def run_jackhmmer(
     logging.info(f'Searching using input sequence: {input_desc}')
     results = runner.query(input_path, maxseq)
     with open(output_path, 'w') as f: 
-        f.write(results)
+        f.write(results['sto'])
 
 
 if __name__=='__main__':
