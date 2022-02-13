@@ -63,10 +63,11 @@ implementation:
       \    _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None,\
       \ # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for\
       \ db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools\
-      \ = set(tools)\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The\
-      \ database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image\
-      \ = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n\
-      \                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\
+      \ = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise\
+      \ RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool =\
+      \ tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n\
+      \    database_paths = [reference_databases.metadata[database]\n            \
+      \          for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\
       \n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n\
       \    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n\
       \    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type',\
