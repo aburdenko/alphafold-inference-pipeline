@@ -72,10 +72,10 @@ def template_search(
     # At runtime we could pass them as tool_options dictionary
 
     _MACHINE_TYPE = 'c2-standard-8'
-    _BOOT_DISK_SIZE = 200
-    _N_CPU = 8
-    _MAXSEQ = 1_000_000
-    _MAX_TEMPLATE_HITS = 20
+    _BOOT_DISK_SIZE = '200'
+    _N_CPU = '8'
+    _MAXSEQ = '1_000_000'
+    _MAX_TEMPLATE_HITS = '20'hh
 
     logging.basicConfig(format='%(asctime)s - %(message)s',
                       level=logging.INFO, 
@@ -93,9 +93,7 @@ def template_search(
     sequence_path = sequence.uri
     msa_path = msa.uri
     msa_data_format = msa.metadata['data_format']
-    template_hits_path = template_hits.uri
     template_hits.metadata['data_format'] = 'hhr'
-    template_features_path = template_features.uri
     template_features.metadata['data_format'] = 'pkl'
 
     job_params = [
@@ -108,8 +106,8 @@ def template_search(
         '--mount', f'DB_ROOT={disk_image}',
         '--input', f'INPUT_SEQUENCE_PATH={sequence_path}',
         '--input', f'INPUT_MSA_PATH={msa_path}',
-        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={template_hits_path}',
-        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={template_features_path}',
+        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={template_hits.uri}',
+        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={template_features.uri}',
         '--env', f'MSA_DATA_FORMAT={msa_data_format}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'MMCIF_PATH={mmcif_path}',

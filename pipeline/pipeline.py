@@ -59,9 +59,12 @@ _PDB_OBSOLETE = 'pdb_obsolete'
 _PDB_SEQRES = 'pdb_seqres'
 _UNIPROT = 'uniprot'
 
-_JACKHMMER = 'jackhmmer'
-_HHSEARCH = 'hhsearch'
-_HHBLITS = 'hhblits'
+MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
+CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
+GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
+GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
+GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
+
 
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
@@ -170,6 +173,10 @@ def pipeline(
             random_seed=model.random_seed
         )
         model_predict.set_display_name('Predict')
+        model_predict.set_cpu_limit(CPU_LIMIT)
+        model_predict.set_memory_limit(MEMORY_LIMIT)
+        model_predict.set_gpu_limit(GPU_LIMIT)
+        model_predict.add_node_selector_constraint(GKE_ACCELERATOR_KEY, GPU_TYPE)
 
 
 def _main(argv):

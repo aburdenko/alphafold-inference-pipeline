@@ -75,18 +75,18 @@ def msa_search(
 
     _TOOL_TO_SETTINGS_MAPPING = {
        'jackhmmer': {
-           'MACHINE_TYPE': 'n1-standard-4',
+           'MACHINE_TYPE': 'n1-standard-8',
            'BOOT_DISK_SIZE': '200',
            'OUTPUT_DATA_FORMAT': 'sto',
-           'N_CPU': 4,
+           'N_CPU': '8',
            'MAXSEQ': '10_000',
            'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' 
        },
        'hhblits': {
-           'MACHINE_TYPE': 'c2-standard-4',
+           'MACHINE_TYPE': 'c2-standard-8',
            'BOOT_DISK_SIZE': '200',
            'OUTPUT_DATA_FORMAT': 'a3m',
-           'N_CPU': 4,
+           'N_CPU': '8',
            'MAXSEQ': '1_000_000',
            'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' 
        },
