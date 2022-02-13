@@ -49,20 +49,21 @@ implementation:
       \    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n    logging.basicConfig(format='%(asctime)s\
       \ - %(message)s',\n                      level=logging.INFO, \n            \
       \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
-      \n    for database in msa_dbs:\n        if not database in _SUPPORTED_DATABASES:\n\
+      \n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n\
       \            raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\
-      \n    database_paths = ','.join(database_paths)\n\n    job_params = [\n    \
-      \    '--machine-type', machine_type,\n        '--boot-disk-size', boot_disk_size,\n\
-      \        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL,\
-      \ \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n\
-      \        '--mount', f'DB_ROOT={reference_databases.metadata[\"disk_image\"]}',\n\
-      \        '--input', f'INPUT_PATH={sequence.uri}',\n        '--output', f'OUTPUT_PATH={msa.uri}',\n\
-      \        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={reference_databases.metadata[database]}',\n\
-      \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
-      \        '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n       \
-      \ provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n\
-      \        params=job_params,\n    )\n\n    msa.metadata['data_format'] = 'a3m'\
-      \   \n\n"
+      \n    database_paths = [reference_databases.metadata[database] for database\
+      \ in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    job_params\
+      \ = [\n        '--machine-type', machine_type,\n        '--boot-disk-size',\
+      \ boot_disk_size,\n        '--logging', cls_logging.uri,\n        '--log-interval',\
+      \ _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env',\
+      \ f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={reference_databases.metadata[\"\
+      disk_image\"]}',\n        '--input', f'INPUT_PATH={sequence.uri}',\n       \
+      \ '--output', f'OUTPUT_PATH={msa.uri}',\n        '--env', f'DB_PATHS={database_paths}',\n\
+      \        '--env', f'N_CPU={reference_databases.metadata[database]}',\n     \
+      \   '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n    \
+      \    '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n\
+      \        project=project,\n        regions=region,\n        params=job_params,\n\
+      \    )\n\n    msa.metadata['data_format'] = 'a3m'   \n\n"
     args:
     - --executor_input
     - {executorInput: null}
