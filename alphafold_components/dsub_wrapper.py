@@ -57,47 +57,9 @@ def run_dsub_job(params: List[str],
     if result.returncode != 0:
         logging.info(result.stderr)
         logging.info(result.stdout)
-        raise RuntimeError(f'dsub detected failure of the job. Retcode: {result.returncode}')
+        raise RuntimeError(f'dsub failed. Retcode: {result.returncode}')
 
-    # Currently we do not retrieve logs from a CLS job while waiting. Consider adding if
-    # we will stay with the CLS solution
-
-    #job_id = result.stdout.decode('UTF-8').strip()
-    #logging.info(f'Waiting for the job {job_id} to complete') 
-    #dstat_cmd = [
-    #    _DSTAT_BINARY_PATH,
-    #    '--provider', provider,
-    #    '--jobs', job_id,
-    #    '--user', 'root',
-    #    #'--wait'
-    #    ]
-    #if provider == 'google-cls-v2':
-    #    dstat_cmd += ['--project', project] 
-
-    ##result = subprocess.run(
-    ##    dstat_cmd,
-    ##    stderr=subprocess.PIPE,
-    ##    stdout=subprocess.PIPE
-    ##)
-
-    #while True:
-    #    result = subprocess.run(
-    #        dstat_cmd,
-    #        stderr=subprocess.PIPE,
-    #        stdout=subprocess.PIPE)
-
-    #    if result.stdout.decode('UTF-8').strip() == "":
-    #        break
-
-    #    # Logging must dramatically improve :)
-    #    # Currently we don't detect a fa
-
-    #    logging.info(result.stderr)
-    #    logging.info(result.stdout) 
-    #    time.sleep(_POLLING_INTERVAL)
-
-
-    #return result
+    
 
 
     
