@@ -97,7 +97,7 @@ def hhsearch(
         '--env', f'N_CPU={n_cpu}',
         '--env', f'MAXSEQ={maxseq}', 
         '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',
-        '--evn', f'MAX_TEMPLATE_DATE={max_template_date}', 
+        '--env', f'MAX_TEMPLATE_DATE={max_template_date}', 
         '--script', _SCRIPT, 
     ]
 
