@@ -35,7 +35,7 @@ def hhblits(
     maxseq:int=1_000_000,
     machine_type:str='c2-standard-8',
     boot_disk_size:int=100,
-    n_cpu:int=8, 
+    n_cpu:int=4, 
     ):
     """Searches sequence databases using the specified tool.
 
