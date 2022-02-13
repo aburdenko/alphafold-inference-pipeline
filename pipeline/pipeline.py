@@ -25,48 +25,11 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-from alphafold_components import MSASearchOp, TemplateSearchOp, AggregateFeaturesOp, ModelPredictOp
-
-FLAGS = flags.FLAGS
-
-_PIPELINE_NAME = 'alphafold-inference'
-_PIPELINE_DESCRIPTION = 'Alphafold inference'
-
-flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path to the Uniref90 '
-                    'database for use by JackHMMER.')
-
-_REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
-_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
-_MODEL_PARAMS_GCS_LOCATION='gs://jk-alphafold-datasets-archive/jan-22/params'
-
-_UNIREF90_PATH = 'uniref90/uniref90.fasta'
-_MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
-_BFD_PATH = 'bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
-_UNICLUST30_PATH = 'uniclust30/uniclust30_2018_08/uniclust30_2018_08'
-_UNIPROT_PATH = 'uniprot/uniprot.fasta'
-_PDB70_PATH = 'pdb70/pdb70'
-_PDB_MMCIF = 'pdb_mmcif/mmcif_files'
-_PDB_OBSOLETE_PATH = 'pdb_mmcif/obsolete.dat'
-_PDB_SEQRES_PATH = 'pdb_seqres/pdb_seqres.txt'
-
-_UNIREF90 = 'uniref90'
-_MGNIFY = 'mgnify'
-_BFD = 'bfd'
-_UNICLUST30 = 'uniclust30'
-_PDB70 = 'pdb70'
-_PDB_MMCIF = 'pdb_mmcif'
-_PDB_OBSOLETE = 'pdb_obsolete'
-_PDB_SEQRES = 'pdb_seqres'
-_UNIPROT = 'uniprot'
-
-MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
-CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
-GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
-GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
-GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
+import config
+from alphafold_components import  AggregateFeaturesOp, ModelPredictOp, JackhmmerOp, HHBlitsOp, HHSearchOp
 
 
-@dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
+@dsl.pipeline(name=config.PIPELINE_NAME, description=config.PIPELINE_DESCRIPTION)
 def pipeline(
     fasta_path: str,
     project: str='jk-mlops-dev',
@@ -74,8 +37,8 @@ def pipeline(
     max_template_date: str='2020-05-14',
     models: List[Mapping]=[{'model_name': 'model_1'}, {'random_seed': 1}],
     num_ensemble: int=1,
-    datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION,
-    model_params_gcs_location: str=_MODEL_PARAMS_GCS_LOCATION):
+    datasets_gcs_location: str=config.REFERENCE_DATASETS_GCS_LOCATION,
+    model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
     input_sequence = dsl.importer(
@@ -99,54 +62,54 @@ def pipeline(
         artifact_class=dsl.Dataset,
         reimport=False,
         metadata={
-            'disk_image': _REFERENCE_DATASETS_IMAGE,
-            _UNIREF90: _UNIREF90_PATH,
-            _MGNIFY: _MGNIFY_PATH,
-            _BFD: _BFD_PATH,
-            _UNICLUST30: _UNICLUST30_PATH,
-            _PDB70: _PDB70_PATH,
-            _PDB_MMCIF: _PDB_MMCIF,
-            _PDB_OBSOLETE: _PDB_OBSOLETE_PATH,
-            _PDB_SEQRES: _PDB_SEQRES_PATH,
-            _UNIPROT: _UNIPROT_PATH,
+            'disk_image': config.REFERENCE_DATASETS_IMAGE,
+            'uniref90': config.UNIREF90_PATH,
+            'mgnify': config.MGNIFY_PATH,
+            'bfd': config.BFD_PATH,
+            'uniclus30': config.UNICLUST30_PATH,
+            'pdb70': config.PDB70_PATH,
+            'pdb_mmcif': config.PDB_MMCIF,
+            'pdb_obsolete': config.PDB_OBSOLETE_PATH,
+            'pdb_seqres': config.PDB_SEQRES_PATH,
+            'uniprot': config.UNIPROT_PATH,
             }    
     )
     reference_databases.set_display_name('Reference databases')
 
 
-    search_uniref = MSASearchOp(
+    search_uniref = JackhmmerOp(
         project=project,
         region=region,
-        msa_dbs=[_UNIREF90],
+        database=['uniref90'],
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
     search_uniref.set_display_name('Search Uniref').set_caching_options(enable_caching=True)
 
-    search_mgnify = MSASearchOp(
+    search_mgnify = JackhmmerOp(
         project=project,
         region=region,
-        msa_dbs=[_MGNIFY],
+        database='mgnify',
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
     search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
 
-    search_bfd_uniclust = MSASearchOp(
+    search_bfd_uniclust = HHBlitsOp(
         project=project,
         region=region,
-        msa_dbs=[_BFD, _UNICLUST30],
+        msa_dbs=['bfd', 'uniclust30'],
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
     search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
 
-    search_pdb = TemplateSearchOp(
+    search_pdb = HHSearchOp(
         project=project,
         region=region,
-        template_dbs=[_PDB70],
-        mmcif_db=_PDB_MMCIF,
-        obsolete_db=_PDB_OBSOLETE,
+        template_dbs=['pdb70'],
+        mmcif_db='pdb_mmcif',
+        obsolete_db='pdb_obsolete',
         max_template_date=max_template_date,
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
@@ -173,16 +136,16 @@ def pipeline(
             random_seed=model.random_seed
         )
         model_predict.set_display_name('Predict')
-        model_predict.set_cpu_limit(CPU_LIMIT)
-        model_predict.set_memory_limit(MEMORY_LIMIT)
-        model_predict.set_gpu_limit(GPU_LIMIT)
-        model_predict.add_node_selector_constraint(GKE_ACCELERATOR_KEY, GPU_TYPE)
+        model_predict.set_cpu_limit(config.CPU_LIMIT)
+        model_predict.set_memory_limit(config.MEMORY_LIMIT)
+        model_predict.set_gpu_limit(config.GPU_LIMIT)
+        model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
 
 def _main(argv):
     compiler.Compiler().compile(
         pipeline_func=pipeline,
-        package_path=f'{_PIPELINE_NAME}.json')
+        package_path=f'{config.PIPELINE_NAME}.json')
 
 
 if __name__ == "__main__":

@@ -36,7 +36,7 @@ INPUT_PATH= os.environ['INPUT_PATH']
 OUTPUT_PATH = os.environ['OUTPUT_PATH']
 
 DB_ROOT = os.environ['DB_ROOT']
-DB_PATHS = os.environ['DB_PATHS']
+DB_PATH = os.environ['DB_PATH']
 
 # Optional inputs 
 N_CPU = int(os.getenv('N_CPU'))
@@ -83,13 +83,10 @@ if __name__=='__main__':
                         level=logging.INFO, 
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
-    database_paths = [
-            os.path.join(DB_ROOT, database_path) 
-            for database_path in DB_PATHS.split(',')] 
 
     run_jackhmmer(
         input_path=INPUT_PATH,
         output_path=OUTPUT_PATH,
-        database_path=database_paths[0],
+        database_path=DB_PATH,
         maxseq=MAXSEQ,
         n_cpu=N_CPU,)

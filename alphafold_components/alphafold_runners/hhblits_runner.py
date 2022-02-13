@@ -78,8 +78,6 @@ def run_hhblits(
     with open(output_path, 'w') as f: 
         f.write(results['a3m'])
 
-
-
 if __name__=='__main__':
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         level=logging.INFO, 
