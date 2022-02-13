@@ -14,8 +14,6 @@
 
 
 import os
-from re import I
-
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
@@ -41,6 +39,9 @@ def msa_search(
     This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
     We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.
     GCSFuse does not perform well with tools like hhsearch or hhblits.
+
+    The prototype also lacks job control. If a pipeline step fails, the CLS job can get 
+    orphaned
 
     """
     

@@ -14,7 +14,8 @@
 
 
 import os
-from re import I
+import random
+import sys
 
 from absl import flags
 from absl import app
@@ -37,14 +38,26 @@ flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccou
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
 flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepopulated with databases')
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
+flags.DEFINE_string('model_name', 'model_1', 'Model name')
+flags.DEFINE_integer('num_ensemble', 1, 'TBD')
+flags.DEFINE_integer('random_seed', None, 'TBD')
 
 def _main(argv):
+
+    if FLAGS.random_seed is None:
+        # needs to be fixed when we switch to parallel loop
+        random_seed = random.randrange(sys.maxsize // 1)
+    else:
+        random_seed = FLAGS.random_seed
 
     params = {
         'fasta_path': FLAGS.fasta_path,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,
+        'model_name': FLAGS.model_name,
+        'num_ensemble': FLAGS.num_ensemble,
+        'random_seed': random_seed,
     }
 
     pipeline_job = aip.PipelineJob(

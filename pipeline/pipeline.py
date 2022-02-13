@@ -25,7 +25,7 @@ from kfp.v2 import dsl
 from kfp.v2 import compiler
 from kfp import components
 
-from alphafold_components import MSASearchOp, TemplateSearchOp, AggregateFeaturesOp
+from alphafold_components import MSASearchOp, TemplateSearchOp, AggregateFeaturesOp, ModelPredictOp
 
 FLAGS = flags.FLAGS
 
@@ -36,7 +36,9 @@ flags.DEFINE_string('uniref90_database_path', '/uniref90/uniref90.fasta', 'Path 
                     'database for use by JackHMMER.')
 
 _REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
-_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
+_REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22/params'
+_MODEL_PARAMS_GCS_LOCATION='gs://'
+
 _UNIREF90_PATH = 'uniref90/uniref90.fasta'
 _MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'
 _BFD_PATH = 'bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
@@ -64,10 +66,14 @@ _HHBLITS = 'hhblits'
 @dsl.pipeline(name=_PIPELINE_NAME, description=_PIPELINE_DESCRIPTION)
 def pipeline(
     fasta_path: str,
+    random_seed: int,
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
-    datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION):
+    model_name: str='model_1',
+    num_ensemble: int=1,
+    datasets_gcs_location: str=_REFERENCE_DATASETS_GCS_LOCATION,
+    model_params_gcs_location: str=_MODEL_PARAMS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
     input_sequence = dsl.importer(
@@ -77,6 +83,12 @@ def pipeline(
         metadata={'data_format': 'fasta'}
     )
     input_sequence.set_display_name('Input sequence')
+
+    model_parameters = dsl.importer(
+        artifact_uri=model_params_gcs_location,
+        artifact_class=dsl.Artifact,
+        reimport=False,
+    )
 
     reference_databases = dsl.importer(
         artifact_uri=datasets_gcs_location,
@@ -146,6 +158,16 @@ def pipeline(
         template_features=search_pdb.outputs['template_features'],
     )
     aggregate_features.set_display_name('Aggregate features').set_caching_options(enable_caching=True)
+
+    # Think what to do with random seed when switch to Parallel loop
+    model_predict = ModelPredictOp(
+        model_features=aggregate_features.outputs['model_features'],
+        model_params=model_parameters.output,
+        model_name=model_name,
+        num_ensemble=num_ensemble,
+        random_seed=random_seed
+    )
+    model_predict.set_display_name('Predict')
 
 
 def _main(argv):

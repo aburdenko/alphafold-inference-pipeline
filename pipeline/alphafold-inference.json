@@ -81,6 +81,26 @@
           "artifacts": {
             "artifact": {
               "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-importer-3": {
+        "executorLabel": "exec-importer-3",
+        "inputDefinitions": {
+          "parameters": {
+            "uri": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "artifact": {
+              "artifactType": {
                 "schemaTitle": "system.Dataset",
                 "schemaVersion": "0.0.1"
               }
@@ -226,6 +246,52 @@
           }
         }
       },
+      "comp-predict": {
+        "executorLabel": "exec-predict",
+        "inputDefinitions": {
+          "artifacts": {
+            "model_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "model_params": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "model_name": {
+              "type": "STRING"
+            },
+            "num_ensemble": {
+              "type": "INT"
+            },
+            "random_seed": {
+              "type": "INT"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "prediction_result": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "unrelaxed_protein": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
       "comp-template-search": {
         "executorLabel": "exec-template-search",
         "inputDefinitions": {
@@ -335,6 +401,17 @@
             "artifactUri": {
               "runtimeParameter": "uri"
             },
+            "typeSchema": {
+              "schemaTitle": "system.Artifact",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        },
+        "exec-importer-3": {
+          "importer": {
+            "artifactUri": {
+              "runtimeParameter": "uri"
+            },
             "metadata": {
               "bfd": "bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
               "disk_image": "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000",
@@ -368,7 +445,7 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    The prototype also lacks job control. If a pipeline step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components"
           }
@@ -388,7 +465,7 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    The prototype also lacks job control. If a pipeline step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components"
           }
@@ -408,9 +485,29 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef msa_search(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches sequence databases using the specified tool.\n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\n    The prototype also lacks job control. If a pipeline step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\n    _UNIREF90 = 'uniref90'\n    _MGNIFY = 'mgnify'\n    _BFD = 'bfd'\n    _UNICLUST30 = 'uniclust30'\n    _UNIPROT = 'uniprot'\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\n    _DEFAULT_FILE_PREFIX = 'datafile'\n\n    # For a prototype we are hardcoding some values. Whe productionizing\n    # we can make them compile time or runtime parameters\n    # E.g. CPU type is important. HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    _TOOL_TO_SETTINGS_MAPPING = {\n       'jackhmmer': {\n           'MACHINE_TYPE': 'n1-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'sto',\n           'N_CPU': 4,\n           'MAXSEQ': '10_000',\n           'SCRIPT': '/scripts/alphafold_runners/jackhmmer_runner.py' \n       },\n       'hhblits': {\n           'MACHINE_TYPE': 'c2-standard-4',\n           'BOOT_DISK_SIZE': '200',\n           'OUTPUT_DATA_FORMAT': 'a3m',\n           'N_CPU': 4,\n           'MAXSEQ': '1_000_000',\n           'SCRIPT': '/scripts/alphafold_runners/hhblits_runner.py' \n       },\n    }\n\n    # This is a temporary crude solution to map a the list of databases to search\n    # to a search tool. In the prototype we assume that the provided databases list \n    # can be searched with a single tool\n    _DATABASE_TO_TOOL_MAPPING = {\n        _UNIREF90: 'jackhmmer',\n        _MGNIFY: 'jackhmmer',\n        _BFD: 'hhblits',\n        _UNICLUST30: 'hhblits', \n        _UNIPROT: None, # to be determined\n    }\n\n    tools = [_DATABASE_TO_TOOL_MAPPING[db] for db in msa_dbs\n              if _DATABASE_TO_TOOL_MAPPING[db]]\n    tools = list(set(tools))\n\n    if (not tools) or (len(tools) > 1):\n        raise RuntimeError(f'The database list {msa_dbs} not supported')\n    db_tool = tools[0]\n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths = [reference_databases.metadata[database]\n                      for database in msa_dbs]\n    database_paths = ','.join(database_paths)\n\n    output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']\n    msa.metadata['data_format'] = output_data_format\n    output_path = msa.uri\n    input_path = sequence.uri\n\n    job_params = [\n        '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],\n        '--boot-disk-size', _TOOL_TO_SETTINGS_MAPPING[db_tool]['BOOT_DISK_SIZE'],\n        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_PATH={input_path}',\n        '--output', f'OUTPUT_PATH={output_path}',\n        '--env', f'DB_TOOL={db_tool}',\n        '--env', f'DB_PATHS={database_paths}',\n        '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"N_CPU\"]}',\n        '--env', f'MAXSEQ={_TOOL_TO_SETTINGS_MAPPING[db_tool][\"MAXSEQ\"]}', \n        '--script', _TOOL_TO_SETTINGS_MAPPING[db_tool]['SCRIPT'] \n    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n        params=job_params,\n    ) \n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-predict": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "predict"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef predict(\n    model_features: Input[Dataset],\n    model_params: Input[Artifact],\n    model_name: str,\n    num_ensemble: int,\n    random_seed: int,\n    prediction_result: Output[Artifact],\n    unrelaxed_protein: Output[Artifact]\n):\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n\n    import haiku as hk\n\n    from alphafold.model import config\n    from alphafold.model import data\n    from alphafold.model import model\n    from alphafold.model import utils\n    from alphafold.common import residue_constants\n    from alphafold.common import protein\n\n\n    def _get_model_haiku_params(model_name: str,\n                                model_params: Input[Dataset]):\n        \"\"\"Get the Haiku parameters from a model name.\"\"\"\n\n        params_dir = model_params.path\n        path = os.path.join(params_dir, f'params_{model_name}.npz')\n\n        with open(path, 'rb') as f:\n            params = np.load(io.BytesIO(f.read()), allow_pickle=False)\n\n        return utils.flat_params_to_haiku(params)\n\n\n    def _load_features(model_featurs: Input[Dataset]):\n        features_path = model_features.path\n        with open(features_path, 'rb'):\n            features = pickle.load(f)\n        return features\n\n\n    model_config = config.model_config(model_name)\n    # we assume monomer pipeline\n    model_config.model.eval.nume_ensemble = num_ensemble\n    model_params = _get_model_haiku_params(\n        model_name=model_name, data_dir=model_params.path)\n    model_runner = model.RunMode(model_config, model_params)\n    features = _load_features(model_features)\n    logging.info(f'Running prediction using model {model_name}')\n    processed_feature_dict = model_runner.process_features(\n        feature_dict=features,\n        random_seed=random_seed\n    )\n    prediction_result = model_runner.predict(\n        processed_feature_dict,\n        random_seed=random_seed\n    )\n\n    plddt = prediction_result['plddt']\n    ranking_confidence = prediction_result['ranking_confidence']\n    with open(prediction_result.path, 'wb') as f:\n        pickle.dump(prediction_result, f, protocol=4)\n    prediction_result.metadata['ranking_confidence']=ranking_confidence\n    prediction_result.metadata['data_format']='pkl'\n\n    plddt_b_factors = np.repeat(\n        plddt[:, None], residue_constants.atom_type_num, axis=-1)\n    unrelaxed_protein = protein.from_prediction(\n        features=processed_feature_dict,\n        result=prediction_result,\n        b_factors=plddt_b_factors,\n        remove_leading_feature_dimension=not model_runner.multimer_mode)\n    unrelaxed_pdbs = protein.to_pdb(unrelaxed_protein)\n    with open(unrelaxed_protein.path, 'w') as f:\n        f.write(unrelaxed_pdbs)\n    unrelaxed_protein.metadata['data_format']='pdb'\n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold"
           }
         },
         "exec-template-search": {
@@ -521,6 +618,24 @@
             "inputs": {
               "parameters": {
                 "uri": {
+                  "componentInputParameter": "model_params_gcs_location"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "importer-2"
+            }
+          },
+          "importer-3": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-importer-3"
+            },
+            "inputs": {
+              "parameters": {
+                "uri": {
                   "componentInputParameter": "datasets_gcs_location"
                 }
               }
@@ -538,14 +653,14 @@
             },
             "dependentTasks": [
               "importer",
-              "importer-2"
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
@@ -584,14 +699,14 @@
             },
             "dependentTasks": [
               "importer",
-              "importer-2"
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
@@ -630,14 +745,14 @@
             },
             "dependentTasks": [
               "importer",
-              "importer-2"
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
@@ -667,6 +782,48 @@
               "name": "Search Uniclust and BFD"
             }
           },
+          "predict": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-predict"
+            },
+            "dependentTasks": [
+              "aggregate-features",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "model_features": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "model_features",
+                    "producerTask": "aggregate-features"
+                  }
+                },
+                "model_params": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "model_name": {
+                  "componentInputParameter": "model_name"
+                },
+                "num_ensemble": {
+                  "componentInputParameter": "num_ensemble"
+                },
+                "random_seed": {
+                  "componentInputParameter": "random_seed"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Predict"
+            }
+          },
           "template-search": {
             "cachingOptions": {
               "enableCache": true
@@ -676,7 +833,7 @@
             },
             "dependentTasks": [
               "importer",
-              "importer-2",
+              "importer-3",
               "msa-search"
             ],
             "inputs": {
@@ -690,7 +847,7 @@
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
@@ -750,8 +907,20 @@
           "max_template_date": {
             "type": "STRING"
           },
+          "model_name": {
+            "type": "STRING"
+          },
+          "model_params_gcs_location": {
+            "type": "STRING"
+          },
+          "num_ensemble": {
+            "type": "INT"
+          },
           "project": {
             "type": "STRING"
+          },
+          "random_seed": {
+            "type": "INT"
           },
           "region": {
             "type": "STRING"
@@ -765,10 +934,19 @@
   "runtimeConfig": {
     "parameters": {
       "datasets_gcs_location": {
-        "stringValue": "gs://jk-alphafold-datasets-archive/jan-22"
+        "stringValue": "gs://jk-alphafold-datasets-archive/jan-22/params"
       },
       "max_template_date": {
         "stringValue": "2020-05-14"
+      },
+      "model_name": {
+        "stringValue": "model_1"
+      },
+      "model_params_gcs_location": {
+        "stringValue": "gs://"
+      },
+      "num_ensemble": {
+        "intValue": "1"
       },
       "project": {
         "stringValue": "jk-mlops-dev"

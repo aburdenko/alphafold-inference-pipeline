@@ -27,4 +27,5 @@
 from alphafold_components.msa_search import msa_search as MSASearchOp
 from alphafold_components.template_search import template_search as TemplateSearchOp
 from alphafold_components.aggregate_features import aggregate_features as AggregateFeaturesOp
+from alphafold_components.model_predict import predict as ModelPredictOp
 
