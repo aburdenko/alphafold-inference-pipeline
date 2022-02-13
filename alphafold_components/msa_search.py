@@ -32,8 +32,8 @@ def msa_search(
     region: str,
     msa_dbs: list,
     reference_databases: Input[Dataset],
-    input_data: Input[Dataset],
-    output_data: Output[Dataset],
+    sequence: Input[Dataset],
+    msa: Output[Dataset],
     cls_logging: Output[Artifact] 
     ):
     """Searches sequence databases using the specified tool.
@@ -116,8 +116,9 @@ def msa_search(
     database_paths = ','.join(database_paths)
 
     output_data_format = _TOOL_TO_SETTINGS_MAPPING[db_tool]['OUTPUT_DATA_FORMAT']
-    output_data.metadata['data_format'] = output_data_format
-    output_path = output_data.uri
+    msa.metadata['data_format'] = output_data_format
+    output_path = msa.uri
+    input_path = sequence.uri
     
     job_params = [
         '--machine-type', _TOOL_TO_SETTINGS_MAPPING[db_tool]['MACHINE_TYPE'],
@@ -127,8 +128,8 @@ def msa_search(
         '--image', _ALPHAFOLD_RUNNER_IMAGE,
         '--env', f'PYTHONPATH=/app/alphafold',
         '--mount', f'DB_ROOT={disk_image}',
-        '--input', f'INPUT_DATA={input_data.uri}',
-        '--output', f'OUTPUT_DATA={output_path}',
+        '--input', f'INPUT_PATH={input_path}',
+        '--output', f'OUTPUT_PATH={output_path}',
         '--env', f'DB_TOOL={db_tool}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'N_CPU={_TOOL_TO_SETTINGS_MAPPING[db_tool]["N_CPU"]}',

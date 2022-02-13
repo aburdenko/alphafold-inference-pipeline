@@ -103,7 +103,7 @@ def pipeline(
         region=region,
         msa_dbs=[_UNIREF90],
         reference_databases=reference_databases.output,
-        input_data=input_sequence.output,
+        sequence=input_sequence.output,
     )
     search_uniref.set_display_name('Search Uniref').set_caching_options(enable_caching=True)
 
@@ -112,7 +112,7 @@ def pipeline(
         region=region,
         msa_dbs=[_MGNIFY],
         reference_databases=reference_databases.output,
-        input_data=input_sequence.output,
+        sequence=input_sequence.output,
     )
     search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
 
@@ -121,7 +121,7 @@ def pipeline(
         region=region,
         msa_dbs=[_BFD, _UNICLUST30],
         reference_databases=reference_databases.output,
-        input_data=input_sequence.output,
+        sequence=input_sequence.output,
     )
     search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
 
@@ -133,8 +133,8 @@ def pipeline(
         obsolete_db=_PDB_OBSOLETE,
         max_template_date=max_template_date,
         reference_databases=reference_databases.output,
-        input_sequence=input_sequence.output,
-        input_msa=search_uniref.outputs['output_data'],
+        sequence=input_sequence.output,
+        msa=search_uniref.outputs['msa'],
     )
     search_pdb.set_display_name('Search Pdb').set_caching_options(enable_caching=True)
 

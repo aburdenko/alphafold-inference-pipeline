@@ -35,10 +35,10 @@ def template_search(
     obsolete_db: str,
     max_template_date: str,
     reference_databases: Input[Dataset],
-    input_sequence: Input[Dataset],
-    input_msa: Input[Dataset],
-    output_template_hits: Output[Dataset],
-    output_template_features: Output[Dataset],
+    sequence: Input[Dataset],
+    msa: Input[Dataset],
+    template_hits: Output[Dataset],
+    template_features: Output[Dataset],
     cls_logging: Output[Artifact] 
     ):
     """Searches for protein templates 
@@ -87,11 +87,11 @@ def template_search(
     mmcif_path = reference_databases.metadata[mmcif_db]
     obsolete_path = reference_databases.metadata[obsolete_db]
 
-    input_sequence_path = input_sequence.uri
-    input_msa_path = input_msa.uri
-    msa_data_format = input_msa.metadata['data_format']
-    output_template_hits_path = output_template_hits.uri
-    output_template_features_path = output_template_features.uri
+    sequence_path = sequence.uri
+    msa_path = msa.uri
+    msa_data_format = msa.metadata['data_format']
+    template_hits_path = template_hits.uri
+    template_features_path = template_features.uri
 
     job_params = [
         '--machine-type', _MACHINE_TYPE,
@@ -101,10 +101,10 @@ def template_search(
         '--image', _ALPHAFOLD_RUNNER_IMAGE,
         '--env', f'PYTHONPATH=/app/alphafold',
         '--mount', f'DB_ROOT={disk_image}',
-        '--input', f'INPUT_SEQUENCE_PATH={input_sequence_path}',
-        '--input', f'INPUT_MSA_PATH={input_msa_path}',
-        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={output_template_hits_path}',
-        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={output_template_features_path}',
+        '--input', f'INPUT_SEQUENCE_PATH={sequence_path}',
+        '--input', f'INPUT_MSA_PATH={msa_path}',
+        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={template_hits_path}',
+        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={template_features_path}',
         '--env', f'MSA_DATA_FORMAT={msa_data_format}',
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'MMCIF_PATH={mmcif_path}',

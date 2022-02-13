@@ -8,11 +8,11 @@ inputs:
 - {name: obsolete_db, type: String}
 - {name: max_template_date, type: String}
 - {name: reference_databases, type: Dataset}
-- {name: input_sequence, type: Dataset}
-- {name: input_msa, type: Dataset}
+- {name: sequence, type: Dataset}
+- {name: msa, type: Dataset}
 outputs:
-- {name: output_template_hits, type: Dataset}
-- {name: output_template_features, type: Dataset}
+- {name: template_hits, type: Dataset}
+- {name: template_features, type: Dataset}
 - {name: cls_logging, type: Artifact}
 implementation:
   container:
@@ -36,39 +36,37 @@ implementation:
     - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
       \ import *\n\ndef template_search(\n    project: str,\n    region: str,\n  \
       \  template_dbs: list,\n    mmcif_db: str,\n    obsolete_db: str,\n    max_template_date:\
-      \ str,\n    reference_databases: Input[Dataset],\n    input_sequence: Input[Dataset],\n\
-      \    input_msa: Input[Dataset],\n    output_template_hits: Output[Dataset],\n\
-      \    output_template_features: Output[Dataset],\n    cls_logging: Output[Artifact]\
-      \ \n    ):\n    \"\"\"Searches for protein templates \n\n    This is a simple\
-      \ prototype using dsub to submit a Cloud Life Sciences pipeline.\n    We are\
-      \ using CLS as KFP does not support attaching pre-populated disks or premtible\
-      \ VMs.\n    GCSFuse does not perform well with tools like hhsearch or hhblits.\n\
-      \n    \"\"\"\n\n\n    import logging\n    import os\n    import sys\n\n    from\
-      \ dsub_wrapper import run_dsub_job\n\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n\
-      \    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\
-      \    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\n    # For\
-      \ a prototype we are hardcoding some values. Whe productionizing\n    # we can\
-      \ make them compile time or runtime parameters\n    # E.g. CPU type is important.\
-      \ HHBlits requires at least SSE2 instruction set\n    # Works better with AVX2.\
-      \ \n    # At runtime we could pass them as tool_options dictionary\n\n    _MACHINE_TYPE\
-      \ = 'c2-standard-8'\n    _BOOT_DISK_SIZE = 200\n    _N_CPU = 8\n    _MAXSEQ\
-      \ = 1_000_000\n    _MAX_TEMPLATE_HITS = 20\n\n    logging.basicConfig(format='%(asctime)s\
+      \ str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n\
+      \    msa: Input[Dataset],\n    template_hits: Output[Dataset],\n    template_features:\
+      \ Output[Dataset],\n    cls_logging: Output[Artifact] \n    ):\n    \"\"\"Searches\
+      \ for protein templates \n\n    This is a simple prototype using dsub to submit\
+      \ a Cloud Life Sciences pipeline.\n    We are using CLS as KFP does not support\
+      \ attaching pre-populated disks or premtible VMs.\n    GCSFuse does not perform\
+      \ well with tools like hhsearch or hhblits.\n\n    \"\"\"\n\n\n    import logging\n\
+      \    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\
+      \n\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE\
+      \ = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\
+      \n    # For a prototype we are hardcoding some values. Whe productionizing\n\
+      \    # we can make them compile time or runtime parameters\n    # E.g. CPU type\
+      \ is important. HHBlits requires at least SSE2 instruction set\n    # Works\
+      \ better with AVX2. \n    # At runtime we could pass them as tool_options dictionary\n\
+      \n    _MACHINE_TYPE = 'c2-standard-8'\n    _BOOT_DISK_SIZE = 200\n    _N_CPU\
+      \ = 8\n    _MAXSEQ = 1_000_000\n    _MAX_TEMPLATE_HITS = 20\n\n    logging.basicConfig(format='%(asctime)s\
       \ - %(message)s',\n                      level=logging.INFO, \n            \
       \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
       \n\n    disk_image = reference_databases.metadata['disk_image']\n    database_paths\
       \ = [reference_databases.metadata[database]\n                      for database\
       \ in template_dbs]\n    database_paths = ','.join(database_paths)\n    mmcif_path\
       \ = reference_databases.metadata[mmcif_db]\n    obsolete_path = reference_databases.metadata[obsolete_db]\n\
-      \n    input_sequence_path = input_sequence.uri\n    input_msa_path = input_msa.uri\n\
-      \    msa_data_format = input_msa.metadata['data_format']\n    output_template_hits_path\
-      \ = output_template_hits.uri\n    output_template_features_path = output_template_features.uri\n\
-      \n    job_params = [\n        '--machine-type', _MACHINE_TYPE,\n        '--boot-disk-size',\
-      \ _BOOT_DISK_SIZE,\n        '--logging', cls_logging.uri,\n        '--log-interval',\
-      \ _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env',\
-      \ f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={disk_image}',\n\
-      \        '--input', f'INPUT_SEQUENCE_PATH={input_sequence_path}',\n        '--input',\
-      \ f'INPUT_MSA_PATH={input_msa_path}',\n        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={output_template_hits_path}',\n\
-      \        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={output_template_features_path}',\n\
+      \n    sequence_path = sequence.uri\n    msa_path = msa.uri\n    msa_data_format\
+      \ = msa.metadata['data_format']\n    template_hits_path = template_hits.uri\n\
+      \    template_features_path = template_features.uri\n\n    job_params = [\n\
+      \        '--machine-type', _MACHINE_TYPE,\n        '--boot-disk-size', _BOOT_DISK_SIZE,\n\
+      \        '--logging', cls_logging.uri,\n        '--log-interval', _LOG_INTERVAL,\
+      \ \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env', f'PYTHONPATH=/app/alphafold',\n\
+      \        '--mount', f'DB_ROOT={disk_image}',\n        '--input', f'INPUT_SEQUENCE_PATH={sequence_path}',\n\
+      \        '--input', f'INPUT_MSA_PATH={msa_path}',\n        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={template_hits_path}',\n\
+      \        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={template_features_path}',\n\
       \        '--env', f'MSA_DATA_FORMAT={msa_data_format}',\n        '--env', f'DB_PATHS={database_paths}',\n\
       \        '--env', f'MMCIF_PATH={mmcif_path}',\n        '--env', f'OBSOLETE_PATH={obsolete_path}',\n\
       \        '--env', f'N_CPU={_N_CPU}',\n        '--env', f'MAXSEQ={_MAXSEQ}',\
