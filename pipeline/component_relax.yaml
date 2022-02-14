@@ -41,12 +41,12 @@ implementation:
       \ import protein\n    from alphafold.relax import relax\n\n\n    if not os.path.exists(unrelaxed_protein.path):\n\
       \        raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')\n\
       \n    with open(unrelaxed_protein.path, 'r') as f:\n        unrelaxed_protein_pdb=f.read();\n\
-      \n    unrelaxed_protein = protein.from_pdb_string(unrelaxed_protein_pdb)\n\n\
-      \    amber_relaxer = relax.AmberRelaxation(\n        max_iterations=max_iterations,\n\
+      \n    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)\n\
+      \n    amber_relaxer = relax.AmberRelaxation(\n        max_iterations=max_iterations,\n\
       \        tolerance=tolerance,\n        stiffness=stiffness,\n        exclude_residues=exclude_residues,\n\
       \        max_outer_iterations=max_outer_iterations,\n        use_gpu=use_gpu)\n\
-      \n    relaxed_protein = amber_relaxer.process(prot=unrelaxed_protein)\n\n  \
-      \  relaxed_protein_pdb = protein.to_pdb(relaxed_protein) \n    with open(relaxed_protein.path,\
+      \n    relaxed_structure = amber_relaxer.process(prot=unrelaxed_structure)\n\n\
+      \    relaxed_protein_pdb = protein.to_pdb(relaxed_structure) \n    with open(relaxed_protein.path,\
       \ 'w') as f:\n        f.write(relaxed_protein_pdb)\n    relaxed_protein.metadata['data_format']='pdb'\n\
       \n"
     args:

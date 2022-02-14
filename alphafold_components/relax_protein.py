@@ -57,7 +57,7 @@ def relax(
     with open(unrelaxed_protein.path, 'r') as f:
         unrelaxed_protein_pdb=f.read();
 
-    unrelaxed_protein = protein.from_pdb_string(unrelaxed_protein_pdb)
+    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)
     
     amber_relaxer = relax.AmberRelaxation(
         max_iterations=max_iterations,
@@ -67,9 +67,9 @@ def relax(
         max_outer_iterations=max_outer_iterations,
         use_gpu=use_gpu)
 
-    relaxed_protein = amber_relaxer.process(prot=unrelaxed_protein)
+    relaxed_structure = amber_relaxer.process(prot=unrelaxed_structure)
     
-    relaxed_protein_pdb = protein.to_pdb(relaxed_protein) 
+    relaxed_protein_pdb = protein.to_pdb(relaxed_structure) 
     with open(relaxed_protein.path, 'w') as f:
         f.write(relaxed_protein_pdb)
     relaxed_protein.metadata['data_format']='pdb'
