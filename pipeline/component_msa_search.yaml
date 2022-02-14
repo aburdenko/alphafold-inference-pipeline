@@ -15,7 +15,7 @@ outputs:
 - {name: cls_logging, type: Artifact}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/alphafold-components
+    image: gcr.io/jk-mlops-dev/cls-wrappers
     command:
     - sh
     - -c

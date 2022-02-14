@@ -20,11 +20,11 @@ from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
 from typing import List
 
-_COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold')
+import config
 
 
 @dsl.component(
-    base_image=_COMPONENTS_IMAGE,
+    base_image=config.ALPHAFOLD_COMPONENTS_IMAGE,
     output_component_file='component_relax.yaml'
 )
 def relax(

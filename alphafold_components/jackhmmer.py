@@ -17,11 +17,10 @@ import os
 from kfp.v2 import dsl
 from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
-_COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold-components')
-
+import config
 
 @dsl.component(
-    base_image=_COMPONENTS_IMAGE,
+    base_image=config.CLS_WRAPPERS_IMAGE,
     output_component_file='component_msa_search.yaml'
 )
 def jackhmmer(
