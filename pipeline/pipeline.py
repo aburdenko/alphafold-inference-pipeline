@@ -84,7 +84,7 @@ def pipeline(
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
-    search_uniref.set_display_name('Search Uniref').set_caching_options(enable_caching=True)
+    search_uniref.set_display_name('Search Uniref')#.set_caching_options(enable_caching=True)
 
     search_mgnify = JackhmmerOp(
         project=project,
@@ -93,7 +93,7 @@ def pipeline(
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
-    search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
+    search_mgnify.set_display_name('Search Mgnify')#.set_caching_options(enable_caching=True)
 
     search_uniclust = HHBlitsOp(
         project=project,
@@ -102,7 +102,7 @@ def pipeline(
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
-    search_uniclust.set_display_name('Search Uniclust').set_caching_options(enable_caching=True)
+    search_uniclust.set_display_name('Search Uniclust')#.set_caching_options(enable_caching=True)
 
     search_bfd = HHBlitsOp(
         project=project,
@@ -111,7 +111,7 @@ def pipeline(
         reference_databases=reference_databases.output,
         sequence=input_sequence.output,
     )
-    search_bfd.set_display_name('Search BFD').set_caching_options(enable_caching=True)
+    search_bfd.set_display_name('Search BFD')#.set_caching_options(enable_caching=True)
 
     search_pdb = HHSearchOp(
         project=project,
@@ -124,7 +124,7 @@ def pipeline(
         sequence=input_sequence.output,
         msa=search_uniref.outputs['msa'],
     )
-    search_pdb.set_display_name('Search Pdb').set_caching_options(enable_caching=True)
+    search_pdb.set_display_name('Search Pdb')#.set_caching_options(enable_caching=True)
 
     aggregate_features = AggregateFeaturesOp(
         sequence=input_sequence.output,
@@ -134,7 +134,7 @@ def pipeline(
         msa4=search_uniclust.outputs['msa'],
         template_features=search_pdb.outputs['template_features'],
     )
-    aggregate_features.set_display_name('Aggregate features').set_caching_options(enable_caching=True)
+    aggregate_features.set_display_name('Aggregate features')#.set_caching_options(enable_caching=True)
 
     # Think what to do with random seed when switch to Parallel loop
     with dsl.ParallelFor(models) as model:
@@ -145,7 +145,7 @@ def pipeline(
             num_ensemble=num_ensemble,
             random_seed=model.random_seed
         )
-        model_predict.set_display_name('Predict').set_caching_options(enable_caching=True)
+        model_predict.set_display_name('Predict')#.set_caching_options(enable_caching=True)
         model_predict.set_cpu_limit(config.CPU_LIMIT)
         model_predict.set_memory_limit(config.MEMORY_LIMIT)
         #model_predict.set_gpu_limit(config.GPU_LIMIT)
@@ -155,7 +155,7 @@ def pipeline(
             unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
             use_gpu=False,
         )
-        relax_protein.set_display_name('Relax protein').set_caching_options(enable_caching=True)
+        relax_protein.set_display_name('Relax protein')#.set_caching_options(enable_caching=True)
         relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)
         relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
         #relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
