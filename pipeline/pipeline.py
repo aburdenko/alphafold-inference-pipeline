@@ -145,20 +145,21 @@ def pipeline(
             num_ensemble=num_ensemble,
             random_seed=model.random_seed
         )
-        model_predict.set_display_name('Predict')
+        model_predict.set_display_name('Predict'.set_caching_options(enable_caching=True))
         model_predict.set_cpu_limit(config.CPU_LIMIT)
         model_predict.set_memory_limit(config.MEMORY_LIMIT)
-        model_predict.set_gpu_limit(config.GPU_LIMIT)
-        model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
+        #model_predict.set_gpu_limit(config.GPU_LIMIT)
+        #model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
 
         relax_protein = RelaxProteinOp(
-            unrelaxed_protein=model_predict.outputs['unrelaxed_protein']
+            unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
+            use_gpu=False,
         )
         relax_protein.set_display_name('Relax protein').set_caching_options(enable_caching=True)
         relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)
         relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
-        relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
-        relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
+        #relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
+        #relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
  
 
 

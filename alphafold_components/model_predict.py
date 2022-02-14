@@ -15,26 +15,26 @@
 
 import os
 
-from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
-from kfp.v2 import dsl
-from kfp.v2.dsl import Output, Input, Artifact, Dataset
-from typing import List
+#from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
+#from kfp.v2 import dsl
+#from kfp.v2.dsl import Output, Input, Artifact, Dataset
+#from typing import List
 
 _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold')
 
 
-@dsl.component(
-    base_image=_COMPONENTS_IMAGE,
-    output_component_file='component_predict.yaml'
-)
+#@dsl.component(
+#    base_image=_COMPONENTS_IMAGE,
+#    output_component_file='component_predict.yaml'
+#)
 def predict(
-    model_features: Input[Dataset],
-    model_params: Input[Artifact],
+    model_features, #: Input[Dataset],
+    model_params, #: Input[Artifact],
     model_name: str,
     num_ensemble: int,
     random_seed: int,
-    prediction_result: Output[Artifact],
-    unrelaxed_protein: Output[Artifact]
+    raw_prediction, #: Output[Artifact],
+    unrelaxed_protein, #: Output[Artifact]
 ):
     
     import io
@@ -88,10 +88,10 @@ def predict(
         random_seed=random_seed
     )
     
-    with open(prediction_result.path, 'wb') as f:
+    with open(raw_prediction.path, 'wb') as f:
         pickle.dump(prediction_result, f, protocol=4)
-    prediction_result.metadata['ranking_confidence']=prediction_result['ranking_confidence']
-    prediction_result.metadata['data_format']='pkl'
+    raw_prediction.metadata['ranking_confidence']=prediction_result['ranking_confidence']
+    raw_prediction.metadata['data_format']='pkl'
 
     plddt = prediction_result['plddt']
     plddt_b_factors = np.repeat(

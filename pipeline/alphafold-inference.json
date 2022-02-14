@@ -149,7 +149,7 @@
                   "use_gpu": {
                     "runtimeValue": {
                       "constantValue": {
-                        "stringValue": "True"
+                        "intValue": "0"
                       }
                     }
                   }
@@ -845,10 +845,6 @@
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold",
             "resources": {
-              "accelerator": {
-                "count": "2",
-                "type": "NVIDIA_TESLA_T4"
-              },
               "cpuLimit": 16.0,
               "memoryLimit": 32.0
             }
@@ -873,10 +869,6 @@
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold",
             "resources": {
-              "accelerator": {
-                "count": "2",
-                "type": "NVIDIA_TESLA_T4"
-              },
               "cpuLimit": 16.0,
               "memoryLimit": 32.0
             }
