@@ -38,6 +38,7 @@ def relax(
     use_gpu: bool=True,
 ):
     import logging
+    import os
     from alphafold.common import protein
     from alphafold.relax import relax
 
