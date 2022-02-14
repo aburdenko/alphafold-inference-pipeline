@@ -32,9 +32,9 @@ def hhblits(
     msa: Output[Dataset],
     cls_logging: Output[Artifact],
     maxseq:int=1_000_000,
-    machine_type:str='c2-standard-32',
+    machine_type:str='c2-standard-16',
     boot_disk_size:int=200,
-    n_cpu:int=32, 
+    n_cpu:int=12, 
     ):
     """Searches sequence databases using the specified tool.
 
