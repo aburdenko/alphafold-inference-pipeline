@@ -10,7 +10,7 @@ outputs:
 - {name: unrelaxed_protein, type: Artifact}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/alphafold_components
+    image: gcr.io/jk-mlops-dev/alphafold-components
     command:
     - sh
     - -c

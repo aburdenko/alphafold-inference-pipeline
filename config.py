@@ -54,4 +54,4 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
 
 CLS_WRAPPERS_IMAGE = os.getenv("CLS_WRAPPER_IAMGE", 'gcr.io/jk-mlops-dev/cls-wrappers')
-ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold_components')
+ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold-components')

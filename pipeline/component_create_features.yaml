@@ -11,7 +11,7 @@ outputs:
 - {name: features, type: Dataset}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/alphafold_components
+    image: gcr.io/jk-mlops-dev/alphafold-components
     command:
     - sh
     - -c
