@@ -26,13 +26,14 @@ from kfp.v2 import compiler
 from kfp import components
 
 import config
-from alphafold_components import  RelaxProteinOp, AggregateFeaturesOp, ModelPredictOp, JackhmmerOp, HHBlitsOp, HHSearchOp
+from alphafold_components import  (
+    RelaxProteinOp, AggregateFeaturesOp, ModelPredictOp, 
+    JackhmmerOp, HHBlitsOp, HHSearchOp, ImportSeqenceOp)
 
 
 @dsl.pipeline(name=config.PIPELINE_NAME, description=config.PIPELINE_DESCRIPTION)
 def pipeline(
-    fasta_path: str,
-    target_name: str,
+    sequence_path: str,
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
@@ -42,12 +43,16 @@ def pipeline(
     model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
-    input_sequence = dsl.importer(
-        artifact_uri=fasta_path,
-        artifact_class=dsl.Dataset,
-        reimport=False,
-        metadata={'data_format': 'fasta'
-                  'target_name': target_name})
+    #input_sequence = dsl.importer(
+    #    artifact_uri=fasta_path,
+    #    artifact_class=dsl.Dataset,
+    #    reimport=False,
+    #    metadata={'data_format': 'fasta'
+    #              'target_name': target_name})
+    #input_sequence.set_display_name('Input sequence')
+    input_sequence = ImportSeqenceOp(
+        sequence_path=sequence_path
+    )
     input_sequence.set_display_name('Input sequence')
 
     model_parameters = dsl.importer(

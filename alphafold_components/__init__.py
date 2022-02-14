@@ -30,4 +30,5 @@ from alphafold_components.hhsearch import hhsearch as HHSearchOp
 from alphafold_components.aggregate_features import aggregate_features as AggregateFeaturesOp
 from alphafold_components.model_predict import predict as ModelPredictOp
 from alphafold_components.relax_protein import relax as RelaxProteinOp
+from alphafold_components.import_sequence import import_sequence as ImportSeqenceOp
 

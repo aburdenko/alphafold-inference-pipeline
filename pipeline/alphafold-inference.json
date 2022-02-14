@@ -70,7 +70,7 @@
                     "componentInputArtifact": "pipelineparam--aggregate-features-features"
                   },
                   "model_params": {
-                    "componentInputArtifact": "pipelineparam--importer-2-artifact"
+                    "componentInputArtifact": "pipelineparam--importer-artifact"
                   }
                 },
                 "parameters": {
@@ -169,7 +169,7 @@
                 "schemaVersion": "0.0.1"
               }
             },
-            "pipelineparam--importer-2-artifact": {
+            "pipelineparam--importer-artifact": {
               "artifactType": {
                 "schemaTitle": "system.Artifact",
                 "schemaVersion": "0.0.1"
@@ -387,18 +387,18 @@
           }
         }
       },
-      "comp-importer": {
-        "executorLabel": "exec-importer",
+      "comp-import-sequence": {
+        "executorLabel": "exec-import-sequence",
         "inputDefinitions": {
           "parameters": {
-            "uri": {
+            "sequence_path": {
               "type": "STRING"
             }
           }
         },
         "outputDefinitions": {
           "artifacts": {
-            "artifact": {
+            "sequence": {
               "artifactType": {
                 "schemaTitle": "system.Dataset",
                 "schemaVersion": "0.0.1"
@@ -407,8 +407,8 @@
           }
         }
       },
-      "comp-importer-2": {
-        "executorLabel": "exec-importer-2",
+      "comp-importer": {
+        "executorLabel": "exec-importer",
         "inputDefinitions": {
           "parameters": {
             "uri": {
@@ -427,8 +427,8 @@
           }
         }
       },
-      "comp-importer-3": {
-        "executorLabel": "exec-importer-3",
+      "comp-importer-2": {
+        "executorLabel": "exec-importer-2",
         "inputDefinitions": {
           "parameters": {
             "uri": {
@@ -735,21 +735,27 @@
             "image": "gcr.io/jk-mlops-dev/cls-wrappers"
           }
         },
-        "exec-importer": {
-          "importer": {
-            "artifactUri": {
-              "runtimeParameter": "uri"
-            },
-            "metadata": {
-              "data_format": "fasta"
-            },
-            "typeSchema": {
-              "schemaTitle": "system.Dataset",
-              "schemaVersion": "0.0.1"
-            }
+        "exec-import-sequence": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "import_sequence"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef import_sequence(\n    sequence_path: str,\n    sequence: Output[Dataset],\n):\n    from alphafold.data import parsers\n    from google.cloud import storage\n\n    client = storage.Client()\n    with open(sequence.path, 'wb') as f:\n        client.download_blob_to_file(sequence_path, f)\n\n    with open(sequence.path) as f:\n        sequence_str = f.read()\n    seqs, seq_descs = parsers.parse_fasta(sequence_str)\n\n    if len(seqs) !=1:\n        raise ValueError(f'More than one sequence found in {sequence_path}. Unsupported')\n\n    sequence.metadata['sequence']=seqs[0]\n    sequence.metadata['description']=seq_descs[0]\n    sequence.metadata['data_format']='fasta'\n    sequence.metadata['number of residues']=len(seqs[0])\n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold"
           }
         },
-        "exec-importer-2": {
+        "exec-importer": {
           "importer": {
             "artifactUri": {
               "runtimeParameter": "uri"
@@ -763,7 +769,7 @@
             }
           }
         },
-        "exec-importer-3": {
+        "exec-importer-2": {
           "importer": {
             "artifactUri": {
               "runtimeParameter": "uri"
@@ -911,7 +917,7 @@
               "hhblits",
               "hhblits-2",
               "hhsearch",
-              "importer",
+              "import-sequence",
               "jackhmmer",
               "jackhmmer-2"
             ],
@@ -943,8 +949,8 @@
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 },
                 "template_features": {
@@ -965,7 +971,7 @@
             },
             "dependentTasks": [
               "aggregate-features",
-              "importer-2"
+              "importer"
             ],
             "inputs": {
               "artifacts": {
@@ -975,10 +981,10 @@
                     "producerTask": "aggregate-features"
                   }
                 },
-                "pipelineparam--importer-2-artifact": {
+                "pipelineparam--importer-artifact": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1009,21 +1015,21 @@
               "name": "comp-hhblits"
             },
             "dependentTasks": [
-              "importer",
-              "importer-3"
+              "import-sequence",
+              "importer-2"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-3"
+                    "producerTask": "importer-2"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 }
               },
@@ -1083,21 +1089,21 @@
               "name": "comp-hhblits-2"
             },
             "dependentTasks": [
-              "importer",
-              "importer-3"
+              "import-sequence",
+              "importer-2"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-3"
+                    "producerTask": "importer-2"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 }
               },
@@ -1157,8 +1163,8 @@
               "name": "comp-hhsearch"
             },
             "dependentTasks": [
-              "importer",
-              "importer-3",
+              "import-sequence",
+              "importer-2",
               "jackhmmer"
             ],
             "inputs": {
@@ -1172,13 +1178,13 @@
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-3"
+                    "producerTask": "importer-2"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 }
               },
@@ -1254,17 +1260,17 @@
               "name": "Search Pdb"
             }
           },
-          "importer": {
+          "import-sequence": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-importer"
+              "name": "comp-import-sequence"
             },
             "inputs": {
               "parameters": {
-                "uri": {
-                  "componentInputParameter": "fasta_path"
+                "sequence_path": {
+                  "componentInputParameter": "sequence_path"
                 }
               }
             },
@@ -1272,12 +1278,12 @@
               "name": "Input sequence"
             }
           },
-          "importer-2": {
+          "importer": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-importer-2"
+              "name": "comp-importer"
             },
             "inputs": {
               "parameters": {
@@ -1290,12 +1296,12 @@
               "name": "Model parameters"
             }
           },
-          "importer-3": {
+          "importer-2": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-importer-3"
+              "name": "comp-importer-2"
             },
             "inputs": {
               "parameters": {
@@ -1316,21 +1322,21 @@
               "name": "comp-jackhmmer"
             },
             "dependentTasks": [
-              "importer",
-              "importer-3"
+              "import-sequence",
+              "importer-2"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-3"
+                    "producerTask": "importer-2"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 }
               },
@@ -1390,21 +1396,21 @@
               "name": "comp-jackhmmer-2"
             },
             "dependentTasks": [
-              "importer",
-              "importer-3"
+              "import-sequence",
+              "importer-2"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-3"
+                    "producerTask": "importer-2"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "outputArtifactKey": "sequence",
+                    "producerTask": "import-sequence"
                   }
                 }
               },
@@ -1463,9 +1469,6 @@
           "datasets_gcs_location": {
             "type": "STRING"
           },
-          "fasta_path": {
-            "type": "STRING"
-          },
           "max_template_date": {
             "type": "STRING"
           },
@@ -1482,6 +1485,9 @@
             "type": "STRING"
           },
           "region": {
+            "type": "STRING"
+          },
+          "sequence_path": {
             "type": "STRING"
           }
         }
