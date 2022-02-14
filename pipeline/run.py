@@ -75,7 +75,7 @@ def _main(argv):
         template_path=FLAGS.pipeline_spec,
         pipeline_root=f'{FLAGS.pipeline_staging_location}/{_PIPELINE_JOB_NAME}',
         parameter_values=params,
-        enable_caching=False,
+        enable_caching=FLAGS.enable_caching,
 
     )
 
