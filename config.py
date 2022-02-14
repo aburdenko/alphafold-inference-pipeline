@@ -43,7 +43,7 @@ UNIPROT = 'uniprot'
 
 RELAX_MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "32G")
 RELAX_CPU_LIMIT = os.getenv("CPU_LIMIT", "16")
-RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
+RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
 RELAX_GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
 
 MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "32G")
@@ -54,4 +54,4 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
 
 CLS_WRAPPERS_IMAGE = os.getenv("CLS_WRAPPER_IAMGE", 'gcr.io/jk-mlops-dev/cls-wrappers')
-ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold-components')
+ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold')
