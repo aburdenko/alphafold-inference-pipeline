@@ -14,6 +14,7 @@
 """A component encapsulating AlphaFold model predict"""
 
 import io
+import logging
 import numpy as np
 import os
 
@@ -58,7 +59,8 @@ def relax(
         unrelaxed_protein_pdb=f.read();
 
     unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)
-    
+
+    logging.info(f'Starting relaxation process ...') 
     amber_relaxer = relax.AmberRelaxation(
         max_iterations=max_iterations,
         tolerance=tolerance,
@@ -67,9 +69,9 @@ def relax(
         max_outer_iterations=max_outer_iterations,
         use_gpu=use_gpu)
 
-    relaxed_structure = amber_relaxer.process(prot=unrelaxed_structure)
-    
-    relaxed_protein_pdb = protein.to_pdb(relaxed_structure) 
+    relaxed_protein_pdb, _, _ = amber_relaxer.process(prot=unrelaxed_structure)
+
+    logging.info(f'Saving relaxed protein to {relaxed_protein.path}')
     with open(relaxed_protein.path, 'w') as f:
         f.write(relaxed_protein_pdb)
     relaxed_protein.metadata['data_format']='pdb'

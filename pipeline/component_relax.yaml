@@ -42,13 +42,14 @@ implementation:
       \        raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')\n\
       \n    with open(unrelaxed_protein.path, 'r') as f:\n        unrelaxed_protein_pdb=f.read();\n\
       \n    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)\n\
-      \n    amber_relaxer = relax.AmberRelaxation(\n        max_iterations=max_iterations,\n\
-      \        tolerance=tolerance,\n        stiffness=stiffness,\n        exclude_residues=exclude_residues,\n\
+      \n    logging.info(f'Starting relaxation process ...') \n    amber_relaxer =\
+      \ relax.AmberRelaxation(\n        max_iterations=max_iterations,\n        tolerance=tolerance,\n\
+      \        stiffness=stiffness,\n        exclude_residues=exclude_residues,\n\
       \        max_outer_iterations=max_outer_iterations,\n        use_gpu=use_gpu)\n\
-      \n    relaxed_structure = amber_relaxer.process(prot=unrelaxed_structure)\n\n\
-      \    relaxed_protein_pdb = protein.to_pdb(relaxed_structure) \n    with open(relaxed_protein.path,\
-      \ 'w') as f:\n        f.write(relaxed_protein_pdb)\n    relaxed_protein.metadata['data_format']='pdb'\n\
-      \n"
+      \n    relaxed_protein_pdb, _, _ = amber_relaxer.process(prot=unrelaxed_structure)\n\
+      \n    logging.info(f'Saving relaxed protein to {relaxed_protein.path}')\n  \
+      \  with open(relaxed_protein.path, 'w') as f:\n        f.write(relaxed_protein_pdb)\n\
+      \    relaxed_protein.metadata['data_format']='pdb'\n\n"
     args:
     - --executor_input
     - {executorInput: null}
