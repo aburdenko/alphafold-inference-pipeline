@@ -13,9 +13,6 @@
 # limitations under the License.
 """A component encapsulating AlphaFold model predict"""
 
-import io
-import logging
-import numpy as np
 import os
 
 from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
@@ -40,17 +37,9 @@ def relax(
     max_outer_iterations: int=3,
     use_gpu: bool=True,
 ):
-    
-    import os
     import logging
-    import numpy as np
-    import pickle
-
-    from alphafold.model import utils
-    from alphafold.common import residue_constants
     from alphafold.common import protein
     from alphafold.relax import relax
-
 
     if not os.path.exists(unrelaxed_protein.path):
         raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')
@@ -58,9 +47,8 @@ def relax(
     with open(unrelaxed_protein.path, 'r') as f:
         unrelaxed_protein_pdb=f.read();
 
-    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)
-
     logging.info(f'Starting relaxation process ...') 
+    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)
     amber_relaxer = relax.AmberRelaxation(
         max_iterations=max_iterations,
         tolerance=tolerance,
@@ -68,7 +56,6 @@ def relax(
         exclude_residues=exclude_residues,
         max_outer_iterations=max_outer_iterations,
         use_gpu=use_gpu)
-
     relaxed_protein_pdb, _, _ = amber_relaxer.process(prot=unrelaxed_structure)
 
     logging.info(f'Saving relaxed protein to {relaxed_protein.path}')
