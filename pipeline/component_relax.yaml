@@ -1,0 +1,56 @@
+name: Relax
+inputs:
+- {name: unrelaxed_protein, type: Artifact}
+- {name: max_iterations, type: Integer, default: '0', optional: true}
+- {name: tolerance, type: Float, default: '2.39', optional: true}
+- {name: stiffness, type: Float, default: '10.0', optional: true}
+- {name: exclude_residues, type: JsonArray, default: '[]', optional: true}
+- {name: max_outer_iterations, type: Integer, default: '3', optional: true}
+- name: use_gpu
+  type: Boolean
+  default: "True"
+  optional: true
+outputs:
+- {name: relaxed_protein, type: Artifact}
+implementation:
+  container:
+    image: gcr.io/jk-mlops-dev/alphafold
+    command:
+    - sh
+    - -c
+    - |2
+
+      if ! [ -x "$(command -v pip)" ]; then
+          python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip
+      fi
+
+      PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && "$0" "$@"
+    - sh
+    - -ec
+    - |
+      program_path=$(mktemp -d)
+      printf "%s" "$0" > "$program_path/ephemeral_component.py"
+      python3 -m kfp.v2.components.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+    - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
+      \ import *\n\ndef relax(\n    unrelaxed_protein: Input[Artifact],\n    relaxed_protein:\
+      \ Output[Artifact],\n    max_iterations: int=0,\n    tolerance: float=2.39,\n\
+      \    stiffness: float=10.0,\n    exclude_residues: list=[],\n    max_outer_iterations:\
+      \ int=3,\n    use_gpu: bool=True,\n):\n\n    import os\n    import logging\n\
+      \    import numpy as np\n    import pickle\n\n    from alphafold.model import\
+      \ utils\n    from alphafold.common import residue_constants\n    from alphafold.common\
+      \ import protein\n    from alphafold.relax import relax\n\n\n    if not os.path.exists(unrelaxed_protein.path):\n\
+      \        raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')\n\
+      \n    with open(unrelaxed_protein.path, 'r') as f:\n        unrelaxed_protein_pdb=f.read();\n\
+      \n    unrelaxed_protein = protein.from_pdb_string(unrelaxed_protein_pdb)\n\n\
+      \    amber_relaxer = relax.AmberRelaxation(\n        max_iterations=max_iterations,\n\
+      \        tolerance=tolerance,\n        stiffness=stiffness,\n        exclude_residues=exclude_residues,\n\
+      \        max_outer_iterations=max_outer_iterations,\n        use_gpu=use_gpu)\n\
+      \n    relaxed_protein = amber_relaxer.process(prot=unrelaxed_protein)\n\n  \
+      \  relaxed_protein_pdb = protein.to_pdb(relaxed_protein) \n    with open(relaxed_protein.path,\
+      \ 'w') as f:\n        f.write(relaxed_protein_pdb)\n    relaxed_protein.metadata['data_format']='pdb'\n\
+      \n"
+    args:
+    - --executor_input
+    - {executorInput: null}
+    - --function_to_execute
+    - relax

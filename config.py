@@ -41,8 +41,13 @@ PDB_OBSOLETE = 'pdb_obsolete'
 PDB_SEQRES = 'pdb_seqres'
 UNIPROT = 'uniprot'
 
-MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "120G")
-CPU_LIMIT = os.getenv("CPU_LIMIT", "32")
-GPU_LIMIT = os.getenv("GPU_LIMIT", "4")
+RELAX_MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "32G")
+RELAX_CPU_LIMIT = os.getenv("CPU_LIMIT", "16")
+RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
+RELAX_GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
+
+MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "32G")
+CPU_LIMIT = os.getenv("CPU_LIMIT", "16")
+GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
 GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-t4")
 GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
