@@ -6,7 +6,7 @@ inputs:
 - {name: num_ensemble, type: Integer}
 - {name: random_seed, type: Integer}
 outputs:
-- {name: prediction_result, type: Artifact}
+- {name: raw_prediction, type: Artifact}
 - {name: unrelaxed_protein, type: Artifact}
 implementation:
   container:
@@ -40,7 +40,7 @@ implementation:
           model_name: str,
           num_ensemble: int,
           random_seed: int,
-          prediction_result: Output[Artifact],
+          raw_prediction: Output[Artifact],
           unrelaxed_protein: Output[Artifact]
       ):
 
@@ -95,10 +95,10 @@ implementation:
               random_seed=random_seed
           )
 
-          with open(prediction_result.path, 'wb') as f:
+          with open(raw_prediction.path, 'wb') as f:
               pickle.dump(prediction_result, f, protocol=4)
-          prediction_result.metadata['ranking_confidence']=prediction_result['ranking_confidence']
-          prediction_result.metadata['data_format']='pkl'
+          raw_prediction.metadata['ranking_confidence']=prediction_result['ranking_confidence']
+          raw_prediction.metadata['data_format']='pkl'
 
           plddt = prediction_result['plddt']
           plddt_b_factors = np.repeat(

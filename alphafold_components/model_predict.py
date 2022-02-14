@@ -15,26 +15,26 @@
 
 import os
 
-#from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
-#from kfp.v2 import dsl
-#from kfp.v2.dsl import Output, Input, Artifact, Dataset
-#from typing import List
+from typing import Any, Mapping, MutableMapping, Optional, Sequence, Union
+from kfp.v2 import dsl
+from kfp.v2.dsl import Output, Input, Artifact, Dataset
+from typing import List
 
 _COMPONENTS_IMAGE = os.getenv('COMPONENTS_IMAGE', 'gcr.io/jk-mlops-dev/alphafold')
 
 
-#@dsl.component(
-#    base_image=_COMPONENTS_IMAGE,
-#    output_component_file='component_predict.yaml'
-#)
+@dsl.component(
+    base_image=_COMPONENTS_IMAGE,
+    output_component_file='component_predict.yaml'
+)
 def predict(
-    model_features, #: Input[Dataset],
-    model_params, #: Input[Artifact],
+    model_features: Input[Dataset],
+    model_params: Input[Artifact],
     model_name: str,
     num_ensemble: int,
     random_seed: int,
-    raw_prediction, #: Output[Artifact],
-    unrelaxed_protein, #: Output[Artifact]
+    raw_prediction: Output[Artifact],
+    unrelaxed_protein: Output[Artifact]
 ):
     
     import io

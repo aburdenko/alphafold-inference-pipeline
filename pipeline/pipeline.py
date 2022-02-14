@@ -145,7 +145,7 @@ def pipeline(
             num_ensemble=num_ensemble,
             random_seed=model.random_seed
         )
-        model_predict.set_display_name('Predict'.set_caching_options(enable_caching=True))
+        model_predict.set_display_name('Predict').set_caching_options(enable_caching=True)
         model_predict.set_cpu_limit(config.CPU_LIMIT)
         model_predict.set_memory_limit(config.MEMORY_LIMIT)
         #model_predict.set_gpu_limit(config.GPU_LIMIT)
