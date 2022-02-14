@@ -35,7 +35,7 @@ def pipeline(
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
-    models: List[Mapping]=[{'model_name': 'model_1'}, {'random_seed': 1}],
+    models: List[Mapping]=[{'name': 'model_1', 'random_seed': 1}],
     num_ensemble: int=1,
     datasets_gcs_location: str=config.REFERENCE_DATASETS_GCS_LOCATION,
     model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
@@ -94,15 +94,6 @@ def pipeline(
         sequence=input_sequence.output,
     )
     search_mgnify.set_display_name('Search Mgnify').set_caching_options(enable_caching=True)
-
-    #search_bfd_uniclust = HHBlitsOp(
-    #    project=project,
-    #    region=region,
-    #    msa_dbs=[config.BFD, config.UNICLUST30],
-    #    reference_databases=reference_databases.output,
-    #    sequence=input_sequence.output,
-    #)
-    #search_bfd_uniclust.set_display_name('Search Uniclust and BFD').set_caching_options(enable_caching=True)
 
     search_uniclust = HHBlitsOp(
         project=project,

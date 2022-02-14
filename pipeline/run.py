@@ -48,13 +48,13 @@ def _main(argv):
 
     models = [
         {
-            'model_name': 'model_1', 'random_seed': 1,
+            'name': 'model_1', 'random_seed': 1,
         },
         {
-            'model_name': 'model_2', 'random_seed': 2,
+            'name': 'model_2', 'random_seed': 2,
         },
         #{
-        #    'model_name': 'model_3', 'random_seed': 3,
+        #    'name': 'model_3', 'random_seed': 3,
         #},
 
     ]
@@ -65,7 +65,7 @@ def _main(argv):
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,
-        'models': models,
+        #'models': models,
         'num_ensemble': FLAGS.num_ensemble,
     }
 

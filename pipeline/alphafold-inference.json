@@ -1495,7 +1495,7 @@
         "stringValue": "gs://jk-alphafold-datasets-archive/jan-22/params"
       },
       "models": {
-        "stringValue": "[{\"model_name\": \"model_1\"}, {\"random_seed\": 1}]"
+        "stringValue": "[{\"name\": \"model_1\", \"random_seed\": 1}]"
       },
       "num_ensemble": {
         "intValue": "1"
