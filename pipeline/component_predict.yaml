@@ -44,6 +44,7 @@ implementation:
           unrelaxed_protein: Output[Artifact]
       ):
 
+          import io
           import os
           import logging
           import numpy as np
@@ -58,12 +59,10 @@ implementation:
           from alphafold.common import residue_constants
           from alphafold.common import protein
 
-
           def _get_model_haiku_params(model_name: str,
-                                      model_params: Input[Dataset]):
+                                      params_dir: str):
               """Get the Haiku parameters from a model name."""
 
-              params_dir = model_params.path
               path = os.path.join(params_dir, f'params_{model_name}.npz')
 
               with open(path, 'rb') as f:
@@ -71,38 +70,37 @@ implementation:
 
               return utils.flat_params_to_haiku(params)
 
-
-          def _load_features(model_featurs: Input[Dataset]):
+          def _load_features(features_path):
               features_path = model_features.path
-              with open(features_path, 'rb'):
+              with open(features_path, 'rb') as f:
                   features = pickle.load(f)
               return features
 
-
           model_config = config.model_config(model_name)
-          # we assume monomer pipeline
-          model_config.model.eval.nume_ensemble = num_ensemble
+
+          # we assume  a monomer pipeline in a POC
+          model_config.data.eval.num_ensemble = num_ensemble
           model_params = _get_model_haiku_params(
-              model_name=model_name, data_dir=model_params.path)
-          model_runner = model.RunMode(model_config, model_params)
-          features = _load_features(model_features)
+              model_name=model_name, params_dir=model_params.path)
+          model_runner = model.RunModel(model_config, model_params)
+
+          features = _load_features(model_features.path)
           logging.info(f'Running prediction using model {model_name}')
           processed_feature_dict = model_runner.process_features(
-              feature_dict=features,
+              raw_features=features,
               random_seed=random_seed
           )
           prediction_result = model_runner.predict(
-              processed_feature_dict,
+              feat=processed_feature_dict,
               random_seed=random_seed
           )
 
-          plddt = prediction_result['plddt']
-          ranking_confidence = prediction_result['ranking_confidence']
           with open(prediction_result.path, 'wb') as f:
               pickle.dump(prediction_result, f, protocol=4)
-          prediction_result.metadata['ranking_confidence']=ranking_confidence
+          prediction_result.metadata['ranking_confidence']=prediction_result['ranking_confidence']
           prediction_result.metadata['data_format']='pkl'
 
+          plddt = prediction_result['plddt']
           plddt_b_factors = np.repeat(
               plddt[:, None], residue_constants.atom_type_num, axis=-1)
           unrelaxed_protein = protein.from_prediction(

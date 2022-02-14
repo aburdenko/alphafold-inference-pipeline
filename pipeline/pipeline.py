@@ -35,7 +35,7 @@ def pipeline(
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
-    models: List[Mapping]=[{'name': 'model_1', 'random_seed': 1}],
+    models: List[Mapping]=[{'model_name': 'model_1', 'random_seed': 1}],
     num_ensemble: int=1,
     datasets_gcs_location: str=config.REFERENCE_DATASETS_GCS_LOCATION,
     model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
@@ -141,7 +141,7 @@ def pipeline(
         model_predict = ModelPredictOp(
             model_features=aggregate_features.outputs['features'],
             model_params=model_parameters.output,
-            model_name=model.name,
+            model_name=model.model_name,
             num_ensemble=num_ensemble,
             random_seed=model.random_seed
         )
