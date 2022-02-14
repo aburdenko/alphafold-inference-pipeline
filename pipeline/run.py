@@ -41,6 +41,7 @@ flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepo
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
+flags.DEFINE_bool('enable_caching', False, 'Enable pipeline run caching')
 
 def _main(argv):
 
@@ -74,7 +75,7 @@ def _main(argv):
         template_path=FLAGS.pipeline_spec,
         pipeline_root=f'{FLAGS.pipeline_staging_location}/{_PIPELINE_JOB_NAME}',
         parameter_values=params,
-        enable_caching=True,
+        enable_caching=False,
 
     )
 
