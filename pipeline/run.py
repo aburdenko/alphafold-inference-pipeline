@@ -42,6 +42,7 @@ flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
 flags.DEFINE_bool('enable_caching', True, 'Enable pipeline run caching')
+flags.DEFINE_string('target_name', 'T1050', 'Target name')
 
 def _main(argv):
 
@@ -63,6 +64,7 @@ def _main(argv):
 
     params = {
         'fasta_path': FLAGS.fasta_path,
+        'targe_name': FLAGS.target_name,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,

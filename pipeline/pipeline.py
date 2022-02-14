@@ -32,6 +32,7 @@ from alphafold_components import  RelaxProteinOp, AggregateFeaturesOp, ModelPred
 @dsl.pipeline(name=config.PIPELINE_NAME, description=config.PIPELINE_DESCRIPTION)
 def pipeline(
     fasta_path: str,
+    target_name: str,
     project: str='jk-mlops-dev',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
@@ -45,8 +46,8 @@ def pipeline(
         artifact_uri=fasta_path,
         artifact_class=dsl.Dataset,
         reimport=False,
-        metadata={'data_format': 'fasta'}
-    )
+        metadata={'data_format': 'fasta'
+                  'target_name': target_name})
     input_sequence.set_display_name('Input sequence')
 
     model_parameters = dsl.importer(
