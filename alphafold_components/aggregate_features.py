@@ -58,7 +58,7 @@ def aggregate_features(
 
 
     def _make_sequence_features(
-        sequence: str, description: str, num_res: int) -> FeatureDict:
+        sequence: str, description: str, num_res: int) -> dict:
         """Constructs a feature dict of sequence features."""
         features = {}
         features['aatype'] = residue_constants.sequence_to_onehot(
@@ -74,7 +74,7 @@ def aggregate_features(
         return features
         
         
-    def _make_msa_features(msas: Sequence[parsers.Msa]) -> FeatureDict:
+    def _make_msa_features(msas: Sequence[parsers.Msa]) -> dict:
         """Constructs a feature dict of MSA features."""
         if not msas:
             raise ValueError('At least one MSA must be provided.')
@@ -113,7 +113,7 @@ def aggregate_features(
         return features
 
 
-    def _read_msa(msa: Input[Dataset]):
+    def _read_msa(msa: Input[Dataset]) -> str:
         msa = None
         msa_path = msa.path,
         msa_format = msa.metadata['data_format']
