@@ -148,7 +148,7 @@ def pipeline(
     # Think what to do with random seed when switch to Parallel loop
     with dsl.ParallelFor(models) as model:
         model_predict = ModelPredictOp(
-            model_features=aggregate_features.outputs['model_features'],
+            model_features=aggregate_features.outputs['features'],
             model_params=model_parameters.output,
             model_name=model.name,
             num_ensemble=num_ensemble,

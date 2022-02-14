@@ -34,7 +34,7 @@ def aggregate_features(
     msa3: Optional[Input[Dataset]],
     msa4: Optional[Input[Dataset]],
     template_features: Input[Dataset],
-    model_features: Output[Dataset]):
+    features: Output[Dataset]):
     """Aggregates MSAs and template features to create model features 
     
     In the prototype, we assume a fixed number of inputs, mirroring the sample
@@ -113,10 +113,8 @@ def aggregate_features(
         return features
 
 
-    def _read_msa(msa: Input[Dataset]) -> str:
-        msa = None
-        msa_path = msa.path,
-        msa_format = msa.metadata['data_format']
+    def _read_msa(msa_path: str, msa_format: str):
+
         if os.path.exists(msa_path):
             with open(msa_path) as f:
                 msa = f.read()
@@ -128,14 +126,8 @@ def aggregate_features(
                 raise RuntimeError(f'Unsupported MSA format: {msa_format}') 
         return msa
 
-    def _read_sequence(sequence: Input[Dataset]):
+    def _read_sequence(sequence_path: str):
 
-        sequence_path = sequence.path
-        sequence_format = sequence.metadata['data_format']
-
-        if sequence_format != 'fasta':
-            raise RuntimeError(f'Unsupported sequence format {sequence_format}')
-        
         with open(sequence_path) as f:
             sequence_str = f.read()
         sequences, sequence_descs = parsers.parse_fasta(sequence_str)
@@ -146,32 +138,29 @@ def aggregate_features(
         return sequences[0], sequence_descs[0], len(sequences[0])
 
 
-    def _read_template_features(template_featurs: Input[Dataset]):
-        template_features_path = template_features.path
+    def _read_template_features(template_features_path):
         with open(template_features_path, 'rb') as f:
             template_features = pickle.load(f)
         return template_features
 
-
     # Create sequence features
-    seq, seq_desc, num_res = _read_sequence(sequence) 
+    seq, seq_desc, num_res = _read_sequence(sequence.path) 
     sequence_features = _make_sequence_features(
         sequence=seq,
         description=seq_desc,
         num_res=num_res)
 
-    # Create MSA features
     msas = []
-    msas.append(_read_msa(msa1))
-    msas.append(_read_msa(msa2))
-    msas.append(_read_msa(msa3))
-    msas.append(_read_msa(msa4))
+    msas.append(_read_msa(msa1.path, msa1.metadata['data_format']))
+    msas.append(_read_msa(msa2.path, msa2.metadata['data_format']))
+    msas.append(_read_msa(msa3.path, msa3.metadata['data_format']))
+    msas.append(_read_msa(msa4.path, msa4.metadata['data_format']))
     if not msas:
         raise RuntimeError('No MSAs passed to the component')
     msa_features = _make_msa_features(msas=msas)
 
     # Create template features
-    template_features = _read_template_features(template_features)
+    template_features = _read_template_features(template_features.path)
         
     model_features = {
         **sequence_features,
@@ -179,9 +168,9 @@ def aggregate_features(
         **template_features
     }
 
-    model_features_path = model_features.path
-    model_features.metadata['data_format'] = 'pkl'
-    with open(model_features_path, 'wb') as f:
+    features_path = features.path
+    features.metadata['data_format'] = 'pkl'
+    with open(features_path, 'wb') as f:
         pickle.dump(model_features, f, protocol=4)
     
 

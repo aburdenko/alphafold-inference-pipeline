@@ -8,7 +8,7 @@ inputs:
 - {name: msa4, type: Dataset}
 - {name: template_features, type: Dataset}
 outputs:
-- {name: model_features, type: Dataset}
+- {name: features, type: Dataset}
 implementation:
   container:
     image: gcr.io/jk-mlops-dev/alphafold
@@ -32,10 +32,10 @@ implementation:
       \ import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1:\
       \ Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n\
       \    msa4: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n\
-      \    model_features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template\
-      \ features to create model features \n\n    In the prototype, we assume a fixed\
-      \ number of inputs, mirroring the sample\n    inference pipeline from DeepMind.\
-      \ When it comes to productionizing we should\n    consider \"dynamic\" at runtime\
+      \    features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features\
+      \ to create model features \n\n    In the prototype, we assume a fixed number\
+      \ of inputs, mirroring the sample\n    inference pipeline from DeepMind. When\
+      \ it comes to productionizing we should\n    consider \"dynamic\" at runtime\
       \ or at least highly configurable at compile time\n    component.\n\n    \"\"\
       \"\n\n    import os\n    import logging\n    import numpy as np\n    import\
       \ pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data\
@@ -74,36 +74,33 @@ implementation:
       \ * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers']\
       \ = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n      \
       \  features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n\
-      \        return features\n\n\n    def _read_msa(msa: Input[Dataset]) -> str:\n\
-      \        msa = None\n        msa_path = msa.path,\n        msa_format = msa.metadata['data_format']\n\
-      \        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n\
+      \        return features\n\n\n    def _read_msa(msa_path: str, msa_format: str):\n\
+      \n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n\
       \                msa = f.read()\n            if msa_format == 'sto':\n     \
       \           msa = parsers.parse_stockholm(msa)\n            elif msa_format\
       \ == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n\
       \                raise RuntimeError(f'Unsupported MSA format: {msa_format}')\
-      \ \n        return msa\n\n    def _read_sequence(sequence: Input[Dataset]):\n\
-      \n        sequence_path = sequence.path\n        sequence_format = sequence.metadata['data_format']\n\
-      \n        if sequence_format != 'fasta':\n            raise RuntimeError(f'Unsupported\
-      \ sequence format {sequence_format}')\n\n        with open(sequence_path) as\
-      \ f:\n            sequence_str = f.read()\n        sequences, sequence_descs\
-      \ = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n   \
-      \         raise ValueError(\n                f'More than one input sequence\
-      \ found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0],\
-      \ len(sequences[0])\n\n\n    def _read_template_features(template_featurs: Input[Dataset]):\n\
-      \        template_features_path = template_features.path\n        with open(template_features_path,\
-      \ 'rb') as f:\n            template_features = pickle.load(f)\n        return\
-      \ template_features\n\n\n    # Create sequence features\n    seq, seq_desc,\
-      \ num_res = _read_sequence(sequence) \n    sequence_features = _make_sequence_features(\n\
-      \        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\
-      \n    # Create MSA features\n    msas = []\n    msas.append(_read_msa(msa1))\n\
-      \    msas.append(_read_msa(msa2))\n    msas.append(_read_msa(msa3))\n    msas.append(_read_msa(msa4))\n\
-      \    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n\
+      \ \n        return msa\n\n    def _read_sequence(sequence_path: str):\n\n  \
+      \      with open(sequence_path) as f:\n            sequence_str = f.read()\n\
+      \        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n   \
+      \     if len(sequences) != 1:\n            raise ValueError(\n             \
+      \   f'More than one input sequence found in {sequence_path}.')\n\n        return\
+      \ sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_features_path):\n\
+      \        with open(template_features_path, 'rb') as f:\n            template_features\
+      \ = pickle.load(f)\n        return template_features\n\n    # Create sequence\
+      \ features\n    seq, seq_desc, num_res = _read_sequence(sequence.path) \n  \
+      \  sequence_features = _make_sequence_features(\n        sequence=seq,\n   \
+      \     description=seq_desc,\n        num_res=num_res)\n\n    msas = []\n   \
+      \ msas.append(_read_msa(msa1.path, msa1.metadata['data_format']))\n    msas.append(_read_msa(msa2.path,\
+      \ msa2.metadata['data_format']))\n    msas.append(_read_msa(msa3.path, msa3.metadata['data_format']))\n\
+      \    msas.append(_read_msa(msa4.path, msa4.metadata['data_format']))\n    if\
+      \ not msas:\n        raise RuntimeError('No MSAs passed to the component')\n\
       \    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n\
-      \    template_features = _read_template_features(template_features)\n\n    model_features\
-      \ = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n\
-      \    }\n\n    model_features_path = model_features.path\n    model_features.metadata['data_format']\
-      \ = 'pkl'\n    with open(model_features_path, 'wb') as f:\n        pickle.dump(model_features,\
-      \ f, protocol=4)\n\n"
+      \    template_features = _read_template_features(template_features.path)\n\n\
+      \    model_features = {\n        **sequence_features,\n        **msa_features,\n\
+      \        **template_features\n    }\n\n    features_path = features.path\n \
+      \   features.metadata['data_format'] = 'pkl'\n    with open(features_path, 'wb')\
+      \ as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
     args:
     - --executor_input
     - {executorInput: null}
