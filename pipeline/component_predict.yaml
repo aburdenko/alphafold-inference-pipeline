@@ -103,12 +103,12 @@ implementation:
           plddt = prediction_result['plddt']
           plddt_b_factors = np.repeat(
               plddt[:, None], residue_constants.atom_type_num, axis=-1)
-          unrelaxed_protein = protein.from_prediction(
+          unrelaxed_structure= protein.from_prediction(
               features=processed_feature_dict,
               result=prediction_result,
               b_factors=plddt_b_factors,
               remove_leading_feature_dimension=not model_runner.multimer_mode)
-          unrelaxed_pdbs = protein.to_pdb(unrelaxed_protein)
+          unrelaxed_pdbs = protein.to_pdb(unrelaxed_structure)
           with open(unrelaxed_protein.path, 'w') as f:
               f.write(unrelaxed_pdbs)
           unrelaxed_protein.metadata['data_format']='pdb'
