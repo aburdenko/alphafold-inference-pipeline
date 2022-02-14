@@ -54,9 +54,9 @@ def _main(argv):
         {
             'model_name': 'model_2', 'random_seed': 2,
         },
-        #{
-        #    'model_name': 'model_3', 'random_seed': 3,
-        #},
+        {
+            'model_name': 'model_3', 'random_seed': 3,
+        },
 
     ]
     
