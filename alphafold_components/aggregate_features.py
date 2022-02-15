@@ -29,9 +29,9 @@ import config
 def aggregate_features(
     sequence: Input[Dataset],
     msa1: Input[Dataset],
-    msa2: Optional[Input[Dataset]],
-    msa3: Optional[Input[Dataset]],
-    msa4: Optional[Input[Dataset]],
+    msa2: Input[Dataset],
+    msa3: Input[Dataset],
+    msa4: Input[Dataset],
     template_features: Input[Dataset],
     features: Output[Dataset]):
     """Aggregates MSAs and template features to create model features 

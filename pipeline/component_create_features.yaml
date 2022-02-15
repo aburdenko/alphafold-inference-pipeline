@@ -30,16 +30,16 @@ implementation:
       python3 -m kfp.v2.components.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
     - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
       \ import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1:\
-      \ Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n\
-      \    msa4: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n\
-      \    features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features\
-      \ to create model features \n\n    In the prototype, we assume a fixed number\
-      \ of inputs, mirroring the sample\n    inference pipeline from DeepMind. When\
-      \ it comes to productionizing we should\n    consider \"dynamic\" at runtime\
-      \ or at least highly configurable at compile time\n    component.\n\n    \"\"\
-      \"\n\n    import os\n    import logging\n    import numpy as np\n    import\
-      \ pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data\
-      \ import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data\
+      \ Input[Dataset],\n    msa2: Input[Dataset],\n    msa3: Input[Dataset],\n  \
+      \  msa4: Input[Dataset],\n    template_features: Input[Dataset],\n    features:\
+      \ Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create\
+      \ model features \n\n    In the prototype, we assume a fixed number of inputs,\
+      \ mirroring the sample\n    inference pipeline from DeepMind. When it comes\
+      \ to productionizing we should\n    consider \"dynamic\" at runtime or at least\
+      \ highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import\
+      \ os\n    import logging\n    import numpy as np\n    import pickle\n\n\n  \
+      \  from alphafold.common import residue_constants\n    from alphafold.data import\
+      \ msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data\
       \ import templates\n\n\n\n    def _make_sequence_features(\n        sequence:\
       \ str, description: str, num_res: int) -> dict:\n        \"\"\"Constructs a\
       \ feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype']\

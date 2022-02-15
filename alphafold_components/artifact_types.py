@@ -20,6 +20,7 @@ import json
 class MSA(dsl.Artifact):
   """An artifact representing an MSA."""
   TYPE_NAME = 'alphafold.MSA'
+  VERSION = '0.0.1'
 
   def __init__(self,
                name: Optional[str] = None,

@@ -42,6 +42,7 @@ flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
 flags.DEFINE_bool('enable_caching', False, 'Enable pipeline run caching')
+flags.DEFINE_string('sequence_desc', 'T1050 A7LXT1, Bacteroides Ovatus, 779 residues', '')
 
 def _main(argv):
 
@@ -61,8 +62,11 @@ def _main(argv):
     ]
     
 
+    
+
     params = {
         'sequence_path': FLAGS.fasta_path,
+        'sequence_desc': FLAGS.sequence_desc,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
         'region': FLAGS.region,

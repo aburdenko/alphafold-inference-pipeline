@@ -70,7 +70,7 @@
                     "componentInputArtifact": "pipelineparam--aggregate-features-features"
                   },
                   "model_params": {
-                    "componentInputArtifact": "pipelineparam--importer-artifact"
+                    "componentInputArtifact": "pipelineparam--importer-2-artifact"
                   }
                 },
                 "parameters": {
@@ -169,7 +169,7 @@
                 "schemaVersion": "0.0.1"
               }
             },
-            "pipelineparam--importer-artifact": {
+            "pipelineparam--importer-2-artifact": {
               "artifactType": {
                 "schemaTitle": "system.Artifact",
                 "schemaVersion": "0.0.1"
@@ -387,18 +387,18 @@
           }
         }
       },
-      "comp-import-sequence": {
-        "executorLabel": "exec-import-sequence",
+      "comp-importer": {
+        "executorLabel": "exec-importer",
         "inputDefinitions": {
           "parameters": {
-            "sequence_path": {
+            "uri": {
               "type": "STRING"
             }
           }
         },
         "outputDefinitions": {
           "artifacts": {
-            "sequence": {
+            "artifact": {
               "artifactType": {
                 "schemaTitle": "system.Dataset",
                 "schemaVersion": "0.0.1"
@@ -407,8 +407,8 @@
           }
         }
       },
-      "comp-importer": {
-        "executorLabel": "exec-importer",
+      "comp-importer-2": {
+        "executorLabel": "exec-importer-2",
         "inputDefinitions": {
           "parameters": {
             "uri": {
@@ -427,8 +427,8 @@
           }
         }
       },
-      "comp-importer-2": {
-        "executorLabel": "exec-importer-2",
+      "comp-importer-3": {
+        "executorLabel": "exec-importer-3",
         "inputDefinitions": {
           "parameters": {
             "uri": {
@@ -670,7 +670,7 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1: Input[Dataset],\n    msa2: Optional[Input[Dataset]],\n    msa3: Optional[Input[Dataset]],\n    msa4: Optional[Input[Dataset]],\n    template_features: Input[Dataset],\n    features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create model features \n\n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n    inference pipeline from DeepMind. When it comes to productionizing we should\n    consider \"dynamic\" at runtime or at least highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data import templates\n\n\n\n    def _make_sequence_features(\n        sequence: str, description: str, num_res: int) -> dict:\n        \"\"\"Constructs a feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n        features['domain_name'] = np.array([description.encode('utf-8')],\n                                        dtype=np.object_)\n        features['residue_index'] = np.array(range(num_res), dtype=np.int32)\n        features['seq_length'] = np.array([num_res] * num_res, dtype=np.int32)\n        features['sequence'] = np.array([sequence.encode('utf-8')], dtype=np.object_)\n        return features\n\n\n    def _make_msa_features(msas: Sequence[parsers.Msa]) -> dict:\n        \"\"\"Constructs a feature dict of MSA features.\"\"\"\n        if not msas:\n            raise ValueError('At least one MSA must be provided.')\n\n        int_msa = []\n        deletion_matrix = []\n        uniprot_accession_ids = []\n        species_ids = []\n        seen_sequences = set()\n        for msa_index, msa in enumerate(msas):\n            if not msa:\n                raise ValueError(f'MSA {msa_index} must contain at least one sequence.')\n            for sequence_index, sequence in enumerate(msa.sequences):\n                if sequence in seen_sequences:\n                    continue\n                seen_sequences.add(sequence)\n                int_msa.append(\n                    [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])\n                deletion_matrix.append(msa.deletion_matrix[sequence_index])\n                identifiers = msa_identifiers.get_identifiers(\n                    msa.descriptions[sequence_index])\n                uniprot_accession_ids.append(\n                    identifiers.uniprot_accession_id.encode('utf-8'))\n                species_ids.append(identifiers.species_id.encode('utf-8'))\n\n        num_res = len(msas[0].sequences[0])\n        num_alignments = len(int_msa)\n        features = {}\n        features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)\n        features['msa'] = np.array(int_msa, dtype=np.int32)\n        features['num_alignments'] = np.array(\n            [num_alignments] * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers'] = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n        features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n        return features\n\n\n    def _read_msa(msa_path: str, msa_format: str):\n\n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n                msa = f.read()\n            if msa_format == 'sto':\n                msa = parsers.parse_stockholm(msa)\n            elif msa_format == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n                raise RuntimeError(f'Unsupported MSA format: {msa_format}') \n        return msa\n\n    def _read_sequence(sequence_path: str):\n\n        with open(sequence_path) as f:\n            sequence_str = f.read()\n        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n            raise ValueError(\n                f'More than one input sequence found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_features_path):\n        with open(template_features_path, 'rb') as f:\n            template_features = pickle.load(f)\n        return template_features\n\n    # Create sequence features\n    seq, seq_desc, num_res = _read_sequence(sequence.path) \n    sequence_features = _make_sequence_features(\n        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\n    msas = []\n    msas.append(_read_msa(msa1.path, msa1.metadata['data_format']))\n    msas.append(_read_msa(msa2.path, msa2.metadata['data_format']))\n    msas.append(_read_msa(msa3.path, msa3.metadata['data_format']))\n    msas.append(_read_msa(msa4.path, msa4.metadata['data_format']))\n    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n    template_features = _read_template_features(template_features.path)\n\n    model_features = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n    }\n\n    features_path = features.path\n    features.metadata['data_format'] = 'pkl'\n    with open(features_path, 'wb') as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1: Input[Dataset],\n    msa2: Input[Dataset],\n    msa3: Input[Dataset],\n    msa4: Input[Dataset],\n    template_features: Input[Dataset],\n    features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create model features \n\n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n    inference pipeline from DeepMind. When it comes to productionizing we should\n    consider \"dynamic\" at runtime or at least highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data import templates\n\n\n\n    def _make_sequence_features(\n        sequence: str, description: str, num_res: int) -> dict:\n        \"\"\"Constructs a feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n        features['domain_name'] = np.array([description.encode('utf-8')],\n                                        dtype=np.object_)\n        features['residue_index'] = np.array(range(num_res), dtype=np.int32)\n        features['seq_length'] = np.array([num_res] * num_res, dtype=np.int32)\n        features['sequence'] = np.array([sequence.encode('utf-8')], dtype=np.object_)\n        return features\n\n\n    def _make_msa_features(msas: Sequence[parsers.Msa]) -> dict:\n        \"\"\"Constructs a feature dict of MSA features.\"\"\"\n        if not msas:\n            raise ValueError('At least one MSA must be provided.')\n\n        int_msa = []\n        deletion_matrix = []\n        uniprot_accession_ids = []\n        species_ids = []\n        seen_sequences = set()\n        for msa_index, msa in enumerate(msas):\n            if not msa:\n                raise ValueError(f'MSA {msa_index} must contain at least one sequence.')\n            for sequence_index, sequence in enumerate(msa.sequences):\n                if sequence in seen_sequences:\n                    continue\n                seen_sequences.add(sequence)\n                int_msa.append(\n                    [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])\n                deletion_matrix.append(msa.deletion_matrix[sequence_index])\n                identifiers = msa_identifiers.get_identifiers(\n                    msa.descriptions[sequence_index])\n                uniprot_accession_ids.append(\n                    identifiers.uniprot_accession_id.encode('utf-8'))\n                species_ids.append(identifiers.species_id.encode('utf-8'))\n\n        num_res = len(msas[0].sequences[0])\n        num_alignments = len(int_msa)\n        features = {}\n        features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)\n        features['msa'] = np.array(int_msa, dtype=np.int32)\n        features['num_alignments'] = np.array(\n            [num_alignments] * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers'] = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n        features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n        return features\n\n\n    def _read_msa(msa_path: str, msa_format: str):\n\n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n                msa = f.read()\n            if msa_format == 'sto':\n                msa = parsers.parse_stockholm(msa)\n            elif msa_format == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n                raise RuntimeError(f'Unsupported MSA format: {msa_format}') \n        return msa\n\n    def _read_sequence(sequence_path: str):\n\n        with open(sequence_path) as f:\n            sequence_str = f.read()\n        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n            raise ValueError(\n                f'More than one input sequence found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_features_path):\n        with open(template_features_path, 'rb') as f:\n            template_features = pickle.load(f)\n        return template_features\n\n    # Create sequence features\n    seq, seq_desc, num_res = _read_sequence(sequence.path) \n    sequence_features = _make_sequence_features(\n        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\n    msas = []\n    msas.append(_read_msa(msa1.path, msa1.metadata['data_format']))\n    msas.append(_read_msa(msa2.path, msa2.metadata['data_format']))\n    msas.append(_read_msa(msa3.path, msa3.metadata['data_format']))\n    msas.append(_read_msa(msa4.path, msa4.metadata['data_format']))\n    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n    template_features = _read_template_features(template_features.path)\n\n    model_features = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n    }\n\n    features_path = features.path\n    features.metadata['data_format'] = 'pkl'\n    with open(features_path, 'wb') as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold"
           }
@@ -735,27 +735,22 @@
             "image": "gcr.io/jk-mlops-dev/cls-wrappers"
           }
         },
-        "exec-import-sequence": {
-          "container": {
-            "args": [
-              "--executor_input",
-              "{{$}}",
-              "--function_to_execute",
-              "import_sequence"
-            ],
-            "command": [
-              "sh",
-              "-c",
-              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
-              "sh",
-              "-ec",
-              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef import_sequence(\n    sequence_path: str,\n    sequence: Output[Dataset],\n):\n    from alphafold.data import parsers\n    from google.cloud import storage\n\n    client = storage.Client()\n    with open(sequence.path, 'wb') as f:\n        client.download_blob_to_file(sequence_path, f)\n\n    with open(sequence.path) as f:\n        sequence_str = f.read()\n    seqs, seq_descs = parsers.parse_fasta(sequence_str)\n\n    if len(seqs) !=1:\n        raise ValueError(f'More than one sequence found in {sequence_path}. Unsupported')\n\n    sequence.metadata['sequence']=seqs[0]\n    sequence.metadata['description']=seq_descs[0]\n    sequence.metadata['data_format']='fasta'\n    sequence.metadata['number of residues']=len(seqs[0])\n\n"
-            ],
-            "image": "gcr.io/jk-mlops-dev/alphafold"
+        "exec-importer": {
+          "importer": {
+            "artifactUri": {
+              "runtimeParameter": "uri"
+            },
+            "metadata": {
+              "data_format": "fasta",
+              "descripton": "{{pipelineparam:op=;name=sequence_desc}}"
+            },
+            "typeSchema": {
+              "schemaTitle": "system.Dataset",
+              "schemaVersion": "0.0.1"
+            }
           }
         },
-        "exec-importer": {
+        "exec-importer-2": {
           "importer": {
             "artifactUri": {
               "runtimeParameter": "uri"
@@ -769,7 +764,7 @@
             }
           }
         },
-        "exec-importer-2": {
+        "exec-importer-3": {
           "importer": {
             "artifactUri": {
               "runtimeParameter": "uri"
@@ -917,7 +912,7 @@
               "hhblits",
               "hhblits-2",
               "hhsearch",
-              "import-sequence",
+              "importer",
               "jackhmmer",
               "jackhmmer-2"
             ],
@@ -949,8 +944,8 @@
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 },
                 "template_features": {
@@ -971,7 +966,7 @@
             },
             "dependentTasks": [
               "aggregate-features",
-              "importer"
+              "importer-2"
             ],
             "inputs": {
               "artifacts": {
@@ -981,10 +976,10 @@
                     "producerTask": "aggregate-features"
                   }
                 },
-                "pipelineparam--importer-artifact": {
+                "pipelineparam--importer-2-artifact": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
+                    "producerTask": "importer-2"
                   }
                 }
               },
@@ -1015,21 +1010,21 @@
               "name": "comp-hhblits"
             },
             "dependentTasks": [
-              "import-sequence",
-              "importer-2"
+              "importer",
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1089,21 +1084,21 @@
               "name": "comp-hhblits-2"
             },
             "dependentTasks": [
-              "import-sequence",
-              "importer-2"
+              "importer",
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1163,8 +1158,8 @@
               "name": "comp-hhsearch"
             },
             "dependentTasks": [
-              "import-sequence",
-              "importer-2",
+              "importer",
+              "importer-3",
               "jackhmmer"
             ],
             "inputs": {
@@ -1178,13 +1173,13 @@
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1260,16 +1255,16 @@
               "name": "Search Pdb"
             }
           },
-          "import-sequence": {
+          "importer": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-import-sequence"
+              "name": "comp-importer"
             },
             "inputs": {
               "parameters": {
-                "sequence_path": {
+                "uri": {
                   "componentInputParameter": "sequence_path"
                 }
               }
@@ -1278,12 +1273,12 @@
               "name": "Input sequence"
             }
           },
-          "importer": {
+          "importer-2": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-importer"
+              "name": "comp-importer-2"
             },
             "inputs": {
               "parameters": {
@@ -1296,12 +1291,12 @@
               "name": "Model parameters"
             }
           },
-          "importer-2": {
+          "importer-3": {
             "cachingOptions": {
               "enableCache": true
             },
             "componentRef": {
-              "name": "comp-importer-2"
+              "name": "comp-importer-3"
             },
             "inputs": {
               "parameters": {
@@ -1322,21 +1317,21 @@
               "name": "comp-jackhmmer"
             },
             "dependentTasks": [
-              "import-sequence",
-              "importer-2"
+              "importer",
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1396,21 +1391,21 @@
               "name": "comp-jackhmmer-2"
             },
             "dependentTasks": [
-              "import-sequence",
-              "importer-2"
+              "importer",
+              "importer-3"
             ],
             "inputs": {
               "artifacts": {
                 "reference_databases": {
                   "taskOutputArtifact": {
                     "outputArtifactKey": "artifact",
-                    "producerTask": "importer-2"
+                    "producerTask": "importer-3"
                   }
                 },
                 "sequence": {
                   "taskOutputArtifact": {
-                    "outputArtifactKey": "sequence",
-                    "producerTask": "import-sequence"
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
                   }
                 }
               },
@@ -1485,6 +1480,9 @@
             "type": "STRING"
           },
           "region": {
+            "type": "STRING"
+          },
+          "sequence_desc": {
             "type": "STRING"
           },
           "sequence_path": {

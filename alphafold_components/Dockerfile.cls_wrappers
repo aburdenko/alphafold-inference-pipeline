@@ -21,4 +21,5 @@ WORKDIR /scripts
 ADD alphafold_runners alphafold_runners
 
 ADD dsub_wrapper.py .
+ADD artifact_types.py .
 
