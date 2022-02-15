@@ -1,7 +1,7 @@
 docker run -it --rm \
 -v /mnt/disks/alphafold-datasets:/data \
 -v /home/jupyter/alphafold-inference-pipeline:/scripts \
--v /home/jupyter/alphafold-inference-pipeline/fasta:/fasta \
+-v /home/jupyter/alphafold-inference-pipeline/sequences/:/sequences \
 -v /home/jupyter/output:/output \
 -e PYTHONPATH=/app/alphafold \
 --entrypoint /bin/bash \

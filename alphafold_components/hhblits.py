@@ -52,6 +52,7 @@ def hhblits(
     import sys
 
     from dsub_wrapper import run_dsub_job
+    from alphafold.data import parsers
 
     _SUPPORTED_DATABASES = ['bfd', 'uniclust30']
     _DSUB_PROVIDER = 'google-cls-v2'
@@ -94,7 +95,11 @@ def hhblits(
         params=job_params,
     )
 
-    msa.metadata['data_format'] = 'a3m'   
+    with open(msa.path) as f:
+        msa_str = f.read()
+    parsed_msa = parsers.parse_a3m(msa_str)
+    msa.metadata['data_format'] = 'a3m'  
+    msa.metadata['num of sequences'] = len(parsed_msa.sequences) 
 
     
 

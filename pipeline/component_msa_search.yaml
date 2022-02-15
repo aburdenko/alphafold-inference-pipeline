@@ -44,9 +44,10 @@ implementation:
       \ hhsearch or hhblits.\n\n    The prototype also lacks job control. If a pipeline\
       \ step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import\
       \ logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\
-      \n    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']\n    _DSUB_PROVIDER = 'google-cls-v2'\n\
-      \    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\
-      \    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n    logging.basicConfig(format='%(asctime)s\
+      \    from alphafold.data import parsers\n\n    _SUPPORTED_DATABASES = ['bfd',\
+      \ 'uniclust30']\n    _DSUB_PROVIDER = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n\
+      \    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT\
+      \ = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n    logging.basicConfig(format='%(asctime)s\
       \ - %(message)s',\n                      level=logging.INFO, \n            \
       \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
       \n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n\
@@ -62,8 +63,10 @@ implementation:
       \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
       \        '--script', _SCRIPT \n    ]\n\n    result = run_dsub_job(\n       \
       \ provider=_DSUB_PROVIDER,\n        project=project,\n        regions=region,\n\
-      \        params=job_params,\n    )\n\n    msa.metadata['data_format'] = 'a3m'\
-      \   \n\n"
+      \        params=job_params,\n    )\n\n    with open(msa.path) as f:\n      \
+      \  msa_str = f.read()\n    parsed_msa = parsers.parse_a3m(msa_str)\n    msa.metadata['data_format']\
+      \ = 'a3m'  \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences)\
+      \ \n\n"
     args:
     - --executor_input
     - {executorInput: null}

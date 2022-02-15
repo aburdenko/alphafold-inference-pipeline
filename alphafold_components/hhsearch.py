@@ -60,6 +60,7 @@ def hhsearch(
     import sys
 
     from dsub_wrapper import run_dsub_job
+    from alphafold.data import parsers
 
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
@@ -105,8 +106,12 @@ def hhsearch(
         regions=region,
         params=job_params,
     )
-
+    
+    with open(template_hits.path) as f:
+        hhr_str = f.read()
+    parsed_hhr = parsers.parse_hhr(hhr_str)
     template_hits.metadata['data_format'] = 'hhr'
+    template_hits.metadata['num of hits'] = len(parsed_hhr)
     template_features.metadata['data_format'] = 'pkl' 
 
     

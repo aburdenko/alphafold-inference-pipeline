@@ -53,6 +53,7 @@ def jackhmmer(
     import os
     import sys
 
+    from alphafold.data import parsers
     from dsub_wrapper import run_dsub_job
 
     _SUPPORTED_DATABASES = ['uniref90', 'mgnify']
@@ -92,6 +93,9 @@ def jackhmmer(
         params=job_params,
     )
 
+    with open(msa.path) as f:
+        msa_str = f.read()
+    parsed_msa = parsers.parse_stockholm(msa_str)
     msa.metadata['data_format'] = 'sto'  
 
     
