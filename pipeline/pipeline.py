@@ -47,16 +47,13 @@ def pipeline(
     input_sequence = dsl.importer(
         artifact_uri=sequence_path,
         artifact_class=dsl.Dataset,
-        reimport=False,
-        metadata={'data_format': 'fasta', 'descripton': str(sequence_desc)})
+        reimport=True)
     input_sequence.set_display_name('Input sequence')
 
     model_parameters = dsl.importer(
         artifact_uri=model_params_gcs_location,
         artifact_class=dsl.Artifact,
-        reimport=True,
-        metadata={'Description': 'AlphaFold parameters - v2.2'}
-    )
+        reimport=True)
     model_parameters.set_display_name('Model parameters')
 
     reference_databases = dsl.importer(

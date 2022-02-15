@@ -96,7 +96,8 @@ def jackhmmer(
     with open(msa.path) as f:
         msa_str = f.read()
     parsed_msa = parsers.parse_stockholm(msa_str)
-    msa.metadata['data_format'] = 'sto'  
+    msa.metadata['data_format'] = 'sto' 
+    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  
 
     
 
