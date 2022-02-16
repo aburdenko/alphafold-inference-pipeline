@@ -43,6 +43,7 @@ def predict(
     import numpy as np
     import pickle
     import haiku as hk
+    import time
 
     from alphafold.model import config
     from alphafold.model import model
@@ -65,6 +66,10 @@ def predict(
         with open(features_path, 'rb') as f:
             features = pickle.load(f)
         return features
+
+
+    t0 = time.time()
+    logging.info('Starting model predict ...')
 
     model_config = config.model_config(model_name)
 
@@ -106,6 +111,8 @@ def predict(
         f.write(unrelaxed_pdbs)
     unrelaxed_protein.metadata['data_format']='pdb'
 
+    t1 = time.time()
+    logging.info(f'Model completed. Elapsed time: {t1-t0}')
 
 
 

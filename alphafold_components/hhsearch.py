@@ -58,6 +58,7 @@ def hhsearch(
     import logging
     import os
     import sys
+    import time
 
     from dsub_wrapper import run_dsub_job
     from alphafold.data import parsers
@@ -99,13 +100,17 @@ def hhsearch(
         '--env', f'MAX_TEMPLATE_DATE={max_template_date}', 
         '--script', _SCRIPT, 
     ]
-
+     
+    t0 = time.time()
+    logging.info('Starting database search...')
     result = run_dsub_job(
         provider=_DSUB_PROVIDER,
         project=project,
         regions=region,
         params=job_params,
     )
+    t1 = time.time()
+    logging.info(f'Search completed. Elapsed time: {t1-t0}')
     
     with open(template_hits.path) as f:
         hhr_str = f.read()

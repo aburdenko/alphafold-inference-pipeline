@@ -1,4 +1,10 @@
-/app/run_alphafold.sh \
+
+
+start_time_display=$(date)
+start_time=$(date +%s)
+echo "Starting run_alphafold.py pipeline: $start_time_display"
+
+python /app/alphafold/run_alphafold.py \
  --fasta_paths=${FASTA} \
  --uniref90_database_path=${DB}/uniref90/uniref90.fasta \
  --mgnify_database_path=${DB}/mgnify/mgy_clusters_2018_12.fa \
@@ -12,3 +18,10 @@
  --max_template_date=2020-05-14 \
  --benchmark=False \
  --use_gpu_relax
+
+
+end_time_display=$(date)
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Pipeline completed: $(date)"
+echo "Elapsed time: $elapsed" 

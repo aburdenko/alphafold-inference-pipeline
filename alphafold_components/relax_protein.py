@@ -39,11 +39,17 @@ def relax(
 ):
     import logging
     import os
+    import time
+
     from alphafold.common import protein
     from alphafold.relax import relax
 
+
     if not os.path.exists(unrelaxed_protein.path):
         raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')
+
+    t0 = time.time()
+    logging.info('Starting model relaxation ...')
     
     with open(unrelaxed_protein.path, 'r') as f:
         unrelaxed_protein_pdb=f.read();
@@ -64,7 +70,8 @@ def relax(
         f.write(relaxed_protein_pdb)
     relaxed_protein.metadata['data_format']='pdb'
 
-
+    t1 = time.time()
+    logging.info(f'Model relaxation. Elapsed time: {t1-t0}')
 
 
 

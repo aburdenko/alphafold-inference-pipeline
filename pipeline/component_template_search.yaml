@@ -51,14 +51,14 @@ implementation:
       \ disks or premtible VMs.\n    GCSFuse does not perform well with tools like\
       \ hhsearch or hhblits.\n\n    he prototype also lacks job control. If a pipeline\
       \ step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import\
-      \ logging\n    import os\n    import sys\n\n    from dsub_wrapper import run_dsub_job\n\
-      \    from alphafold.data import parsers\n\n    _DSUB_PROVIDER = 'google-cls-v2'\n\
-      \    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'\n\
-      \    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\n\n    logging.basicConfig(format='%(asctime)s\
-      \ - %(message)s',\n                      level=logging.INFO, \n            \
-      \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
-      \n    database_paths = [reference_databases.metadata[database]\n           \
-      \           for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\
+      \ logging\n    import os\n    import sys\n    import time\n\n    from dsub_wrapper\
+      \ import run_dsub_job\n    from alphafold.data import parsers\n\n    _DSUB_PROVIDER\
+      \ = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE\
+      \ = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\
+      \n\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n          \
+      \            level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n\
+      \                      stream=sys.stdout)\n\n    database_paths = [reference_databases.metadata[database]\n\
+      \                      for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\
       \n    job_params = [\n        '--machine-type', machine_type,\n        '--boot-disk-size',\
       \ str(boot_disk_size),\n        '--logging', cls_logging.uri,\n        '--log-interval',\
       \ _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env',\
@@ -72,12 +72,14 @@ implementation:
       \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
       \        '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',\n        '--env',\
       \ f'MAX_TEMPLATE_DATE={max_template_date}', \n        '--script', _SCRIPT, \n\
-      \    ]\n\n    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n   \
-      \     project=project,\n        regions=region,\n        params=job_params,\n\
-      \    )\n\n    with open(template_hits.path) as f:\n        hhr_str = f.read()\n\
-      \    parsed_hhr = parsers.parse_hhr(hhr_str)\n    template_hits.metadata['data_format']\
-      \ = 'hhr'\n    template_hits.metadata['num of hits'] = len(parsed_hhr)\n   \
-      \ template_features.metadata['data_format'] = 'pkl' \n\n"
+      \    ]\n\n    t0 = time.time()\n    logging.info('Starting database search...')\n\
+      \    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n\
+      \        regions=region,\n        params=job_params,\n    )\n    t1 = time.time()\n\
+      \    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(template_hits.path)\
+      \ as f:\n        hhr_str = f.read()\n    parsed_hhr = parsers.parse_hhr(hhr_str)\n\
+      \    template_hits.metadata['data_format'] = 'hhr'\n    template_hits.metadata['num\
+      \ of hits'] = len(parsed_hhr)\n    template_features.metadata['data_format']\
+      \ = 'pkl' \n\n"
     args:
     - --executor_input
     - {executorInput: null}

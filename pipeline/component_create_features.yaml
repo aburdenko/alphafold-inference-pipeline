@@ -37,9 +37,9 @@ implementation:
       \ mirroring the sample\n    inference pipeline from DeepMind. When it comes\
       \ to productionizing we should\n    consider \"dynamic\" at runtime or at least\
       \ highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import\
-      \ os\n    import logging\n    import numpy as np\n    import pickle\n\n\n  \
-      \  from alphafold.common import residue_constants\n    from alphafold.data import\
-      \ msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data\
+      \ os\n    import logging\n    import numpy as np\n    import pickle\n    import\
+      \ time\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data\
+      \ import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data\
       \ import templates\n\n\n\n    def _make_sequence_features(\n        sequence:\
       \ str, description: str, num_res: int) -> dict:\n        \"\"\"Constructs a\
       \ feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype']\
@@ -87,7 +87,8 @@ implementation:
       \   f'More than one input sequence found in {sequence_path}.')\n\n        return\
       \ sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_features_path):\n\
       \        with open(template_features_path, 'rb') as f:\n            template_features\
-      \ = pickle.load(f)\n        return template_features\n\n    # Create sequence\
+      \ = pickle.load(f)\n        return template_features\n\n    t0 = time.time()\n\
+      \    logging.info('Starting feature aggregation ...')\n\n    # Create sequence\
       \ features\n    seq, seq_desc, num_res = _read_sequence(sequence.path) \n  \
       \  sequence_features = _make_sequence_features(\n        sequence=seq,\n   \
       \     description=seq_desc,\n        num_res=num_res)\n\n    msas = []\n   \
@@ -100,7 +101,9 @@ implementation:
       \    model_features = {\n        **sequence_features,\n        **msa_features,\n\
       \        **template_features\n    }\n\n    features_path = features.path\n \
       \   features.metadata['data_format'] = 'pkl'\n    with open(features_path, 'wb')\
-      \ as f:\n        pickle.dump(model_features, f, protocol=4)\n\n"
+      \ as f:\n        pickle.dump(model_features, f, protocol=4)\n\n    t1 = time.time()\n\
+      \    logging.info(f'Feature aggregation completed. Elapsed time: {t1-t0}')\n\
+      \n"
     args:
     - --executor_input
     - {executorInput: null}

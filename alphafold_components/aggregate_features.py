@@ -47,6 +47,7 @@ def aggregate_features(
     import logging
     import numpy as np
     import pickle
+    import time
 
     
     from alphafold.common import residue_constants
@@ -142,6 +143,9 @@ def aggregate_features(
             template_features = pickle.load(f)
         return template_features
 
+    t0 = time.time()
+    logging.info('Starting feature aggregation ...')
+
     # Create sequence features
     seq, seq_desc, num_res = _read_sequence(sequence.path) 
     sequence_features = _make_sequence_features(
@@ -171,7 +175,9 @@ def aggregate_features(
     features.metadata['data_format'] = 'pkl'
     with open(features_path, 'wb') as f:
         pickle.dump(model_features, f, protocol=4)
-    
+
+    t1 = time.time()
+    logging.info(f'Feature aggregation completed. Elapsed time: {t1-t0}')
 
 
 
