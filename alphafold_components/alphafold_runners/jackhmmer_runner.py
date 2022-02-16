@@ -39,7 +39,7 @@ DB_ROOT = os.environ['DB_ROOT']
 DB_PATH = os.environ['DB_PATH']
 
 # Optional inputs 
-N_CPU = int(os.getenv('N_CPU'))
+N_CPU = int(os.getenv('N_CPU', 8))
 MAXSEQ = int(os.getenv('MAXSEQ', '10_000'))
 
 # Paths to tool binaries

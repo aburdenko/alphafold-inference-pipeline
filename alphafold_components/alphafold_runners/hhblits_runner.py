@@ -39,8 +39,8 @@ DB_ROOT = os.environ['DB_ROOT']
 DB_PATHS = os.environ['DB_PATHS']
 
 # Optional inputs 
-N_CPU = int(os.getenv('N_CPU'))
-MAXSEQ = int(os.getenv('MAXSEQ', '10_000'))
+N_CPU = int(os.getenv('N_CPU', 4))
+MAXSEQ = int(os.getenv('MAXSEQ', '1_000_000'))
 
 # Paths to tool binaries
 HHBLITS_BINARY_PATH = shutil.which('hhblits')

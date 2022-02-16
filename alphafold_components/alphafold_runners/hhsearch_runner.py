@@ -45,7 +45,7 @@ MMCIF_PATH = os.environ['MMCIF_PATH']
 OBSOLETE_PATH = os.environ['OBSOLETE_PATH']
 
 # Optional inputs 
-MAXSEQ = int(os.getenv('MAXSEQ', '10_000'))
+MAXSEQ = int(os.getenv('MAXSEQ', '1_000_000'))
 MAX_TEMPLATE_HITS = int(os.getenv('MAX_TEMPLATE_HITS', 20))
 
 # Paths to tool binaries
