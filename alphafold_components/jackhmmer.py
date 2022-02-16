@@ -19,7 +19,6 @@ from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
 import config
 
-from alphafold_components.artifact_types import MSA
 
 @dsl.component(
     base_image=config.CLS_WRAPPERS_IMAGE,

@@ -37,3 +37,4 @@ dsub --provider google-cls-v2 \
 --env PYTHONPATH=/app/alphafold \
 --wait \
 --summary
+

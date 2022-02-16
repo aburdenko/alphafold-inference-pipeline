@@ -39,6 +39,7 @@ def pipeline(
     region: str='us-central1',
     max_template_date: str='2020-05-14',
     models: List[Mapping]=[{'model_name': 'model_1', 'random_seed': 1}],
+    use_gpu_for_relaxation: bool=True,
     num_ensemble: int=1,
     datasets_gcs_location: str=config.REFERENCE_DATASETS_GCS_LOCATION,
     model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
@@ -154,7 +155,7 @@ def pipeline(
 
         relax_protein = RelaxProteinOp(
             unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
-            use_gpu=False,
+            use_gpu=use_gpu_for_relaxation,
         )
         relax_protein.set_display_name('Relax protein')#.set_caching_options(enable_caching=True)
         relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)

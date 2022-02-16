@@ -147,11 +147,7 @@
                     }
                   },
                   "use_gpu": {
-                    "runtimeValue": {
-                      "constantValue": {
-                        "intValue": "0"
-                      }
-                    }
+                    "componentInputParameter": "pipelineparam--use_gpu_for_relaxation"
                   }
                 }
               },
@@ -185,6 +181,9 @@
             },
             "pipelineparam--num_ensemble": {
               "type": "INT"
+            },
+            "pipelineparam--use_gpu_for_relaxation": {
+              "type": "STRING"
             }
           }
         }
@@ -850,11 +849,11 @@
             "image": "gcr.io/jk-mlops-dev/alphafold",
             "resources": {
               "accelerator": {
-                "count": "2",
-                "type": "NVIDIA_TESLA_T4"
+                "count": "1",
+                "type": "NVIDIA_TESLA_A100"
               },
-              "cpuLimit": 16.0,
-              "memoryLimit": 32.0
+              "cpuLimit": 12.0,
+              "memoryLimit": 8.5e-08
             }
           }
         },
@@ -879,10 +878,10 @@
             "resources": {
               "accelerator": {
                 "count": "1",
-                "type": "NVIDIA_TESLA_T4"
+                "type": "NVIDIA_TESLA_A100"
               },
-              "cpuLimit": 16.0,
-              "memoryLimit": 32.0
+              "cpuLimit": 12.0,
+              "memoryLimit": 85.0
             }
           }
         }
@@ -982,6 +981,9 @@
                 },
                 "pipelineparam--num_ensemble": {
                   "componentInputParameter": "num_ensemble"
+                },
+                "pipelineparam--use_gpu_for_relaxation": {
+                  "componentInputParameter": "use_gpu_for_relaxation"
                 }
               }
             },
@@ -1480,6 +1482,9 @@
           },
           "sequence_path": {
             "type": "STRING"
+          },
+          "use_gpu_for_relaxation": {
+            "type": "STRING"
           }
         }
       }
@@ -1509,6 +1514,9 @@
       },
       "region": {
         "stringValue": "us-central1"
+      },
+      "use_gpu_for_relaxation": {
+        "stringValue": "True"
       }
     }
   }
