@@ -1,4 +1,5 @@
 
+```
 PROJECT_ID=jk-mlops-dev
 PROJECT_NUMBER=$(gcloud projects list --filter="projectId:$PROJECT_ID" --format="value(PROJECT_NUMBER)")
 REGION=us-central-1
@@ -14,7 +15,9 @@ gcloud filestore instances create $FILESTORE_ID \
     --tier=STANDARD \
     --file-share=name="$FILE_SHARE_NAME,capacity=3TB" \
     --network=name=$NETWORK,connect-mode=PRIVATE_SERVICE_ACCESS
+```
 
+```
 
 PEERING_RANGE_NAME=google-reserved-range
 NETWORK=default
@@ -33,3 +36,4 @@ gcloud services vpc-peerings connect \
   --network=$NETWORK \
   --ranges=$PEERING_RANGE_NAME \
   --project=$PROJECT_ID
+```
