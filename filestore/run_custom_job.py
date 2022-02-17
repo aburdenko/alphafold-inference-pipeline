@@ -17,6 +17,9 @@ import os
 import random
 from re import I
 import sys
+import time
+from datetime import datetime
+
 
 from absl import flags
 from absl import app
@@ -47,54 +50,7 @@ flags.DEFINE_string('sequence_desc', 'T1050 A7LXT1, Bacteroides Ovatus, 779 resi
 
 def _main(argv):
 
-    # Think about a better way of dealing with random seeds
-
-    models = [
-        {
-            'model_name': 'model_1', 'random_seed': 1,
-        },
-        {
-            'model_name': 'model_2', 'random_seed': 2,
-        },
-        {
-            'model_name': 'model_3', 'random_seed': 3,
-        },
-                {
-            'model_name': 'model_4', 'random_seed': 4,
-        },
-                {
-            'model_name': 'model_5', 'random_seed': 5,
-        },
-
-    ]
-    
-
-    
-
-    params = {
-        'sequence_path': FLAGS.fasta_path,
-        'sequence_desc': FLAGS.sequence_desc,
-        'max_template_date': FLAGS.max_template_date,
-        'project': FLAGS.project,
-        'region': FLAGS.region,
-        'models': models,
-        'num_ensemble': FLAGS.num_ensemble,
-        'use_gpu_for_relaxation': True,
-    }
-
-    pipeline_job = aip.PipelineJob(
-        display_name=_PIPELINE_JOB_NAME,
-        template_path=FLAGS.pipeline_spec,
-        pipeline_root=f'{FLAGS.pipeline_staging_location}/{_PIPELINE_JOB_NAME}',
-        parameter_values=params,
-        enable_caching=FLAGS.enable_caching,
-
-    )
-
-    pipeline_job.run(
-        service_account=FLAGS.pipelines_sa
-        
-    )
+    #
 
 
 if __name__ == "__main__":

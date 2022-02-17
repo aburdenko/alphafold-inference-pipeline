@@ -8,6 +8,17 @@ docker run -it --rm \
 gcr.io/jk-mlops-dev/alphafold
 
 
+docker run -it --rm \
+-v /mnt/nfs/alphafold:/data \
+-v /home/jupyter/alphafold-inference-pipeline:/scripts \
+-v /home/jupyter/alphafold-inference-pipeline/sequences/:/sequences \
+-v /home/jupyter/output:/output \
+-e PYTHONPATH=/app/alphafold \
+--entrypoint /bin/bash \
+gcr.io/jk-mlops-dev/alphafold
+
+
+
 ## HHblits
 
 export INPUT_PATH=/fasta/T1050.fasta

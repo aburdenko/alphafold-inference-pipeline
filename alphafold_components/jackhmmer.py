@@ -87,17 +87,15 @@ def jackhmmer(
     ]
 
     t0 = time.time()
-    logging.info('Starting jackmmer search...')
-
+    logging.info('Starting database search...')
     result = run_dsub_job(
         provider=_DSUB_PROVIDER,
         project=project,
         regions=region,
         params=job_params,
     )
-
     t1 = time.time()
-    logging.info(f'jackmmer search completed. Elapsed time: {t1-t0}')
+    logging.info(f'Search completed. Elapsed time: {t1-t0}')
 
     with open(msa.path) as f:
         msa_str = f.read()

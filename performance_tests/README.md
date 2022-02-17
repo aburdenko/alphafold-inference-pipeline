@@ -1,6 +1,6 @@
 
 ```
-export TARGET=T1061
+export TARGET=T1050
 export EXPERIMENT_NAME=${TARGET}-$(date +"%Y-%m-%d-%M-%s")
 export STAGING_BUCKET=gs://jk-alphafold-staging
 export MACHINE_TYPE=a2-highgpu-1g
@@ -27,7 +27,6 @@ dsub --provider google-cls-v2 \
 --input FASTA=${STAGING_BUCKET}/fasta/${TARGET}.fasta \
 --output-recursive $OUTPUT_PATH \
 --env TF_FORCE_UNIFIED_MEMORY=1 \
---env XLA_PYTHON_CLIENT_MEM_FRACTION=2.0 \
---wait
+--env XLA_PYTHON_CLIENT_MEM_FRACTION=2.0 
 
 
