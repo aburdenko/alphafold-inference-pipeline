@@ -25,7 +25,7 @@ import time
 from typing import List, Optional, Mapping
 
 from google.cloud.aiplatform_v1beta1 import JobServiceClient
-from google.cloud.aiplatform_v1.types import job_state as gca_job_state
+from google.cloud.aiplatform_v1beta1.types import job_state as gca_job_state
 import google.auth
 from google.protobuf import json_format
 
@@ -123,6 +123,8 @@ class JobRunner():
                         # TODO(ruifang) propagate the error.
                         raise
 
+                print(get_job_response.state)
+                print(get_job_response.state == gca_job_state.JobState.JOB_STATE_SUCCEEDED)
                 if get_job_response.state == gca_job_state.JobState.JOB_STATE_SUCCEEDED:
                     logging.info('Job completed successfully =%s', get_job_response.state)
                     return get_job_response
