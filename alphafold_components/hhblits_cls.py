@@ -19,46 +19,59 @@ from kfp.v2.dsl import Output, Input, Artifact, Dataset
 
 import config
 
-
 @dsl.component(
     base_image=config.CLS_WRAPPERS_IMAGE,
     output_component_file='component_msa_search.yaml'
 )
-def jackhmmer(
+def hhblits(
     project: str,
     region: str,
-    database: str,
+    msa_dbs: list,
     reference_databases: Input[Dataset],
     sequence: Input[Dataset],
     msa: Output[Dataset],
-    maxseq:int=10_000,
-    machine_type:str='n1-standard-8',
-    boot_disk_size:int=100,
-    n_cpu:int=8,
+    cls_logging: Output[Artifact],
+    maxseq:int=1_000_000,
+    machine_type:str='c2-standard-16',
+    boot_disk_size:int=200,
+    n_cpu:int=12, 
     ):
-    """Searches the specified database using jackhmmer. """
+    """Searches sequence databases using the specified tool.
+
+    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
+    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.
+    GCSFuse does not perform well with tools like hhsearch or hhblits.
+
+    The prototype also lacks job control. If a pipeline step fails, the CLS job can get 
+    orphaned
+
+    """
     
     import logging
     import os
     import sys
     import time
 
-    from alphafold.data import parsers
     from dsub_wrapper import run_dsub_job
+    from alphafold.data import parsers
 
-    _SUPPORTED_DATABASES = ['uniref90', 'mgnify']
+    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']
     _DSUB_PROVIDER = 'google-cls-v2'
     _LOG_INTERVAL = '30s'
     _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
-    _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  
+    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  
 
     logging.basicConfig(format='%(asctime)s - %(message)s',
                       level=logging.INFO, 
                       datefmt='%d-%m-%y %H:%M:%S',
                       stream=sys.stdout)
 
-    if not (str(database) in _SUPPORTED_DATABASES):
-        raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')
+    for database in msa_dbs:
+        if not (database in _SUPPORTED_DATABASES):
+            raise RuntimeError(f'HHBlits cannot be used with {database} database.')
+
+    database_paths = [reference_databases.metadata[database] for database in msa_dbs] 
+    database_paths = ','.join(database_paths)
 
     job_params = [
         '--machine-type', machine_type,
@@ -70,7 +83,7 @@ def jackhmmer(
         '--mount', f'DB_ROOT={reference_databases.metadata["disk_image"]}',
         '--input', f'INPUT_PATH={sequence.uri}',
         '--output', f'OUTPUT_PATH={msa.uri}',
-        '--env', f'DB_PATH={reference_databases.metadata[database]}',
+        '--env', f'DB_PATHS={database_paths}',
         '--env', f'N_CPU={n_cpu}',
         '--env', f'MAXSEQ={maxseq}', 
         '--script', _SCRIPT 
@@ -89,9 +102,9 @@ def jackhmmer(
 
     with open(msa.path) as f:
         msa_str = f.read()
-    parsed_msa = parsers.parse_stockholm(msa_str)
-    msa.metadata['data_format'] = 'sto' 
-    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  
+    parsed_msa = parsers.parse_a3m(msa_str)
+    msa.metadata['data_format'] = 'a3m'  
+    msa.metadata['num of sequences'] = len(parsed_msa.sequences) 
 
     
 

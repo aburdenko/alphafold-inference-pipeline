@@ -34,7 +34,6 @@ from alphafold.data.tools import jackhmmer
 # Required inputs
 INPUT_PATH= os.environ['INPUT_PATH']
 OUTPUT_PATH = os.environ['OUTPUT_PATH']
-
 DB_ROOT = os.environ['DB_ROOT']
 DB_PATH = os.environ['DB_PATH']
 

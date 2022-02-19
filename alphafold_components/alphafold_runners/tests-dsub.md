@@ -8,27 +8,9 @@ docker run -it --rm \
 gcr.io/jk-mlops-dev/alphafold
 
 
-docker run -it --rm \
--v /mnt/nfs/alphafold:/data \
--v /home/jupyter/alphafold-inference-pipeline:/scripts \
--v /home/jupyter/alphafold-inference-pipeline/sequences/:/sequences \
--v /home/jupyter/output:/output \
--e PYTHONPATH=/app/alphafold \
---entrypoint /bin/bash \
-gcr.io/jk-mlops-dev/alphafold
 
 
 
-## HHblits
-
-export INPUT_PATH=/fasta/T1050.fasta
-export OUTPUT_PATH=/output/testing/hhblits/output.a3m
-export N_CPU=8
-export MAXSEQ=1_000_000
-export DB_ROOT=/data
-export DB_PATHS=uniclust30/uniclust30_2018_08/uniclust30_2018_08,bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt
-
-python /scripts/alphafold_components/alphafold_runners/hhblits_runner.py
 
 
 dsub --provider google-cls-v2 \
@@ -49,3 +31,16 @@ dsub --provider google-cls-v2 \
 --wait \
 --summary
 
+
+
+docker run -it --rm \
+-v /mnt:/data \
+-v /home/jupyter/alphafold-inference-pipeline:/scripts \
+-v /home/jupyter/alphafold-inference-pipeline/sequences/:/sequences \
+-v /home/jupyter/output:/output \
+-e PYTHONPATH=/app/alphafold \
+--entrypoint /bin/bash \
+gcr.io/jk-mlops-dev/alphafold
+
+
+#

@@ -1,0 +1,59 @@
+name: Import sequence
+inputs:
+- {name: sequence_path, type: String}
+outputs:
+- {name: sequence, type: Dataset}
+implementation:
+  container:
+    image: gcr.io/jk-mlops-dev/alphafold
+    command:
+    - sh
+    - -c
+    - |2
+
+      if ! [ -x "$(command -v pip)" ]; then
+          python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip
+      fi
+
+      PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && "$0" "$@"
+    - sh
+    - -ec
+    - |
+      program_path=$(mktemp -d)
+      printf "%s" "$0" > "$program_path/ephemeral_component.py"
+      python3 -m kfp.v2.components.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+    - |2+
+
+      import kfp
+      from kfp.v2 import dsl
+      from kfp.v2.dsl import *
+      from typing import *
+
+      def import_sequence(
+          sequence_path: str,
+          sequence: Output[Dataset],
+      ):
+          from alphafold.data import parsers
+          from google.cloud import storage
+
+          client = storage.Client()
+          with open(sequence.path, 'wb') as f:
+              client.download_blob_to_file(sequence_path, f)
+
+          with open(sequence.path) as f:
+              sequence_str = f.read()
+          seqs, seq_descs = parsers.parse_fasta(sequence_str)
+
+          if len(seqs) !=1:
+              raise ValueError(f'More than one sequence found in {sequence_path}. Unsupported')
+
+          sequence.metadata['sequence']=seqs[0]
+          sequence.metadata['description']=seq_descs[0]
+          sequence.metadata['data_format']='fasta'
+          sequence.metadata['number of residues']=len(seqs[0])
+
+    args:
+    - --executor_input
+    - {executorInput: null}
+    - --function_to_execute
+    - import_sequence

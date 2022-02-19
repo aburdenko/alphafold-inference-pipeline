@@ -31,12 +31,22 @@ def jackhmmer(
     reference_databases: Input[Dataset],
     sequence: Input[Dataset],
     msa: Output[Dataset],
+    cls_logging: Output[Artifact],
     maxseq:int=10_000,
     machine_type:str='n1-standard-8',
     boot_disk_size:int=100,
     n_cpu:int=8,
     ):
-    """Searches the specified database using jackhmmer. """
+    """Searches the specified database using jackhmmer.
+
+    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
+    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.
+    GCSFuse does not perform well with genetic database search tools .
+
+    The prototype also lacks job control. If a pipeline step fails, the CLS job can get 
+    orphaned
+
+    """
     
     import logging
     import os
