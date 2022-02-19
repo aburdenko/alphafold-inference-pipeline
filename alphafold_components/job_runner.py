@@ -103,14 +103,14 @@ class JobRunner():
         return job_name 
 
 
-    def poll_job(self, get_job_fn, job_name: str):
+    def poll_job(self, job_name: str):
         """Poll the job status."""
         with execution_context.ExecutionContext(
             on_cancel=lambda: self.send_cancel_request(job_name)):
             retry_count = 0
             while True:
                 try:
-                    get_job_response = self.job_client.get_custom_job(job_name) 
+                    get_job_response = self.job_client.get_custom_job(name=job_name) 
                     retry_count = 0
                 # Handle transient connection error.
                 except ConnectionError as err:
@@ -129,16 +129,13 @@ class JobRunner():
                         raise
 
                 if get_job_response.state == gca_job_state.JobState.JOB_STATE_SUCCEEDED:
-                    logging.info('Get%s response state =%s', self.job_type,
-                                    get_job_response.state)
+                    logging.info('Job completed successfully =%s', get_job_response.state)
                     return get_job_response
                 elif get_job_response.state in _JOB_ERROR_STATES:
-                    # TODO(ruifang) propagate the error.
-                    raise RuntimeError('Job failed with error state: {}.'.format(
-                        get_job_response.state))
+                    raise RuntimeError(f'Job failed with error state: {get_job_response.state}.')
                 else:
                     logging.info(
-                        'Job %s is in a non-final state %s.'
+                        'Job %s is running:  %s.'
                         ' Waiting for %s seconds for next poll.', job_name,
                         get_job_response.state, _POLLING_INTERVAL_IN_SECONDS)
                     time.sleep(_POLLING_INTERVAL_IN_SECONDS)

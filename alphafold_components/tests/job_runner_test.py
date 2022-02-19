@@ -37,6 +37,12 @@ NFS_ROOT_PATH = '/datasets_v1'
 MOUNT_PATH = '/mnt/nfs/alphafold' 
 IMAGE = 'gcr.io/jk-mlops-dev/nfs-test'
 SUBFOLDER='test'
+SLEEP_TIME=120
+
+logging.basicConfig(format='%(asctime)s - %(message)s',
+                    level=logging.INFO, 
+                    datefmt='%d-%m-%y %H:%M:%S',
+                    stream=sys.stdout)
 
 def test_create_job():
 
@@ -57,6 +63,7 @@ def test_create_job():
             "args": [ "task.py",
                 f"--mount_root_path={MOUNT_PATH}",
                 f"--subfolder={SUBFOLDER}",
+                f"--sleep_time={SLEEP_TIME}",
             ],
         },
     }      
@@ -75,4 +82,6 @@ def test_create_job():
     job_runner = JobRunner(project=PROJECT, location=LOCATION) 
     result = job_runner.create_custom_job(job_name, custom_job_spec)
     print(result)
+
+    job_runner.poll_job(result)
 

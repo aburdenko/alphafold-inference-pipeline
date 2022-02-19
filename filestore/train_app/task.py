@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import argparse
+import time
 
 from datetime import datetime
 
@@ -11,6 +12,12 @@ MY_FILE_CONTENT='Hello vertex AI'  #@param {type:"string"}
 def main(args):
   # WRITE YOUR TRAINING CODE HERE
   # For now we just write a file to the NFS and verify the file exists here
+
+  sleep_time = int(args.sleep_time)
+  print(f'Sleeping for a {args.sleep_time}')
+  time.sleep(sleep_time)
+  return
+
   assert (os.path.exists(args.mount_root_path)),"Mounted Path Not Found"
   print("Files in folder {} are:\n".format(args.mount_root_path))
   print(os.listdir(args.mount_root_path))
@@ -49,6 +56,10 @@ if __name__ == "__main__":
       '--subfolder',
       help='The subfolder under the mount path for writing files',
       default='public')
+  PARSER.add_argument(
+      '--sleep_time',
+      help='Sleep time',
+      default=120)
   
   ARGUMENTS, _ = PARSER.parse_known_args()
 
