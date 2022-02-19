@@ -30,6 +30,7 @@ from typing import List
 from alphafold_components.job_runner import JobRunner
 
 PROJECT='jk-mlops-dev'
+PROJECT_NUMBER='895222332033'
 LOCATION='us-central1'
 
 NFS_SERVER = '10.71.1.10'
@@ -38,6 +39,7 @@ MOUNT_PATH = '/mnt/nfs/alphafold'
 IMAGE = 'gcr.io/jk-mlops-dev/nfs-test'
 SUBFOLDER='test'
 SLEEP_TIME=120
+NETWORK = f'projects/{PROJECT_NUMBER}/global/networks/default' 
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     level=logging.INFO, 
@@ -52,11 +54,11 @@ def test_create_job():
             'machine_type': 'n1-standard-8'
         },
         'replica_count': 1,
-   #"nfs_mounts": [{
-   #     "server": NFS_SERVER,
-   #     "path": NFS_ROOT_PATH,
-   #     "mount_point": MOUNT_PATH,
-   # }],
+        "nfs_mounts": [{
+            "server": NFS_SERVER,
+            "path": NFS_ROOT_PATH,
+            "mount_point": MOUNT_PATH,
+        }],
         "container_spec": {
             "image_uri": IMAGE,
             "command": ["python"],
@@ -74,8 +76,9 @@ def test_create_job():
         'job_spec': {
             'worker_pool_specs': [
                 master_spec
-            ]
-        } 
+            ],
+            'network': NETWORK, 
+        },
     }
 
     print('\n')

@@ -95,7 +95,7 @@ def _main(argv):
             "network": network,
         } 
     }
-
+    print(endpoint)
     pp=pprint.PrettyPrinter()
     pp.pprint(custom_job)
 

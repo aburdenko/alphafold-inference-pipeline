@@ -24,7 +24,7 @@ import time
 
 from typing import List, Optional, Mapping
 
-from google.cloud import aiplatform
+from google.cloud.aiplatform_v1beta1 import JobServiceClient
 from google.cloud.aiplatform_v1.types import job_state as gca_job_state
 import google.auth
 from google.protobuf import json_format
@@ -62,45 +62,40 @@ class JobRunner():
         self.client_options = {
             'api_endpoint': f'{location}-aiplatform.googleapis.com'
         }
-        self.job_client = aiplatform.gapic.JobServiceClient(
+        self.job_client = JobServiceClient(
             client_options=self.client_options
         )
-        self.job_uri_prefix = f"{self.client_options['api_endpoint']}/v1/" #beta1/projects/{project}/locations/{location}/customJobs'
-        self.poll_job_name = ''
 
     def check_if_job_exists(self) -> Optional[str]:
         """Check if the job already exists."""
         pass
 
-
-   # def create_job(self, job_name: str, worker_pool_specs: dict, network: str) -> str:
-   #     """Create a job."""
-
-   #     credentials, _ = google.auth.default()
-   #     authed_session = google.auth.transport.requests.AuthorizedSession(credentials)
-
-   #     custom_job = {
-   #         "display_name": job_name,
-   #         "job_spec": {
-   #             "worker_poll_specs": worker_pool_specs 
-   #         },
-   #         "network": network,
-   #     }
-
-   #     response = authed_session.post(self.job_uri, data=json.dumps(custom_job))
-
-    def create_custom_job(self, job_name, custom_job_spec) -> str:
+   
+    # For now we have to call the REST API directly as SDK does not support 
+    # NFS mount section
+    def create_custom_job(self, job_name: str, custom_job_spec: dict) -> str:
         """Create a job."""
-        parent = f'projects/{self.project}/locations/{self.location}'
 
-        create_job_response = self.job_client.create_custom_job(
-            parent=parent,
-            custom_job=custom_job_spec
-        )
+        credentials, _ = google.auth.default()
+        authed_session = google.auth.transport.requests.AuthorizedSession(credentials)
+        job_uri = f'https://{self.location}-aiplatform.googleapis.com/v1beta1/projects/{self.project}/locations/{self.location}/customJobs'
+        response = authed_session.post(job_uri, data=json.dumps(custom_job_spec))
 
-        job_name = create_job_response.name
+        return response.json()['name']
+    
 
-        return job_name 
+    #def create_custom_job(self, job_name: str, custom_job_spec: dict) -> str:
+    #    """Create a job."""
+    #    parent = f'projects/{self.project}/locations/{self.location}'
+
+    #    create_job_response = self.job_client.create_custom_job(
+    #        parent=parent,
+    #        custom_job=custom_job_spec
+    #    )
+
+    #    job_name = create_job_response.name
+
+    #    return job_name 
 
 
     def poll_job(self, job_name: str):
@@ -120,7 +115,7 @@ class JobRunner():
                             'ConnectionError (%s) encountered when polling job: %s. Trying to '
                             'recreate the API client.', err, job_name)
                         # Recreate the Python API client.
-                        self.job_client = aiplatform.gapic.JobServiceClient(
+                        self.job_client = JobServiceClient(
                             self.client_options)
                     else:
                         logging.error('Request failed after %s retries.',
