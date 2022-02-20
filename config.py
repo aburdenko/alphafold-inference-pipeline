@@ -19,7 +19,7 @@ PIPELINE_DESCRIPTION = 'Alphafold inference'
 
 REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
 REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
-REFERENCE_DATASETS_URI = '10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,default'
+REFERENCE_DATASETS_URI = '10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,projects/895222332033/global/networks/default'
 MODEL_PARAMS_GCS_LOCATION='gs://jk-alphafold-datasets-archive/jan-22/params'
 MODEL_PARAMS_URI='gs://jk-alphafold-datasets-archive/jan-22/params'
 

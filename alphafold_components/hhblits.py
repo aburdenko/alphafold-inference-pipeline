@@ -25,7 +25,6 @@ import config
 )
 def hhblits(
     project: str,
-    project_number: str,
     region: str,
     msa_dbs: list,
     reference_databases: Input[Dataset],
@@ -60,8 +59,7 @@ def hhblits(
     database_paths = [reference_databases.metadata[database] for database in msa_dbs] 
     database_paths = ','.join(database_paths)
 
-    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')
-    network = f'projects/{project_number}/global/networks/{network_name}'    
+    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')
     params = {
         'INPUT_PATH': sequence.uri,
         'OUTPUT_PATH': msa.uri,

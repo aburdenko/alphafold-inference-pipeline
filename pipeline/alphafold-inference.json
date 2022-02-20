@@ -1,6 +1,388 @@
 {
   "pipelineSpec": {
     "components": {
+      "comp-aggregate-features": {
+        "executorLabel": "exec-aggregate-features",
+        "inputDefinitions": {
+          "artifacts": {
+            "msa1": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa2": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa3": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa4": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "template_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-for-loop-1": {
+        "dag": {
+          "tasks": {
+            "predict": {
+              "cachingOptions": {
+                "enableCache": true
+              },
+              "componentRef": {
+                "name": "comp-predict"
+              },
+              "inputs": {
+                "artifacts": {
+                  "model_features": {
+                    "componentInputArtifact": "pipelineparam--aggregate-features-features"
+                  },
+                  "model_params": {
+                    "componentInputArtifact": "pipelineparam--importer-2-artifact"
+                  }
+                },
+                "parameters": {
+                  "model_name": {
+                    "componentInputParameter": "pipelineparam--models-loop-item",
+                    "parameterExpressionSelector": "parseJson(string_value)[\"model_name\"]"
+                  },
+                  "num_ensemble": {
+                    "componentInputParameter": "pipelineparam--num_ensemble"
+                  },
+                  "random_seed": {
+                    "componentInputParameter": "pipelineparam--models-loop-item",
+                    "parameterExpressionSelector": "parseJson(string_value)[\"random_seed\"]"
+                  }
+                }
+              },
+              "taskInfo": {
+                "name": "Predict"
+              }
+            },
+            "relax": {
+              "cachingOptions": {
+                "enableCache": true
+              },
+              "componentRef": {
+                "name": "comp-relax"
+              },
+              "dependentTasks": [
+                "predict"
+              ],
+              "inputs": {
+                "artifacts": {
+                  "unrelaxed_protein": {
+                    "taskOutputArtifact": {
+                      "outputArtifactKey": "unrelaxed_protein",
+                      "producerTask": "predict"
+                    }
+                  }
+                },
+                "parameters": {
+                  "exclude_residues": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "stringValue": "[]"
+                      }
+                    }
+                  },
+                  "max_iterations": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "intValue": "0"
+                      }
+                    }
+                  },
+                  "max_outer_iterations": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "intValue": "3"
+                      }
+                    }
+                  },
+                  "stiffness": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "doubleValue": 10.0
+                      }
+                    }
+                  },
+                  "tolerance": {
+                    "runtimeValue": {
+                      "constantValue": {
+                        "doubleValue": 2.39
+                      }
+                    }
+                  },
+                  "use_gpu": {
+                    "componentInputParameter": "pipelineparam--use_gpu_for_relaxation"
+                  }
+                }
+              },
+              "taskInfo": {
+                "name": "Relax protein"
+              }
+            }
+          }
+        },
+        "inputDefinitions": {
+          "artifacts": {
+            "pipelineparam--aggregate-features-features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "pipelineparam--importer-2-artifact": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "pipelineparam--models": {
+              "type": "STRING"
+            },
+            "pipelineparam--models-loop-item": {
+              "type": "STRING"
+            },
+            "pipelineparam--num_ensemble": {
+              "type": "INT"
+            },
+            "pipelineparam--use_gpu_for_relaxation": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-hhblits": {
+        "executorLabel": "exec-hhblits",
+        "inputDefinitions": {
+          "artifacts": {
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "boot_disk_size": {
+              "type": "INT"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "maxseq": {
+              "type": "INT"
+            },
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "n_cpu": {
+              "type": "INT"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-hhblits-2": {
+        "executorLabel": "exec-hhblits-2",
+        "inputDefinitions": {
+          "artifacts": {
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "boot_disk_size": {
+              "type": "INT"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "maxseq": {
+              "type": "INT"
+            },
+            "msa_dbs": {
+              "type": "STRING"
+            },
+            "n_cpu": {
+              "type": "INT"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "msa": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-hhsearch": {
+        "executorLabel": "exec-hhsearch",
+        "inputDefinitions": {
+          "artifacts": {
+            "msa": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "reference_databases": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "sequence": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "boot_disk_size": {
+              "type": "INT"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "max_template_date": {
+              "type": "STRING"
+            },
+            "max_template_hits": {
+              "type": "INT"
+            },
+            "maxseq": {
+              "type": "INT"
+            },
+            "mmcif_db": {
+              "type": "STRING"
+            },
+            "obsolete_db": {
+              "type": "STRING"
+            },
+            "project": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            },
+            "template_dbs": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "cls_logging": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "template_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "template_hits": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
       "comp-importer": {
         "executorLabel": "exec-importer",
         "inputDefinitions": {
@@ -97,9 +479,6 @@
             "project": {
               "type": "STRING"
             },
-            "project_number": {
-              "type": "STRING"
-            },
             "region": {
               "type": "STRING"
             }
@@ -158,9 +537,6 @@
             "project": {
               "type": "STRING"
             },
-            "project_number": {
-              "type": "STRING"
-            },
             "region": {
               "type": "STRING"
             }
@@ -182,10 +558,179 @@
             }
           }
         }
+      },
+      "comp-predict": {
+        "executorLabel": "exec-predict",
+        "inputDefinitions": {
+          "artifacts": {
+            "model_features": {
+              "artifactType": {
+                "schemaTitle": "system.Dataset",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "model_params": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "model_name": {
+              "type": "STRING"
+            },
+            "num_ensemble": {
+              "type": "INT"
+            },
+            "random_seed": {
+              "type": "INT"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "raw_prediction": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            },
+            "unrelaxed_protein": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
+      },
+      "comp-relax": {
+        "executorLabel": "exec-relax",
+        "inputDefinitions": {
+          "artifacts": {
+            "unrelaxed_protein": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          },
+          "parameters": {
+            "exclude_residues": {
+              "type": "STRING"
+            },
+            "max_iterations": {
+              "type": "INT"
+            },
+            "max_outer_iterations": {
+              "type": "INT"
+            },
+            "stiffness": {
+              "type": "DOUBLE"
+            },
+            "tolerance": {
+              "type": "DOUBLE"
+            },
+            "use_gpu": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "relaxed_protein": {
+              "artifactType": {
+                "schemaTitle": "system.Artifact",
+                "schemaVersion": "0.0.1"
+              }
+            }
+          }
+        }
       }
     },
     "deploymentSpec": {
       "executors": {
+        "exec-aggregate-features": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "aggregate_features"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef aggregate_features(\n    sequence: Input[Dataset],\n    msa1: Input[Dataset],\n    msa2: Input[Dataset],\n    msa3: Input[Dataset],\n    msa4: Input[Dataset],\n    template_features: Input[Dataset],\n    features: Output[Dataset]):\n    \"\"\"Aggregates MSAs and template features to create model features \n\n    In the prototype, we assume a fixed number of inputs, mirroring the sample\n    inference pipeline from DeepMind. When it comes to productionizing we should\n    consider \"dynamic\" at runtime or at least highly configurable at compile time\n    component.\n\n    \"\"\"\n\n    import os\n    import logging\n    import numpy as np\n    import pickle\n    import time\n\n\n    from alphafold.common import residue_constants\n    from alphafold.data import msa_identifiers\n    from alphafold.data import parsers\n    from alphafold.data import templates\n\n\n\n    def _make_sequence_features(\n        sequence: str, description: str, num_res: int) -> dict:\n        \"\"\"Constructs a feature dict of sequence features.\"\"\"\n        features = {}\n        features['aatype'] = residue_constants.sequence_to_onehot(\n            sequence=sequence,\n            mapping=residue_constants.restype_order_with_x,\n            map_unknown_to_x=True)\n        features['between_segment_residues'] = np.zeros((num_res,), dtype=np.int32)\n        features['domain_name'] = np.array([description.encode('utf-8')],\n                                        dtype=np.object_)\n        features['residue_index'] = np.array(range(num_res), dtype=np.int32)\n        features['seq_length'] = np.array([num_res] * num_res, dtype=np.int32)\n        features['sequence'] = np.array([sequence.encode('utf-8')], dtype=np.object_)\n        return features\n\n\n    def _make_msa_features(msas: Sequence[parsers.Msa]) -> dict:\n        \"\"\"Constructs a feature dict of MSA features.\"\"\"\n        if not msas:\n            raise ValueError('At least one MSA must be provided.')\n\n        int_msa = []\n        deletion_matrix = []\n        uniprot_accession_ids = []\n        species_ids = []\n        seen_sequences = set()\n        for msa_index, msa in enumerate(msas):\n            if not msa:\n                raise ValueError(f'MSA {msa_index} must contain at least one sequence.')\n            for sequence_index, sequence in enumerate(msa.sequences):\n                if sequence in seen_sequences:\n                    continue\n                seen_sequences.add(sequence)\n                int_msa.append(\n                    [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])\n                deletion_matrix.append(msa.deletion_matrix[sequence_index])\n                identifiers = msa_identifiers.get_identifiers(\n                    msa.descriptions[sequence_index])\n                uniprot_accession_ids.append(\n                    identifiers.uniprot_accession_id.encode('utf-8'))\n                species_ids.append(identifiers.species_id.encode('utf-8'))\n\n        num_res = len(msas[0].sequences[0])\n        num_alignments = len(int_msa)\n        features = {}\n        features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)\n        features['msa'] = np.array(int_msa, dtype=np.int32)\n        features['num_alignments'] = np.array(\n            [num_alignments] * num_res, dtype=np.int32)\n        features['msa_uniprot_accession_identifiers'] = np.array(\n            uniprot_accession_ids, dtype=np.object_)\n        features['msa_species_identifiers'] = np.array(species_ids, dtype=np.object_)\n        return features\n\n\n    def _read_msa(msa_path: str, msa_format: str):\n\n        if os.path.exists(msa_path):\n            with open(msa_path) as f:\n                msa = f.read()\n            if msa_format == 'sto':\n                msa = parsers.parse_stockholm(msa)\n            elif msa_format == 'a3m':\n                msa = parsers.parse_a3m(msa)\n            else:\n                raise RuntimeError(f'Unsupported MSA format: {msa_format}') \n        return msa\n\n    def _read_sequence(sequence_path: str):\n\n        with open(sequence_path) as f:\n            sequence_str = f.read()\n        sequences, sequence_descs = parsers.parse_fasta(sequence_str)\n        if len(sequences) != 1:\n            raise ValueError(\n                f'More than one input sequence found in {sequence_path}.')\n\n        return sequences[0], sequence_descs[0], len(sequences[0])\n\n\n    def _read_template_features(template_features_path):\n        with open(template_features_path, 'rb') as f:\n            template_features = pickle.load(f)\n        return template_features\n\n    t0 = time.time()\n    logging.info('Starting feature aggregation ...')\n\n    # Create sequence features\n    seq, seq_desc, num_res = _read_sequence(sequence.path) \n    sequence_features = _make_sequence_features(\n        sequence=seq,\n        description=seq_desc,\n        num_res=num_res)\n\n    msas = []\n    msas.append(_read_msa(msa1.path, msa1.metadata['data_format']))\n    msas.append(_read_msa(msa2.path, msa2.metadata['data_format']))\n    msas.append(_read_msa(msa3.path, msa3.metadata['data_format']))\n    msas.append(_read_msa(msa4.path, msa4.metadata['data_format']))\n    if not msas:\n        raise RuntimeError('No MSAs passed to the component')\n    msa_features = _make_msa_features(msas=msas)\n\n    # Create template features\n    template_features = _read_template_features(template_features.path)\n\n    model_features = {\n        **sequence_features,\n        **msa_features,\n        **template_features\n    }\n\n    features_path = features.path\n    features.metadata['data_format'] = 'pkl'\n    with open(features_path, 'wb') as f:\n        pickle.dump(model_features, f, protocol=4)\n\n    t1 = time.time()\n    logging.info(f'Feature aggregation completed. Elapsed time: {t1-t0}')\n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-hhblits": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "hhblits"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef hhblits(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=1_000_000,\n    machine_type:str='c2-standard-16',\n    boot_disk_size:int=200,\n    n_cpu:int=12, \n    ):\n    \"\"\"Searches sequence databases using hhblits.\"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n\n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n            raise RuntimeError(f'HHBlits cannot be used with {database} database.')\n\n    database_paths = [reference_databases.metadata[database] for database in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'HHBLITS_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    ) \n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_a3m(msa_str)\n    msa.metadata['data_format'] = 'a3m'  \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-hhblits-2": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "hhblits"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef hhblits(\n    project: str,\n    region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=1_000_000,\n    machine_type:str='c2-standard-16',\n    boot_disk_size:int=200,\n    n_cpu:int=12, \n    ):\n    \"\"\"Searches sequence databases using hhblits.\"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n\n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n            raise RuntimeError(f'HHBlits cannot be used with {database} database.')\n\n    database_paths = [reference_databases.metadata[database] for database in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'HHBLITS_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    ) \n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_a3m(msa_str)\n    msa.metadata['data_format'] = 'a3m'  \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences) \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-hhsearch": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "hhsearch"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef hhsearch(\n    project: str,\n    region: str,\n    template_dbs: list,\n    mmcif_db: str,\n    obsolete_db: str,\n    max_template_date: str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Input[Dataset],\n    template_hits: Output[Dataset],\n    template_features: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=1_000_000,\n    max_template_hits:int=20, \n    machine_type:str='c2-standard-8',\n    boot_disk_size:int=200,\n    ):\n    \"\"\"Searches for protein templates \"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from job_runner import CustomJob\n    from dsub_wrapper import run_dsub_job\n\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n                      level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\n    database_paths = [reference_databases.metadata[database]\n                      for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n    params = {\n        'INPUT_SEQUENCE_PATH': sequence.uri,\n        'INPUT_MSA_PATH': msa.uri,\n        'MSA_DATA_FORMAT': msa.metadata['data_format'],\n        'OUTPUT_TEMPLATE_HITS_PATH': template_hits.uri,\n        'OUTPUT_TEMPLATE_FEATURES_PATH': template_features.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n        'MMCIF_PATH': reference_databases.metadata[mmcif_db],\n        'OBSOLETE_PATH': reference_databases.metadata[obsolete_db],\n        'MAXSEQ': str(maxseq),\n        'MAX_TEMPLATE_HITS': str(max_template_hits),\n        'MAX_TEMPLATE_DATE': max_template_date,\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(template_hits.path) as f:\n        hhr_str = f.read()\n    parsed_hhr = parsers.parse_hhr(hhr_str)\n    template_hits.metadata['data_format'] = 'hhr'\n    template_hits.metadata['num of hits'] = len(parsed_hhr)\n    template_features.metadata['data_format'] = 'pkl' \n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
         "exec-importer": {
           "importer": {
             "artifactUri": {
@@ -245,7 +790,7 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef jackhmmer(\n    project: str,\n    project_number: str,\n    region: str,\n    database: str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=10_000,\n    n_cpu:int=8,\n    machine_type:str='n1-standard-8',\n    boot_disk_size:int=200,\n    ):\n    \"\"\"Searches the specified database using jackhmmer.  \"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['uniref90', 'mgnify']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  \n\n    #logging.basicConfig(format='%(asctime)s - %(message)s',\n    #                  level=logging.INFO, \n    #                  datefmt='%d-%m-%y %H:%M:%S',\n    #                  stream=sys.stdout)\n\n    if not (str(database) in _SUPPORTED_DATABASES):\n        raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\n    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')\n    network = f'projects/{project_number}/global/networks/{network_name}'    \n\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATH': reference_databases.metadata[database],\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_stockholm(msa_str)\n    msa.metadata['data_format'] = 'sto' \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  \n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef jackhmmer(\n    project: str,\n    region: str,\n    database: str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=10_000,\n    n_cpu:int=8,\n    machine_type:str='n1-standard-8',\n    boot_disk_size:int=200,\n    ):\n    \"\"\"Searches the specified database using jackhmmer.  \"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['uniref90', 'mgnify']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  \n\n\n    if not (str(database) in _SUPPORTED_DATABASES):\n        raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATH': reference_databases.metadata[database],\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_stockholm(msa_str)\n    msa.metadata['data_format'] = 'sto' \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  \n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components"
           }
@@ -265,9 +810,75 @@
               "sh",
               "-ec",
               "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef jackhmmer(\n    project: str,\n    project_number: str,\n    region: str,\n    database: str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=10_000,\n    n_cpu:int=8,\n    machine_type:str='n1-standard-8',\n    boot_disk_size:int=200,\n    ):\n    \"\"\"Searches the specified database using jackhmmer.  \"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['uniref90', 'mgnify']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  \n\n    #logging.basicConfig(format='%(asctime)s - %(message)s',\n    #                  level=logging.INFO, \n    #                  datefmt='%d-%m-%y %H:%M:%S',\n    #                  stream=sys.stdout)\n\n    if not (str(database) in _SUPPORTED_DATABASES):\n        raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\n    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')\n    network = f'projects/{project_number}/global/networks/{network_name}'    \n\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATH': reference_databases.metadata[database],\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_stockholm(msa_str)\n    msa.metadata['data_format'] = 'sto' \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  \n\n"
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef jackhmmer(\n    project: str,\n    region: str,\n    database: str,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=10_000,\n    n_cpu:int=8,\n    machine_type:str='n1-standard-8',\n    boot_disk_size:int=200,\n    ):\n    \"\"\"Searches the specified database using jackhmmer.  \"\"\"\n\n    import logging\n    import os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['uniref90', 'mgnify']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  \n\n\n    if not (str(database) in _SUPPORTED_DATABASES):\n        raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')\n\n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH': msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATH': reference_databases.metadata[database],\n        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n        display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n        project=project,\n        location=region,\n        machine_type=machine_type,\n        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n        env_variables=params,\n    )\n    custom_job.run(\n       network=network\n    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(msa.path) as f:\n        msa_str = f.read()\n    parsed_msa = parsers.parse_stockholm(msa_str)\n    msa.metadata['data_format'] = 'sto' \n    msa.metadata['num of sequences'] = len(parsed_msa.sequences)  \n\n"
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components"
+          }
+        },
+        "exec-predict": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "predict"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef predict(\n    model_features: Input[Dataset],\n    model_params: Input[Artifact],\n    model_name: str,\n    num_ensemble: int,\n    random_seed: int,\n    raw_prediction: Output[Artifact],\n    unrelaxed_protein: Output[Artifact]\n):\n\n    import io\n    import os\n    import logging\n    import numpy as np\n    import pickle\n    import haiku as hk\n    import time\n\n    from alphafold.model import config\n    from alphafold.model import model\n    from alphafold.model import utils\n    from alphafold.common import residue_constants\n    from alphafold.common import protein\n\n    def _get_model_haiku_params(model_name: str,\n                                params_dir: str):\n        \"\"\"Get the Haiku parameters from a model name.\"\"\"\n\n        path = os.path.join(params_dir, f'params_{model_name}.npz')\n        with open(path, 'rb') as f:\n            params = np.load(io.BytesIO(f.read()), allow_pickle=False)\n\n        return utils.flat_params_to_haiku(params)\n\n    def _load_features(features_path):\n        features_path = model_features.path\n        with open(features_path, 'rb') as f:\n            features = pickle.load(f)\n        return features\n\n\n    t0 = time.time()\n    logging.info('Starting model predict ...')\n\n    model_config = config.model_config(model_name)\n\n    # we assume  a monomer pipeline in a POC\n    model_config.data.eval.num_ensemble = num_ensemble\n    model_params = _get_model_haiku_params(\n        model_name=model_name, params_dir=model_params.path)\n    model_runner = model.RunModel(model_config, model_params)\n\n    features = _load_features(model_features.path)\n    logging.info(f'Running prediction using model {model_name}')\n    processed_feature_dict = model_runner.process_features(\n        raw_features=features,\n        random_seed=random_seed\n    )\n    prediction_result = model_runner.predict(\n        feat=processed_feature_dict,\n        random_seed=random_seed\n    )\n\n    logging.info(f'Writing model {model_name} prediction to {raw_prediction.path}') \n    with open(raw_prediction.path, 'wb') as f:\n        pickle.dump(prediction_result, f, protocol=4)\n    raw_prediction.metadata['ranking_confidence']=prediction_result['ranking_confidence']\n    raw_prediction.metadata['data_format']='pkl'\n\n    plddt = prediction_result['plddt']\n    plddt_b_factors = np.repeat(\n        plddt[:, None], residue_constants.atom_type_num, axis=-1)\n    unrelaxed_structure= protein.from_prediction(\n        features=processed_feature_dict,\n        result=prediction_result,\n        b_factors=plddt_b_factors,\n        remove_leading_feature_dimension=not model_runner.multimer_mode)\n    unrelaxed_pdbs = protein.to_pdb(unrelaxed_structure)\n\n    logging.info(f'Writing unrelaxed protein generated by {model_name} to {unrelaxed_protein.path}') \n    with open(unrelaxed_protein.path, 'w') as f:\n        f.write(unrelaxed_pdbs)\n    unrelaxed_protein.metadata['data_format']='pdb'\n\n    t1 = time.time()\n    logging.info(f'Model completed. Elapsed time: {t1-t0}')\n\n"
+            ],
+            "env": [
+              {
+                "name": "TF_FORCE_UNIFIED_MEMORY",
+                "value": "1"
+              },
+              {
+                "name": "XLA_PYTHON_CLIENT_MEM_FRACTION",
+                "value": "2.0"
+              }
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components",
+            "resources": {
+              "accelerator": {
+                "count": "1",
+                "type": "NVIDIA_TESLA_A100"
+              },
+              "cpuLimit": 12.0,
+              "memoryLimit": 8.5e-08
+            }
+          }
+        },
+        "exec-relax": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "relax"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.11' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef relax(\n    unrelaxed_protein: Input[Artifact],\n    relaxed_protein: Output[Artifact],\n    max_iterations: int=0,\n    tolerance: float=2.39,\n    stiffness: float=10.0,\n    exclude_residues: list=[],\n    max_outer_iterations: int=3,\n    use_gpu: bool=True,\n):\n    import logging\n    import os\n    import time\n\n    from alphafold.common import protein\n    from alphafold.relax import relax\n\n\n    if not os.path.exists(unrelaxed_protein.path):\n        raise RuntimeError(f'Invalid path to unrelaxed structure: {unrelaxed_protein.path}')\n\n    t0 = time.time()\n    logging.info('Starting model relaxation ...')\n\n    with open(unrelaxed_protein.path, 'r') as f:\n        unrelaxed_protein_pdb=f.read();\n\n    logging.info(f'Starting relaxation process ...') \n    unrelaxed_structure = protein.from_pdb_string(unrelaxed_protein_pdb)\n    amber_relaxer = relax.AmberRelaxation(\n        max_iterations=max_iterations,\n        tolerance=tolerance,\n        stiffness=stiffness,\n        exclude_residues=exclude_residues,\n        max_outer_iterations=max_outer_iterations,\n        use_gpu=use_gpu)\n    relaxed_protein_pdb, _, _ = amber_relaxer.process(prot=unrelaxed_structure)\n\n    logging.info(f'Saving relaxed protein to {relaxed_protein.path}')\n    with open(relaxed_protein.path, 'w') as f:\n        f.write(relaxed_protein_pdb)\n    relaxed_protein.metadata['data_format']='pdb'\n\n    t1 = time.time()\n    logging.info(f'Model relaxation. Elapsed time: {t1-t0}')\n\n"
+            ],
+            "image": "gcr.io/jk-mlops-dev/alphafold-components",
+            "resources": {
+              "accelerator": {
+                "count": "1",
+                "type": "NVIDIA_TESLA_A100"
+              },
+              "cpuLimit": 12.0,
+              "memoryLimit": 85.0
+            }
           }
         }
       }
@@ -278,6 +889,356 @@
     "root": {
       "dag": {
         "tasks": {
+          "aggregate-features": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-aggregate-features"
+            },
+            "dependentTasks": [
+              "hhblits",
+              "hhblits-2",
+              "hhsearch",
+              "importer",
+              "jackhmmer",
+              "jackhmmer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "msa1": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "jackhmmer"
+                  }
+                },
+                "msa2": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "jackhmmer-2"
+                  }
+                },
+                "msa3": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "hhblits-2"
+                  }
+                },
+                "msa4": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "hhblits"
+                  }
+                },
+                "sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                },
+                "template_features": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "template_features",
+                    "producerTask": "hhsearch"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Aggregate features"
+            }
+          },
+          "for-loop-1": {
+            "componentRef": {
+              "name": "comp-for-loop-1"
+            },
+            "dependentTasks": [
+              "aggregate-features",
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "pipelineparam--aggregate-features-features": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "features",
+                    "producerTask": "aggregate-features"
+                  }
+                },
+                "pipelineparam--importer-2-artifact": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                }
+              },
+              "parameters": {
+                "pipelineparam--models": {
+                  "componentInputParameter": "models"
+                },
+                "pipelineparam--num_ensemble": {
+                  "componentInputParameter": "num_ensemble"
+                },
+                "pipelineparam--use_gpu_for_relaxation": {
+                  "componentInputParameter": "use_gpu_for_relaxation"
+                }
+              }
+            },
+            "parameterIterator": {
+              "itemInput": "pipelineparam--models-loop-item",
+              "items": {
+                "inputParameter": "pipelineparam--models"
+              }
+            },
+            "taskInfo": {
+              "name": "for-loop-1"
+            }
+          },
+          "hhblits": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-hhblits"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-3"
+            ],
+            "inputs": {
+              "artifacts": {
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-3"
+                  }
+                },
+                "sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              },
+              "parameters": {
+                "boot_disk_size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "200"
+                    }
+                  }
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "c2-standard-16"
+                    }
+                  }
+                },
+                "maxseq": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1000000"
+                    }
+                  }
+                },
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"uniclust30\"]"
+                    }
+                  }
+                },
+                "n_cpu": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "12"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Uniclust"
+            }
+          },
+          "hhblits-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-hhblits-2"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-3"
+            ],
+            "inputs": {
+              "artifacts": {
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-3"
+                  }
+                },
+                "sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              },
+              "parameters": {
+                "boot_disk_size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "200"
+                    }
+                  }
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "c2-standard-16"
+                    }
+                  }
+                },
+                "maxseq": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1000000"
+                    }
+                  }
+                },
+                "msa_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"bfd\"]"
+                    }
+                  }
+                },
+                "n_cpu": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "12"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search BFD"
+            }
+          },
+          "hhsearch": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-hhsearch"
+            },
+            "dependentTasks": [
+              "importer",
+              "importer-3",
+              "jackhmmer"
+            ],
+            "inputs": {
+              "artifacts": {
+                "msa": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "msa",
+                    "producerTask": "jackhmmer"
+                  }
+                },
+                "reference_databases": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-3"
+                  }
+                },
+                "sequence": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              },
+              "parameters": {
+                "boot_disk_size": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "200"
+                    }
+                  }
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "c2-standard-8"
+                    }
+                  }
+                },
+                "max_template_date": {
+                  "componentInputParameter": "max_template_date"
+                },
+                "max_template_hits": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "20"
+                    }
+                  }
+                },
+                "maxseq": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "intValue": "1000000"
+                    }
+                  }
+                },
+                "mmcif_db": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "pdb_mmcif"
+                    }
+                  }
+                },
+                "obsolete_db": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "pdb_obsolete"
+                    }
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "project"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                },
+                "template_dbs": {
+                  "runtimeValue": {
+                    "constantValue": {
+                      "stringValue": "[\"pdb70\"]"
+                    }
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "Search Pdb"
+            }
+          },
           "importer": {
             "cachingOptions": {
               "enableCache": true
@@ -397,9 +1358,6 @@
                 "project": {
                   "componentInputParameter": "project"
                 },
-                "project_number": {
-                  "componentInputParameter": "project_number"
-                },
                 "region": {
                   "componentInputParameter": "region"
                 }
@@ -474,9 +1432,6 @@
                 "project": {
                   "componentInputParameter": "project"
                 },
-                "project_number": {
-                  "componentInputParameter": "project_number"
-                },
                 "region": {
                   "componentInputParameter": "region"
                 }
@@ -503,9 +1458,6 @@
             "type": "INT"
           },
           "project": {
-            "type": "STRING"
-          },
-          "project_number": {
             "type": "STRING"
           },
           "reference_datasets_uri": {
@@ -546,11 +1498,8 @@
       "project": {
         "stringValue": "jk-mlops-dev"
       },
-      "project_number": {
-        "stringValue": "895222332033"
-      },
       "reference_datasets_uri": {
-        "stringValue": "10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,default"
+        "stringValue": "10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,projects/895222332033/global/networks/default"
       },
       "region": {
         "stringValue": "us-central1"

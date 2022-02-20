@@ -77,7 +77,6 @@ def _main(argv):
         'sequence_desc': FLAGS.sequence_desc,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
-        'project_number': FLAGS.project_number,
         'region': FLAGS.region,
         'models': models,
         'num_ensemble': FLAGS.num_ensemble,

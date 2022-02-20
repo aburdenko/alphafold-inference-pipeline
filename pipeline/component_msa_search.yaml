@@ -2,7 +2,6 @@ name: Hhblits
 description: Searches sequence databases using hhblits.
 inputs:
 - {name: project, type: String}
-- {name: project_number, type: String}
 - {name: region, type: String}
 - {name: msa_dbs, type: JsonArray}
 - {name: reference_databases, type: Dataset}
@@ -34,23 +33,22 @@ implementation:
       printf "%s" "$0" > "$program_path/ephemeral_component.py"
       python3 -m kfp.v2.components.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
     - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
-      \ import *\n\ndef hhblits(\n    project: str,\n    project_number: str,\n  \
-      \  region: str,\n    msa_dbs: list,\n    reference_databases: Input[Dataset],\n\
-      \    sequence: Input[Dataset],\n    msa: Output[Dataset],\n    cls_logging:\
-      \ Output[Artifact],\n    maxseq:int=1_000_000,\n    machine_type:str='c2-standard-16',\n\
-      \    boot_disk_size:int=200,\n    n_cpu:int=12, \n    ):\n    \"\"\"Searches\
-      \ sequence databases using hhblits.\"\"\"\n\n    import logging\n    import\
-      \ os\n    import sys\n    import time\n\n    from alphafold.data import parsers\n\
-      \    from dsub_wrapper import run_dsub_job\n    from job_runner import CustomJob\n\
-      \n    _SUPPORTED_DATABASES = ['bfd', 'uniclust30']\n    _ALPHAFOLD_RUNNER_IMAGE\
-      \ = 'gcr.io/jk-mlops-dev/alphafold-components'\n    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'\
-      \  \n\n\n    for database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n\
+      \ import *\n\ndef hhblits(\n    project: str,\n    region: str,\n    msa_dbs:\
+      \ list,\n    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n\
+      \    msa: Output[Dataset],\n    cls_logging: Output[Artifact],\n    maxseq:int=1_000_000,\n\
+      \    machine_type:str='c2-standard-16',\n    boot_disk_size:int=200,\n    n_cpu:int=12,\
+      \ \n    ):\n    \"\"\"Searches sequence databases using hhblits.\"\"\"\n\n \
+      \   import logging\n    import os\n    import sys\n    import time\n\n    from\
+      \ alphafold.data import parsers\n    from dsub_wrapper import run_dsub_job\n\
+      \    from job_runner import CustomJob\n\n    _SUPPORTED_DATABASES = ['bfd',\
+      \ 'uniclust30']\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n\
+      \    _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  \n\n\n    for\
+      \ database in msa_dbs:\n        if not (database in _SUPPORTED_DATABASES):\n\
       \            raise RuntimeError(f'HHBlits cannot be used with {database} database.')\n\
       \n    database_paths = [reference_databases.metadata[database] for database\
       \ in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    nfs_server,\
-      \ nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')\n\
-      \    network = f'projects/{project_number}/global/networks/{network_name}' \
-      \   \n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH':\
+      \ nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n\
+      \    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH':\
       \ msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n\
       \        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name\
       \ = f'HHBLITS_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n\

@@ -27,7 +27,6 @@ import config
 )
 def hhsearch(
     project: str,
-    project_number: str,
     region: str,
     template_dbs: list,
     mmcif_db: str,
@@ -39,7 +38,6 @@ def hhsearch(
     template_hits: Output[Dataset],
     template_features: Output[Dataset],
     cls_logging: Output[Artifact],
-    n_cpu:int=8,
     maxseq:int=1_000_000,
     max_template_hits:int=20, 
     machine_type:str='c2-standard-8',
@@ -68,19 +66,22 @@ def hhsearch(
                       for database in template_dbs]
     database_paths = ','.join(database_paths)
 
-
-    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')
-    network = f'projects/{project_number}/global/networks/{network_name}'    
+    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')
     params = {
-        'INPUT_PATH': sequence.uri,
-        'OUTPUT_PATH': msa.uri,
+        'INPUT_SEQUENCE_PATH': sequence.uri,
+        'INPUT_MSA_PATH': msa.uri,
+        'MSA_DATA_FORMAT': msa.metadata['data_format'],
+        'OUTPUT_TEMPLATE_HITS_PATH': template_hits.uri,
+        'OUTPUT_TEMPLATE_FEATURES_PATH': template_features.uri,
         'DB_ROOT': mount_path,
-        'DB_PATH': reference_databases.metadata[database],
-        'N_CPU': n_cpu,
-        'MAXSEQ': maxseq
+        'DB_PATHS': database_paths,
+        'MMCIF_PATH': reference_databases.metadata[mmcif_db],
+        'OBSOLETE_PATH': reference_databases.metadata[obsolete_db],
+        'MAXSEQ': str(maxseq),
+        'MAX_TEMPLATE_HITS': str(max_template_hits),
+        'MAX_TEMPLATE_DATE': max_template_date,
     } 
     job_name = f'JACKHMMER_JOB_{time.strftime("%Y%m%d_%H%M%S")}'
-
     t0 = time.time()
     logging.info('Starting database search...')
     custom_job = CustomJob.from_script_in_container(

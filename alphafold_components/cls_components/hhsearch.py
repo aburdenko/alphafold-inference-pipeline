@@ -94,7 +94,6 @@ def hhsearch(
         '--env', f'DB_PATHS={database_paths}',
         '--env', f'MMCIF_PATH={reference_databases.metadata[mmcif_db]}',
         '--env', f'OBSOLETE_PATH={reference_databases.metadata[obsolete_db]}',
-        '--env', f'N_CPU={n_cpu}',
         '--env', f'MAXSEQ={maxseq}', 
         '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',
         '--env', f'MAX_TEMPLATE_DATE={max_template_date}', 

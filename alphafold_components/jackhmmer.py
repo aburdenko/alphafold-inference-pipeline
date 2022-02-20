@@ -27,7 +27,6 @@ import config
 )
 def jackhmmer(
     project: str,
-    project_number: str,
     region: str,
     database: str,
     reference_databases: Input[Dataset],
@@ -54,17 +53,11 @@ def jackhmmer(
     _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'
     _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  
 
-    #logging.basicConfig(format='%(asctime)s - %(message)s',
-    #                  level=logging.INFO, 
-    #                  datefmt='%d-%m-%y %H:%M:%S',
-    #                  stream=sys.stdout)
 
     if not (str(database) in _SUPPORTED_DATABASES):
         raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')
 
-    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')
-    network = f'projects/{project_number}/global/networks/{network_name}'    
-
+    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')
     params = {
         'INPUT_PATH': sequence.uri,
         'OUTPUT_PATH': msa.uri,
@@ -74,7 +67,6 @@ def jackhmmer(
         'MAXSEQ': str(maxseq)
     } 
     job_name = f'JACKHMMER_JOB_{time.strftime("%Y%m%d_%H%M%S")}'
-
     t0 = time.time()
     logging.info('Starting database search...')
     custom_job = CustomJob.from_script_in_container(
