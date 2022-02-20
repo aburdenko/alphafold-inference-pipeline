@@ -25,8 +25,8 @@ import time
 
 from typing import List, Optional, Dict
 
-from google.cloud.aiplatform_v1beta1 import JobServiceClient
-from google.cloud.aiplatform_v1beta1.types import job_state as gca_job_state
+from google.cloud.aiplatform_v1 import JobServiceClient
+from google.cloud.aiplatform_v1.types import job_state as gca_job_state
 
 from google.cloud.aiplatform.utils import source_utils
 from google.cloud.aiplatform.utils import worker_spec_utils
@@ -34,10 +34,10 @@ from google.cloud.aiplatform.utils import worker_spec_utils
 import google.auth
 from google.protobuf import json_format
 
-import config
-from  alphafold_components import execution_context
+#from  alphafold_components import execution_context
+import execution_context
 
-_POLLING_INTERVAL_IN_SECONDS = 20
+_POLLING_INTERVAL_IN_SECONDS = 60 
 _CONNECTION_ERROR_RETRY_LIMIT = 5
 
 _JOB_COMPLETE_STATES = (
@@ -102,7 +102,7 @@ class CustomJob():
 
         credentials, _ = google.auth.default()
         authed_session = google.auth.transport.requests.AuthorizedSession(credentials)
-        job_uri = f'https://{self.location}-aiplatform.googleapis.com/v1beta1/projects/{self.project}/locations/{self.location}/customJobs'
+        job_uri = f'https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project}/locations/{self.location}/customJobs'
         response = authed_session.post(job_uri, data=json.dumps(self.custom_job_spec))
 
         if response.status_code != 200:
@@ -150,8 +150,6 @@ class CustomJob():
                         # TODO(ruifang) propagate the error.
                         raise
 
-                print(get_job_response.state)
-                print(get_job_response.state == gca_job_state.JobState.JOB_STATE_SUCCEEDED)
                 if get_job_response.state == gca_job_state.JobState.JOB_STATE_SUCCEEDED:
                     logging.info('Job completed successfully =%s', get_job_response.state)
                     return get_job_response
@@ -180,7 +178,8 @@ class CustomJob():
         ) -> None:
 
             """Run this configured CustomJob."""
-
+            
+            self.custom_job_spec['job_spec']['network'] = network
             result = self._create_custom_job()
             self._poll_job(result)
             
@@ -194,7 +193,6 @@ class CustomJob():
         container_uri: str,
         project: str,
         location: str,
-        staging_bucket: str,
         env_variables: Optional[Dict[str, str]] = None,
         machine_type: str = 'n1-standard-8',
         accelerator_type: str = 'ACCELERATOR_TYPE_UNSPECIFIED',
@@ -216,11 +214,11 @@ class CustomJob():
         ).pool_specs
 
         if nfs_server and nfs_root_path and mount_path:
-            worker_pool_specs[0]['nfs_mounts'] = {
+            worker_pool_specs[0]['nfs_mounts'] = [{
                 'server': nfs_server,
                 'path': nfs_root_path,
                 'mount_point': mount_path,
-            }
+            }]
 
         container_spec = {
             'image_uri': container_uri,

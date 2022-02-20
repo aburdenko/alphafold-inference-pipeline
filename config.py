@@ -19,7 +19,7 @@ PIPELINE_DESCRIPTION = 'Alphafold inference'
 
 REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
 REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
-REFERENCE_DATASETS_URI = '10.71.1.10,/datasets_v1,/mnt/nfs/alphafold'
+REFERENCE_DATASETS_URI = '10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,default'
 MODEL_PARAMS_GCS_LOCATION='gs://jk-alphafold-datasets-archive/jan-22/params'
 MODEL_PARAMS_URI='gs://jk-alphafold-datasets-archive/jan-22/params'
 
@@ -54,6 +54,4 @@ GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
 GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
 GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
-
-CLS_WRAPPERS_IMAGE = os.getenv("CLS_WRAPPER_IAMGE", 'gcr.io/jk-mlops-dev/cls-wrappers')
-ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold')
+ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold-components')

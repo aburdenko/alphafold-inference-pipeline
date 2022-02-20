@@ -14,7 +14,7 @@ outputs:
 - {name: relaxed_protein, type: Artifact}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/alphafold
+    image: gcr.io/jk-mlops-dev/alphafold-components
     command:
     - sh
     - -c

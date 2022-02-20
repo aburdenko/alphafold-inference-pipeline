@@ -20,12 +20,14 @@ from kfp.v2.dsl import Output, Input, Artifact, Dataset
 import config
 
 
+
 @dsl.component(
-    base_image=config.CLS_WRAPPERS_IMAGE,
+    base_image=config.ALPHAFOLD_COMPONENTS_IMAGE,
     output_component_file='component_msa_search.yaml'
 )
 def jackhmmer(
     project: str,
+    project_number: str,
     region: str,
     database: str,
     reference_databases: Input[Dataset],
@@ -33,20 +35,11 @@ def jackhmmer(
     msa: Output[Dataset],
     cls_logging: Output[Artifact],
     maxseq:int=10_000,
-    machine_type:str='n1-standard-8',
-    boot_disk_size:int=100,
     n_cpu:int=8,
+    machine_type:str='n1-standard-8',
+    boot_disk_size:int=200,
     ):
-    """Searches the specified database using jackhmmer.
-
-    This is a simple prototype using dsub to submit a Cloud Life Sciences pipeline.
-    We are using CLS as KFP does not support attaching pre-populated disks or premtible VMs.
-    GCSFuse does not perform well with genetic database search tools .
-
-    The prototype also lacks job control. If a pipeline step fails, the CLS job can get 
-    orphaned
-
-    """
+    """Searches the specified database using jackhmmer.  """
     
     import logging
     import os
@@ -55,44 +48,50 @@ def jackhmmer(
 
     from alphafold.data import parsers
     from dsub_wrapper import run_dsub_job
+    from job_runner import CustomJob
 
     _SUPPORTED_DATABASES = ['uniref90', 'mgnify']
-    _DSUB_PROVIDER = 'google-cls-v2'
-    _LOG_INTERVAL = '30s'
-    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold'
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'
     _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  
 
-    logging.basicConfig(format='%(asctime)s - %(message)s',
-                      level=logging.INFO, 
-                      datefmt='%d-%m-%y %H:%M:%S',
-                      stream=sys.stdout)
+    #logging.basicConfig(format='%(asctime)s - %(message)s',
+    #                  level=logging.INFO, 
+    #                  datefmt='%d-%m-%y %H:%M:%S',
+    #                  stream=sys.stdout)
 
     if not (str(database) in _SUPPORTED_DATABASES):
         raise RuntimeError(f'Jackhmmer cannot be used with {database} database.')
 
-    job_params = [
-        '--machine-type', machine_type,
-        '--boot-disk-size', str(boot_disk_size),
-        '--logging', cls_logging.uri,
-        '--log-interval', _LOG_INTERVAL, 
-        '--image', _ALPHAFOLD_RUNNER_IMAGE,
-        '--env', f'PYTHONPATH=/app/alphafold',
-        '--mount', f'DB_ROOT={reference_databases.metadata["disk_image"]}',
-        '--input', f'INPUT_PATH={sequence.uri}',
-        '--output', f'OUTPUT_PATH={msa.uri}',
-        '--env', f'DB_PATH={reference_databases.metadata[database]}',
-        '--env', f'N_CPU={n_cpu}',
-        '--env', f'MAXSEQ={maxseq}', 
-        '--script', _SCRIPT 
-    ]
+    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')
+    network = f'projects/{project_number}/global/networks/{network_name}'    
+
+    params = {
+        'INPUT_PATH': sequence.uri,
+        'OUTPUT_PATH': msa.uri,
+        'DB_ROOT': mount_path,
+        'DB_PATH': reference_databases.metadata[database],
+        'N_CPU': str(n_cpu),
+        'MAXSEQ': str(maxseq)
+    } 
+    job_name = f'JACKHMMER_JOB_{time.strftime("%Y%m%d_%H%M%S")}'
 
     t0 = time.time()
     logging.info('Starting database search...')
-    result = run_dsub_job(
-        provider=_DSUB_PROVIDER,
+    custom_job = CustomJob.from_script_in_container(
+        display_name=job_name,
+        script_path=_SCRIPT,
+        container_uri=_ALPHAFOLD_RUNNER_IMAGE,
         project=project,
-        regions=region,
-        params=job_params,
+        location=region,
+        machine_type=machine_type,
+        boot_disk_size_gb=boot_disk_size,
+        nfs_server=nfs_server,
+        nfs_root_path=nfs_root_path,
+        mount_path=mount_path,
+        env_variables=params,
+    )
+    custom_job.run(
+       network=network
     )
     t1 = time.time()
     logging.info(f'Search completed. Elapsed time: {t1-t0}')

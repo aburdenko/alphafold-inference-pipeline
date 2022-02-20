@@ -17,6 +17,7 @@
 import logging
 import os
 from re import L
+import pprint
 import subprocess 
 import shutil
 import sys
@@ -86,10 +87,10 @@ def test_create_job():
     job_runner._poll_job(result)
 
 
-def test_from_local_script():
+def test_from_script_in_container():
 
     job_name = 'NFS_JOB_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
-    script_path = '/home/jupyter/alphafold-inference-pipeline/alphafold_components/alphafold_runners/jackhmmer_runner.py'
+    script_path = '/scripts/alphafold_runners/jackhmmer_runner.py'
     container_uri = 'gcr.io/jk-mlops-dev/alphafold'
     project = PROJECT 
     location = LOCATION
@@ -120,9 +121,8 @@ def test_from_local_script():
         env_variables=env_variables,
     )
 
-    print(custom_job.custom_job_spec)
-
-    return
+    pp=pprint.PrettyPrinter()
+    pp.pprint(custom_job.custom_job_spec)
 
     custom_job.run(
        network=NETWORK

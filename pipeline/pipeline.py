@@ -36,6 +36,7 @@ def pipeline(
     sequence_path: str,
     sequence_desc: str,
     project: str='jk-mlops-dev',
+    project_number: str='895222332033',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
     models: List[Mapping]=[{'model_name': 'model_1', 'random_seed': 1}],
@@ -78,6 +79,7 @@ def pipeline(
 
     search_uniref = JackhmmerOp(
         project=project,
+        project_number=project_number,
         region=region,
         database=config.UNIREF90,
         reference_databases=reference_databases.output,
@@ -87,6 +89,7 @@ def pipeline(
 
     search_mgnify = JackhmmerOp(
         project=project,
+        project_number=project_number,
         region=region,
         database=config.MGNIFY,
         reference_databases=reference_databases.output,
@@ -94,75 +97,75 @@ def pipeline(
     )
     search_mgnify.set_display_name('Search Mgnify')#.set_caching_options(enable_caching=True)
 
-    search_uniclust = HHBlitsOp(
-        project=project,
-        region=region,
-        msa_dbs=[config.UNICLUST30],
-        reference_databases=reference_databases.output,
-        sequence=input_sequence.output,
-    )
-    search_uniclust.set_display_name('Search Uniclust')#.set_caching_options(enable_caching=True)
+    #search_uniclust = HHBlitsOp(
+    #    project=project,
+    #    region=region,
+    #    msa_dbs=[config.UNICLUST30],
+    #    reference_databases=reference_databases.output,
+    #    sequence=input_sequence.output,
+    #)
+    #search_uniclust.set_display_name('Search Uniclust')#.set_caching_options(enable_caching=True)
 
-    search_bfd = HHBlitsOp(
-        project=project,
-        region=region,
-        msa_dbs=[config.BFD],
-        reference_databases=reference_databases.output,
-        sequence=input_sequence.output,
-    )
-    search_bfd.set_display_name('Search BFD')#.set_caching_options(enable_caching=True)
+    #search_bfd = HHBlitsOp(
+    #    project=project,
+    #    region=region,
+    #    msa_dbs=[config.BFD],
+    #    reference_databases=reference_databases.output,
+    #    sequence=input_sequence.output,
+    #)
+    #search_bfd.set_display_name('Search BFD')#.set_caching_options(enable_caching=True)
 
-    search_pdb = HHSearchOp(
-        project=project,
-        region=region,
-        template_dbs=[config.PDB70],
-        mmcif_db=config.PDB_MMCIF,
-        obsolete_db=config.PDB_OBSOLETE,
-        max_template_date=max_template_date,
-        reference_databases=reference_databases.output,
-        sequence=input_sequence.output,
-        msa=search_uniref.outputs['msa'],
-    )
-    search_pdb.set_display_name('Search Pdb')#.set_caching_options(enable_caching=True)
+    #search_pdb = HHSearchOp(
+    #    project=project,
+    #    region=region,
+    #    template_dbs=[config.PDB70],
+    #    mmcif_db=config.PDB_MMCIF,
+    #    obsolete_db=config.PDB_OBSOLETE,
+    #    max_template_date=max_template_date,
+    #    reference_databases=reference_databases.output,
+    #    sequence=input_sequence.output,
+    #    msa=search_uniref.outputs['msa'],
+    #)
+    #search_pdb.set_display_name('Search Pdb')#.set_caching_options(enable_caching=True)
 
-    aggregate_features = AggregateFeaturesOp(
-        sequence=input_sequence.output,
-        msa1=search_uniref.outputs['msa'],
-        msa2=search_mgnify.outputs['msa'],
-        msa3=search_bfd.outputs['msa'],
-        msa4=search_uniclust.outputs['msa'],
-        template_features=search_pdb.outputs['template_features'],
-    )
-    aggregate_features.set_display_name('Aggregate features')#.set_caching_options(enable_caching=True)
+    #aggregate_features = AggregateFeaturesOp(
+    #    sequence=input_sequence.output,
+    #    msa1=search_uniref.outputs['msa'],
+    #    msa2=search_mgnify.outputs['msa'],
+    #    msa3=search_bfd.outputs['msa'],
+    #    msa4=search_uniclust.outputs['msa'],
+    #    template_features=search_pdb.outputs['template_features'],
+    #)
+    #aggregate_features.set_display_name('Aggregate features')#.set_caching_options(enable_caching=True)
 
-    # Think what to do with random seed when switch to Parallel loop
-    with dsl.ParallelFor(models) as model:
-        model_predict = ModelPredictOp(
-            model_features=aggregate_features.outputs['features'],
-            model_params=model_parameters.output,
-            model_name=model.model_name,
-            num_ensemble=num_ensemble,
-            random_seed=model.random_seed
-        )
-        model_predict.set_display_name('Predict')#.set_caching_options(enable_caching=True)
-        model_predict.set_cpu_limit(config.CPU_LIMIT)
-        model_predict.set_memory_limit(config.MEMORY_LIMIT)
-        model_predict.set_gpu_limit(config.GPU_LIMIT)
-        model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
-        model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
-        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
+    ## Think what to do with random seed when switch to Parallel loop
+    #with dsl.ParallelFor(models) as model:
+    #    model_predict = ModelPredictOp(
+    #        model_features=aggregate_features.outputs['features'],
+    #        model_params=model_parameters.output,
+    #        model_name=model.model_name,
+    #        num_ensemble=num_ensemble,
+    #        random_seed=model.random_seed
+    #    )
+    #    model_predict.set_display_name('Predict')#.set_caching_options(enable_caching=True)
+    #    model_predict.set_cpu_limit(config.CPU_LIMIT)
+    #    model_predict.set_memory_limit(config.MEMORY_LIMIT)
+    #    model_predict.set_gpu_limit(config.GPU_LIMIT)
+    #    model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
+    #    model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
+    #    model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
 
-        relax_protein = RelaxProteinOp(
-            unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
-            use_gpu=use_gpu_for_relaxation,
-        )
-        relax_protein.set_display_name('Relax protein')#.set_caching_options(enable_caching=True)
-        relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)
-        relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
-        relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
-        relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
-        model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
-        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
+    #    relax_protein = RelaxProteinOp(
+    #        unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
+    #        use_gpu=use_gpu_for_relaxation,
+    #    )
+    #    relax_protein.set_display_name('Relax protein')#.set_caching_options(enable_caching=True)
+    #    relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)
+    #    relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
+    #    relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
+    #    relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
+    #    model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
+    #    model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
  
 
 

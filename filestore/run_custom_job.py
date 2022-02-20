@@ -29,8 +29,11 @@ from absl import app
 import google.cloud.aiplatform as aip
 
 from google.cloud import aiplatform
-from google.cloud.aiplatform_v1beta1 import types
-from google.cloud.aiplatform_v1beta1.services.job_service import JobServiceClient
+#from google.cloud.aiplatform_v1beta1 import types
+#from google.cloud.aiplatform_v1beta1.services.job_service import JobServiceClient
+
+from google.cloud.aiplatform_v1 import types
+from google.cloud.aiplatform_v1.services.job_service import JobServiceClient
 
 import google.auth
 
@@ -83,7 +86,7 @@ def _main(argv):
 
     credentials, _ = google.auth.default()
     authed_session = google.auth.transport.requests.AuthorizedSession(credentials)
-    endpoint = f'https://{FLAGS.region}-aiplatform.googleapis.com/v1beta1/projects/{FLAGS.project}/locations/{FLAGS.region}/customJobs'
+    endpoint = f'https://{FLAGS.region}-aiplatform.googleapis.com/v1/projects/{FLAGS.project}/locations/{FLAGS.region}/customJobs'
     network = f'projects/{FLAGS.project_number}/global/networks/default' 
 
     custom_job = {
@@ -99,9 +102,9 @@ def _main(argv):
     pp=pprint.PrettyPrinter()
     pp.pprint(custom_job)
 
-    response = authed_session.post(endpoint, data=json.dumps(custom_job))
-    print('*************************')
-    pp.pprint(response.json())
+    #response = authed_session.post(endpoint, data=json.dumps(custom_job))
+    #print('*************************')
+    #pp.pprint(response.json())
 
 
 

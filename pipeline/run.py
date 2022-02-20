@@ -32,8 +32,9 @@ flags.DEFINE_string('pipeline_spec', 'alphafold-inference.json', 'Path to pipeli
 flags.DEFINE_string('pipeline_staging_location', 'gs://jk-vertex-staging/pipelines', 'Vertex AI staging bucket')
 flags.DEFINE_string('dsub_logging_path', 'gs://jk-dsub-staging/logging', 'dsub logging')
 flags.DEFINE_string('project', 'jk-mlops-dev', 'GCP Project')
+flags.DEFINE_string('project_number', '895222332033', 'Project number')
 flags.DEFINE_string('region', 'us-central1', 'GCP Region')
-flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/T1044.fasta', 'A path to a sequence')
+flags.DEFINE_string('fasta_path', '/gcs/jk-alphafold-datasets-archive/fasta/T1044.fasta', 'A path to a sequence')
 flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Vertex SA')
 flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
@@ -76,6 +77,7 @@ def _main(argv):
         'sequence_desc': FLAGS.sequence_desc,
         'max_template_date': FLAGS.max_template_date,
         'project': FLAGS.project,
+        'project_number': FLAGS.project_number,
         'region': FLAGS.region,
         'models': models,
         'num_ensemble': FLAGS.num_ensemble,

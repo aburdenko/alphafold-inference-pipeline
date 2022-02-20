@@ -2,6 +2,7 @@ name: Hhsearch
 description: Searches for protein templates
 inputs:
 - {name: project, type: String}
+- {name: project_number, type: String}
 - {name: region, type: String}
 - {name: template_dbs, type: JsonArray}
 - {name: mmcif_db, type: String}
@@ -10,18 +11,18 @@ inputs:
 - {name: reference_databases, type: Dataset}
 - {name: sequence, type: Dataset}
 - {name: msa, type: Dataset}
-- {name: machine_type, type: String, default: c2-standard-8, optional: true}
 - {name: n_cpu, type: Integer, default: '8', optional: true}
-- {name: boot_disk_size, type: Integer, default: '200', optional: true}
 - {name: maxseq, type: Integer, default: '1000000', optional: true}
 - {name: max_template_hits, type: Integer, default: '20', optional: true}
+- {name: machine_type, type: String, default: c2-standard-8, optional: true}
+- {name: boot_disk_size, type: Integer, default: '200', optional: true}
 outputs:
 - {name: template_hits, type: Dataset}
 - {name: template_features, type: Dataset}
 - {name: cls_logging, type: Artifact}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/cls-wrappers
+    image: gcr.io/jk-mlops-dev/alphafold-components
     command:
     - sh
     - -c
@@ -39,47 +40,39 @@ implementation:
       printf "%s" "$0" > "$program_path/ephemeral_component.py"
       python3 -m kfp.v2.components.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
     - "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing\
-      \ import *\n\ndef hhsearch(\n    project: str,\n    region: str,\n    template_dbs:\
-      \ list,\n    mmcif_db: str,\n    obsolete_db: str,\n    max_template_date: str,\n\
-      \    reference_databases: Input[Dataset],\n    sequence: Input[Dataset],\n \
-      \   msa: Input[Dataset],\n    template_hits: Output[Dataset],\n    template_features:\
-      \ Output[Dataset],\n    cls_logging: Output[Artifact],\n    machine_type:str='c2-standard-8',\n\
-      \    n_cpu:int=8,\n    boot_disk_size:int=200,\n    maxseq:int=1_000_000,\n\
-      \    max_template_hits:int=20, \n    ):\n    \"\"\"Searches for protein templates\
-      \ \n\n    This is a simple prototype using dsub to submit a Cloud Life Sciences\
-      \ pipeline.\n    We are using CLS as KFP does not support attaching pre-populated\
-      \ disks or premtible VMs.\n    GCSFuse does not perform well with tools like\
-      \ hhsearch or hhblits.\n\n    he prototype also lacks job control. If a pipeline\
-      \ step fails, the CLS job can get \n    orphaned\n\n    \"\"\"\n\n    import\
-      \ logging\n    import os\n    import sys\n    import time\n\n    from dsub_wrapper\
-      \ import run_dsub_job\n    from alphafold.data import parsers\n\n    _DSUB_PROVIDER\
-      \ = 'google-cls-v2'\n    _LOG_INTERVAL = '30s'\n    _ALPHAFOLD_RUNNER_IMAGE\
-      \ = 'gcr.io/jk-mlops-dev/alphafold'\n    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\
-      \n\n    logging.basicConfig(format='%(asctime)s - %(message)s',\n          \
-      \            level=logging.INFO, \n                      datefmt='%d-%m-%y %H:%M:%S',\n\
-      \                      stream=sys.stdout)\n\n    database_paths = [reference_databases.metadata[database]\n\
-      \                      for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\
-      \n    job_params = [\n        '--machine-type', machine_type,\n        '--boot-disk-size',\
-      \ str(boot_disk_size),\n        '--logging', cls_logging.uri,\n        '--log-interval',\
-      \ _LOG_INTERVAL, \n        '--image', _ALPHAFOLD_RUNNER_IMAGE,\n        '--env',\
-      \ f'PYTHONPATH=/app/alphafold',\n        '--mount', f'DB_ROOT={reference_databases.metadata[\"\
-      disk_image\"]}',\n        '--input', f'INPUT_SEQUENCE_PATH={sequence.uri}',\n\
-      \        '--input', f'INPUT_MSA_PATH={msa.uri}',\n        '--output', f'OUTPUT_TEMPLATE_HITS_PATH={template_hits.uri}',\n\
-      \        '--output', f'OUTPUT_TEMPLATE_FEATURES_PATH={template_features.uri}',\n\
-      \        '--env', f'MSA_DATA_FORMAT={msa.metadata[\"data_format\"]}',\n    \
-      \    '--env', f'DB_PATHS={database_paths}',\n        '--env', f'MMCIF_PATH={reference_databases.metadata[mmcif_db]}',\n\
-      \        '--env', f'OBSOLETE_PATH={reference_databases.metadata[obsolete_db]}',\n\
-      \        '--env', f'N_CPU={n_cpu}',\n        '--env', f'MAXSEQ={maxseq}', \n\
-      \        '--env', f'MAX_TEMPLATE_HITS={max_template_hits}',\n        '--env',\
-      \ f'MAX_TEMPLATE_DATE={max_template_date}', \n        '--script', _SCRIPT, \n\
-      \    ]\n\n    t0 = time.time()\n    logging.info('Starting database search...')\n\
-      \    result = run_dsub_job(\n        provider=_DSUB_PROVIDER,\n        project=project,\n\
-      \        regions=region,\n        params=job_params,\n    )\n    t1 = time.time()\n\
-      \    logging.info(f'Search completed. Elapsed time: {t1-t0}')\n\n    with open(template_hits.path)\
-      \ as f:\n        hhr_str = f.read()\n    parsed_hhr = parsers.parse_hhr(hhr_str)\n\
-      \    template_hits.metadata['data_format'] = 'hhr'\n    template_hits.metadata['num\
-      \ of hits'] = len(parsed_hhr)\n    template_features.metadata['data_format']\
-      \ = 'pkl' \n\n"
+      \ import *\n\ndef hhsearch(\n    project: str,\n    project_number: str,\n \
+      \   region: str,\n    template_dbs: list,\n    mmcif_db: str,\n    obsolete_db:\
+      \ str,\n    max_template_date: str,\n    reference_databases: Input[Dataset],\n\
+      \    sequence: Input[Dataset],\n    msa: Input[Dataset],\n    template_hits:\
+      \ Output[Dataset],\n    template_features: Output[Dataset],\n    cls_logging:\
+      \ Output[Artifact],\n    n_cpu:int=8,\n    maxseq:int=1_000_000,\n    max_template_hits:int=20,\
+      \ \n    machine_type:str='c2-standard-8',\n    boot_disk_size:int=200,\n   \
+      \ ):\n    \"\"\"Searches for protein templates \"\"\"\n\n    import logging\n\
+      \    import os\n    import sys\n    import time\n\n    from alphafold.data import\
+      \ parsers\n    from job_runner import CustomJob\n    from dsub_wrapper import\
+      \ run_dsub_job\n\n    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'\n\
+      \    _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'\n\n    logging.basicConfig(format='%(asctime)s\
+      \ - %(message)s',\n                      level=logging.INFO, \n            \
+      \          datefmt='%d-%m-%y %H:%M:%S',\n                      stream=sys.stdout)\n\
+      \n    database_paths = [reference_databases.metadata[database]\n           \
+      \           for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\
+      \n\n    nfs_server, nfs_root_path, mount_path, network_name = reference_databases.uri.split(',')\n\
+      \    network = f'projects/{project_number}/global/networks/{network_name}' \
+      \   \n    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH':\
+      \ msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATH': reference_databases.metadata[database],\n\
+      \        'N_CPU': n_cpu,\n        'MAXSEQ': maxseq\n    } \n    job_name = f'JACKHMMER_JOB_{time.strftime(\"\
+      %Y%m%d_%H%M%S\")}'\n\n    t0 = time.time()\n    logging.info('Starting database\
+      \ search...')\n    custom_job = CustomJob.from_script_in_container(\n      \
+      \  display_name=job_name,\n        script_path=_SCRIPT,\n        container_uri=_ALPHAFOLD_RUNNER_IMAGE,\n\
+      \        project=project,\n        location=region,\n        machine_type=machine_type,\n\
+      \        boot_disk_size_gb=boot_disk_size,\n        nfs_server=nfs_server,\n\
+      \        nfs_root_path=nfs_root_path,\n        mount_path=mount_path,\n    \
+      \    env_variables=params,\n    )\n    custom_job.run(\n       network=network\n\
+      \    )\n    t1 = time.time()\n    logging.info(f'Search completed. Elapsed time:\
+      \ {t1-t0}')\n\n    with open(template_hits.path) as f:\n        hhr_str = f.read()\n\
+      \    parsed_hhr = parsers.parse_hhr(hhr_str)\n    template_hits.metadata['data_format']\
+      \ = 'hhr'\n    template_hits.metadata['num of hits'] = len(parsed_hhr)\n   \
+      \ template_features.metadata['data_format'] = 'pkl' \n\n"
     args:
     - --executor_input
     - {executorInput: null}

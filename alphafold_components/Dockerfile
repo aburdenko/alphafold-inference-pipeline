@@ -67,7 +67,10 @@ RUN pip3 install --upgrade pip \
 WORKDIR /opt/conda/lib/python3.7/site-packages
 RUN patch -p0 < /app/alphafold/docker/openmm.patch
 
-WORKDIR /app/alphafold
+WORKDIR /scripts
+ADD alphafold_runners alphafold_runners
+ADD *.py ./
+
 
 ENV PYTHONPATH=/app/alphafold
 # We need to run `ldconfig` first to ensure GPUs are visible, due to some quirk

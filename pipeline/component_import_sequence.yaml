@@ -5,7 +5,7 @@ outputs:
 - {name: sequence, type: Dataset}
 implementation:
   container:
-    image: gcr.io/jk-mlops-dev/alphafold
+    image: gcr.io/jk-mlops-dev/alphafold-components
     command:
     - sh
     - -c
