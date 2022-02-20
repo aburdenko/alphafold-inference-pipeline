@@ -16,10 +16,12 @@
 
 import logging
 import os
+from re import L
 import subprocess 
 import shutil
 import sys
 import time
+from turtle import st
 
 import pytest
 #import mock
@@ -27,7 +29,7 @@ import pytest
 from typing import List
 
 
-from alphafold_components.job_runner import JobRunner
+from alphafold_components.job_runner import CustomJob 
 
 PROJECT='jk-mlops-dev'
 PROJECT_NUMBER='895222332033'
@@ -71,20 +73,57 @@ def test_create_job():
     }      
 
     job_name = 'NFS_JOB_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
-    custom_job_spec = {
-        'display_name': job_name,
-        'job_spec': {
-            'worker_pool_specs': [
-                master_spec
-            ],
-            'network': NETWORK, 
-        },
-    }
-
+ 
     print('\n')
-    job_runner = JobRunner(project=PROJECT, location=LOCATION) 
-    result = job_runner.create_custom_job(job_name, custom_job_spec)
+    job_runner = CustomJob(
+        display_name=job_name,
+        project=PROJECT, 
+        location=LOCATION, 
+        worker_pool_specs=[master_spec]) 
+    result = job_runner._create_custom_job()
     print(result)
 
-    job_runner.poll_job(result)
+    job_runner._poll_job(result)
 
+
+def test_from_local_script():
+
+    job_name = 'NFS_JOB_{}'.format(time.strftime("%Y%m%d_%H%M%S"))
+    script_path = '/home/jupyter/alphafold-inference-pipeline/alphafold_components/alphafold_runners/jackhmmer_runner.py'
+    container_uri = 'gcr.io/jk-mlops-dev/alphafold'
+    project = PROJECT 
+    location = LOCATION
+    staging_bucket = 'gs://jk-alphafold-staging/staging'
+    machine_type = 'n1-standard-8'
+    nfs_server = NFS_SERVER
+    nfs_root_path = NFS_ROOT_PATH
+    mount_path = MOUNT_PATH
+    env_variables = {
+        'INPUT_PATH': '/gcs/jk-alphafold-datasets-archive/fasta/T1044.fasta',
+        'OUTPUT_PATH': '/gcs/jk-alphafold-staging/outputs/testing/output.sto',
+        'DB_ROOT': mount_path,
+        'DB_PATH': 'uniref90/uniref90.fasta'
+    }
+
+
+    custom_job = CustomJob.from_script_in_container(
+        display_name=job_name,
+        script_path=script_path,
+        container_uri=container_uri,
+        project=project,
+        location=location,
+        staging_bucket=staging_bucket,
+        machine_type=machine_type,
+        nfs_server=nfs_server,
+        nfs_root_path=nfs_root_path,
+        mount_path=mount_path,
+        env_variables=env_variables,
+    )
+
+    print(custom_job.custom_job_spec)
+
+    return
+
+    custom_job.run(
+       network=NETWORK
+    )

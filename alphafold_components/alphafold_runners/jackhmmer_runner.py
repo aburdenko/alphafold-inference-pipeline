@@ -64,6 +64,12 @@ def run_jackhmmer(
     n_cpu: int):
     """Runs jackhmeer and saves results to a file."""
 
+    print(input_path)
+    print(output_path)
+    print(database_path)
+    return
+
+
     runner = jackhmmer.Jackhmmer(
         binary_path=JACKHMMER_BINARY_PATH,
         database_path=database_path,

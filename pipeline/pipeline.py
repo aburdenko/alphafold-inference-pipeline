@@ -41,8 +41,8 @@ def pipeline(
     models: List[Mapping]=[{'model_name': 'model_1', 'random_seed': 1}],
     use_gpu_for_relaxation: bool=True,
     num_ensemble: int=1,
-    datasets_gcs_location: str=config.REFERENCE_DATASETS_GCS_LOCATION,
-    model_params_gcs_location: str=config.MODEL_PARAMS_GCS_LOCATION):
+    reference_datasets_uri: str=config.REFERENCE_DATASETS_URI, 
+    model_params_uri: str=config.MODEL_PARAMS_GCS_LOCATION):
     """Runs AlphaFold inference."""
 
     input_sequence = dsl.importer(
@@ -52,17 +52,16 @@ def pipeline(
     input_sequence.set_display_name('Input sequence')
 
     model_parameters = dsl.importer(
-        artifact_uri=model_params_gcs_location,
+        artifact_uri=model_params_uri,
         artifact_class=dsl.Artifact,
         reimport=True)
     model_parameters.set_display_name('Model parameters')
 
     reference_databases = dsl.importer(
-        artifact_uri=datasets_gcs_location,
+        artifact_uri=reference_datasets_uri,
         artifact_class=dsl.Dataset,
         reimport=False,
         metadata={
-            'disk_image': config.REFERENCE_DATASETS_IMAGE,
             config.UNIREF90: config.UNIREF90_PATH,
             config.MGNIFY: config.MGNIFY_PATH,
             config.BFD: config.BFD_PATH,
