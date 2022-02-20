@@ -54,10 +54,10 @@ implementation:
       \                      stream=sys.stdout)\n\n    database_paths = [reference_databases.metadata[database]\n\
       \                      for database in template_dbs]\n    database_paths = ','.join(database_paths)\n\
       \n    nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n\
-      \    params = {\n        'INPUT_SEQUENCE_PATH': sequence.uri,\n        'INPUT_MSA_PATH':\
-      \ msa.uri,\n        'MSA_DATA_FORMAT': msa.metadata['data_format'],\n      \
-      \  'OUTPUT_TEMPLATE_HITS_PATH': template_hits.uri,\n        'OUTPUT_TEMPLATE_FEATURES_PATH':\
-      \ template_features.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS':\
+      \    params = {\n        'INPUT_SEQUENCE_PATH': sequence.path,\n        'INPUT_MSA_PATH':\
+      \ msa.path,\n        'MSA_DATA_FORMAT': msa.metadata['data_format'],\n     \
+      \   'OUTPUT_TEMPLATE_HITS_PATH': template_hits.path,\n        'OUTPUT_TEMPLATE_FEATURES_PATH':\
+      \ template_features.path,\n        'DB_ROOT': mount_path,\n        'DB_PATHS':\
       \ database_paths,\n        'MMCIF_PATH': reference_databases.metadata[mmcif_db],\n\
       \        'OBSOLETE_PATH': reference_databases.metadata[obsolete_db],\n     \
       \   'MAXSEQ': str(maxseq),\n        'MAX_TEMPLATE_HITS': str(max_template_hits),\n\

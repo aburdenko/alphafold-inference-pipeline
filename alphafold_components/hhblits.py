@@ -61,8 +61,8 @@ def hhblits(
 
     nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')
     params = {
-        'INPUT_PATH': sequence.uri,
-        'OUTPUT_PATH': msa.uri,
+        'INPUT_PATH': sequence.path,
+        'OUTPUT_PATH': msa.path,
         'DB_ROOT': mount_path,
         'DB_PATHS': database_paths,
         'N_CPU': str(n_cpu),

@@ -124,7 +124,7 @@ class CustomJob():
 
     #    return job_name 
 
-
+    # We need to improve job control, this does not seem to work
     def _poll_job(self, job_name: str):
         """Poll the job status."""
         with execution_context.ExecutionContext(
@@ -165,7 +165,7 @@ class CustomJob():
     def _send_cancel_request(self, job_name: str):
         if not job_name:
             return
-
+        logging.info(f'Canceling job: {job_name}')
         self.job_client.cancel_custom_job(job_name)
     
 

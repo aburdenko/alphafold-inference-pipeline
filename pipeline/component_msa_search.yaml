@@ -48,8 +48,8 @@ implementation:
       \n    database_paths = [reference_databases.metadata[database] for database\
       \ in msa_dbs] \n    database_paths = ','.join(database_paths)\n\n    nfs_server,\
       \ nfs_root_path, mount_path, network = reference_databases.uri.split(',')\n\
-      \    params = {\n        'INPUT_PATH': sequence.uri,\n        'OUTPUT_PATH':\
-      \ msa.uri,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n\
+      \    params = {\n        'INPUT_PATH': sequence.path,\n        'OUTPUT_PATH':\
+      \ msa.path,\n        'DB_ROOT': mount_path,\n        'DB_PATHS': database_paths,\n\
       \        'N_CPU': str(n_cpu),\n        'MAXSEQ': str(maxseq)\n    } \n    job_name\
       \ = f'HHBLITS_JOB_{time.strftime(\"%Y%m%d_%H%M%S\")}'\n    t0 = time.time()\n\
       \    logging.info('Starting database search...')\n    custom_job = CustomJob.from_script_in_container(\n\

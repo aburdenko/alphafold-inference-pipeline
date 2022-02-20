@@ -68,11 +68,11 @@ def hhsearch(
 
     nfs_server, nfs_root_path, mount_path, network = reference_databases.uri.split(',')
     params = {
-        'INPUT_SEQUENCE_PATH': sequence.uri,
-        'INPUT_MSA_PATH': msa.uri,
+        'INPUT_SEQUENCE_PATH': sequence.path,
+        'INPUT_MSA_PATH': msa.path,
         'MSA_DATA_FORMAT': msa.metadata['data_format'],
-        'OUTPUT_TEMPLATE_HITS_PATH': template_hits.uri,
-        'OUTPUT_TEMPLATE_FEATURES_PATH': template_features.uri,
+        'OUTPUT_TEMPLATE_HITS_PATH': template_hits.path,
+        'OUTPUT_TEMPLATE_FEATURES_PATH': template_features.path,
         'DB_ROOT': mount_path,
         'DB_PATHS': database_paths,
         'MMCIF_PATH': reference_databases.metadata[mmcif_db],

@@ -34,7 +34,7 @@ flags.DEFINE_string('dsub_logging_path', 'gs://jk-dsub-staging/logging', 'dsub l
 flags.DEFINE_string('project', 'jk-mlops-dev', 'GCP Project')
 flags.DEFINE_string('project_number', '895222332033', 'Project number')
 flags.DEFINE_string('region', 'us-central1', 'GCP Region')
-flags.DEFINE_string('fasta_path', '/gcs/jk-alphafold-datasets-archive/fasta/T1044.fasta', 'A path to a sequence')
+flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/T1044.fasta', 'A path to a sequence')
 flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Vertex SA')
 flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
