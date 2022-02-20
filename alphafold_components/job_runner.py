@@ -53,12 +53,6 @@ _JOB_ERROR_STATES = (
     gca_job_state.JobState.JOB_STATE_PAUSED,
 )
 
-#_RUNNER_CONFIG = {
-#    Runners.JACKHMMER: {'script': '/scripts/alphafold_runners/jackhmmer_runner.py'},
-#    Runners.HHSEARCH: {'script': '/scripts/alphafold_runners/hhserach_runner.py'},
-#    Runners.HHBLITS: {'script': '/scripts/alphafold_runners/hhblits_runner.py'}
-#}
-
 
 class CustomJob():
     """Common module for creating and polling custom Vertex jobs.
