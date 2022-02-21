@@ -30,7 +30,7 @@ exit_handler() {
     for job_id in "${job_ids[@]}"
     do
         echo "Deleting job $job_id" 
-        ddel --provider  "$DSUB_PROVIDER" --project "$project" --job "$job_id"
+        ddel --provider  "$DSUB_PROVIDER" --project "$PROJECT" --job "$job_id"
     done
 }
 
@@ -77,51 +77,60 @@ readonly PDB_MAXSEQ=1_000_000
 
 
 # Process command line parameters
-optstring=":hf:o:d:p:l:"
-while getopts ${optstring} arg; do 
-    case ${arg} in        
-        f ) 
-            sequence=$OPTARG
-            ;;
-        o )
-            output_path=${OPTARG}
-            ;;
-        d ) 
-            disk_image=${OPTARG}
-            ;;
-        p )
-            project=${OPTARG}
-            ;;
-        l )
-            location=${OPTARG}
-            ;;
-        h )
-            usage
-            ;;
-        : ) 
-            echo "Must supple an argument to -${OPTARG}" >&2 
-            usage
-            ;;
-        ? )
-            echo "Invalid option: -${OPTARG}" >&2
-            usage
-            ;;
+#optstring=":hf:o:d:p:l:"
+#while getopts ${optstring} arg; do 
+#    case ${arg} in        
+#        f ) 
+#            sequence=$OPTARG
+#            ;;
+#        o )
+#            output_path=${OPTARG}
+#            ;;
+#        d ) 
+#            disk_image=${OPTARG}
+#            ;;
+#        p )
+#            project=${OPTARG}
+#            ;;
+#        l )
+#            location=${OPTARG}
+#            ;;
+#        h )
+#            usage
+#            ;;
+#        : ) 
+#            echo "Must supple an argument to -${OPTARG}" >&2 
+#            usage
+#            ;;
+#        ? )
+#            echo "Invalid option: -${OPTARG}" >&2
+#            usage
+#            ;;
+#
+#
+#    esac
+#done
+#shift $((OPTIND-1))
+#if [ ${#} != 0 ] || \
+#   [ -z ${sequence+x} ] || \
+#   [ -z ${output_path+x} ] || \
+#   [ -z ${disk_image+x} ] || \
+#   [ -z ${project+x} ] || \
+#   [ -z ${location+x} ]
+#then
+#    usage
+#fi
 
-
-    esac
-done
-shift $((OPTIND-1))
-if [ ${#} != 0 ] || \
-   [ -z ${sequence+x} ] || \
-   [ -z ${output_path+x} ] || \
-   [ -z ${disk_image+x} ] || \
-   [ -z ${project+x} ] || \
-   [ -z ${location+x} ]
+if [[ -z ${SEQUENCE+x} ]] || \
+   [[ -z ${PROJECT+x} ]] || \
+   [[ -z ${REGION+x} ]] || \
+   [[ -z ${OUTPUT_PATH+x} ]] || \
+   [[ -x ${REFERENCE_DISK+x} ]]
 then
     usage
 fi
 
-output_path=${output_path}/$(date +"%Y-%m-%d-%M-%S")
+output_path="${OUTPUT_PATH}/$(date +"%Y-%m-%d-%H-%M-%S")"
 echo "Starting the pipeline on: $(date)"
 echo "Pipeline outputs at: ${output_path}"
 pipeline_start_time=$(date +%s)
@@ -142,16 +151,16 @@ uniref90_job_id=$(dsub \
 --image "$IMAGE" \
 --machine-type "$JACKHMMER_MACHINE_TYPE" \
 --boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
+--project "$PROJECT" \
+--regions "$REGION" \
 --logging "$logging_path" \
---input INPUT_PATH="$sequence" \
+--input INPUT_PATH="$SEQUENCE" \
 --output OUTPUT_PATH="$uniref_output_msa_path" \
---mount DB_ROOT="$disk_image" \
+--mount DB_ROOT="$REFERENCE_DISK" \
 --env DB_PATH="$UNIREF90_PATH" \
 --env N_CPU="$JACKHMMER_CPU" \
---env MAXSEQ="$UNIREF90_MAXSEQ" 
-)
+--env MAXSEQ="$UNIREF90_MAXSEQ")
+
 job_ids+=( $uniref90_job_id )
 
 # Starting MGnify search
@@ -165,16 +174,16 @@ mgnify_job_id=$(dsub \
 --image "$IMAGE" \
 --machine-type "$JACKHMMER_MACHINE_TYPE" \
 --boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
+--project "$PROJECT" \
+--regions "$REGION" \
 --logging "$logging_path" \
---input INPUT_PATH="$sequence" \
+--input INPUT_PATH="$SEQUENCE" \
 --output OUTPUT_PATH="$mgnify_output_msa_path" \
---mount DB_ROOT="$disk_image" \
+--mount DB_ROOT="$REFERENCE_DISK" \
 --env DB_PATH="$MGNIFY_PATH" \
 --env N_CPU="$JACKHMMER_CPU" \
---env MAXSEQ="$MGNIFY_MAXSEQ" 
-)
+--env MAXSEQ="$MGNIFY_MAXSEQ")
+
 job_ids+=( $mgnify_job_id )
 
 # Starting Uniclust search
@@ -188,17 +197,17 @@ uniclust_job_id=$(dsub \
 --image "$IMAGE" \
 --machine-type "$HHBLITS_MACHINE_TYPE" \
 --boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
+--project "$PROJECT" \
+--regions "$REGION" \
 --logging "$logging_path" \
---input INPUT_PATH="$sequence" \
+--input INPUT_PATH="$SEQUENCE" \
 --output OUTPUT_PATH="$uniclust_output_msa_path" \
---mount DB_ROOT="$disk_image" \
+--mount DB_ROOT="$REFERENCE_DISK" \
 --env DB_PATHS="$UNICLUST30_PATH" \
 --env N_CPU="$HHBLITS_CPU" \
---env MAXSEQ="$UNICLUST30_MAXSEQ" 
-)
-job_ids+=( $uniclust_job_id )
+--env MAXSEQ="$UNICLUST30_MAXSEQ")
+
+job_ids+=( $uniclust_job_id ) 
 
 # Starting BFD search
 task=search_bfd
@@ -211,17 +220,17 @@ bfd_job_id=$(dsub \
 --image "$IMAGE" \
 --machine-type "$HHBLITS_MACHINE_TYPE" \
 --boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
+--project "$PROJECT" \
+--regions "$REGION" \
 --logging "$logging_path" \
---input INPUT_PATH="$sequence" \
+--input INPUT_PATH="$SEQUENCE" \
 --output OUTPUT_PATH="$bfd_output_msa_path" \
---mount DB_ROOT="$disk_image" \
+--mount DB_ROOT="$REFERENCE_DISK" \
 --env DB_PATHS="$BFD_PATH" \
 --env N_CPU="$HHBLITS_CPU" \
---env MAXSEQ="$BFD_MAXSEQ" 
-)
-job_ids+=( $bfd_job_id )
+--env MAXSEQ="$BFD_MAXSEQ")
+
+job_ids+=( $bfd_job_id ) 
 
 # Starting PDB search
 # We will wait till Uniref90 completes
@@ -238,20 +247,20 @@ pdb_job_id=$(dsub \
 --image "$IMAGE" \
 --machine-type "$HHBLITS_MACHINE_TYPE" \
 --boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
+--project "$PROJECT" \
+--regions "$REGION" \
 --logging "$logging_path" \
---input INPUT_SEQUENCE_PATH="$sequence" \
+--input INPUT_SEQUENCE_PATH="$SEQUENCE" \
 --input INPUT_MSA_PATH="$msa_input_path" \
 --env MSA_DATA_FORMAT="$msa_data_format" \
 --output OUTPUT_TEMPLATE_HITS_PATH="$pdb_output_templates_path" \
 --output OUTPUT_TEMPLATE_FEATURES_PATH="$pdb_output_features_path" \
---mount DB_ROOT="$disk_image" \
+--mount DB_ROOT="$REFERENCE_DISK" \
 --env DB_PATHS="$PDB70_PATH" \
 --env MAXSEQ="$PDB_MAXSEQ" \
 --env MMCIF_PATH="$PDB_MMCIF_PATH" \
 --env OBSOLETE_PATH="$PDB_OBSOLETE_PATH" \
---after "$uniref90_job_id"
+--after "$uniref90_job_id" \
 )
 job_ids+=( $pdb_job_id )
 
@@ -266,15 +275,14 @@ aggregate_job_id=$(dsub \
 --image "{$IMAGE}" \
 --machine-type "${AGGREGATE_MACHINE_TYPE}" \
 --boot-disk-size "${BOOT_DISK_SIZE}" \
---project "${project}" \
---regions "${location}" \
+--project "${PROJECT}" \
+--regions "${REGION}" \
 --logging "${logging_path}" \
 --input-recursive MSAS_PATH="${msas_path}" \
---input SEQUENCE_PATH="${sequence}" \
+--input SEQUENCE_PATH="${SEQUENCE}" \
 --input TEMPLATE_FEATURES_PATH="${pdb_output_features_path}" \
 --output OUTPUT_FEATURES_PATH="${output_features_path}" \
---wait "${job_ids[@]}" \
-)
+--after "${job_ids[@]}" )
 
 
 feature_engineering_end_time=$(date +%s)

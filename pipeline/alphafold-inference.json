@@ -845,11 +845,11 @@
             "image": "gcr.io/jk-mlops-dev/alphafold-components",
             "resources": {
               "accelerator": {
-                "count": "2",
+                "count": "1",
                 "type": "NVIDIA_TESLA_A100"
               },
-              "cpuLimit": 24.0,
-              "memoryLimit": 1.7e-07
+              "cpuLimit": 12.0,
+              "memoryLimit": 8.5e-08
             }
           }
         },
@@ -873,11 +873,11 @@
             "image": "gcr.io/jk-mlops-dev/alphafold-components",
             "resources": {
               "accelerator": {
-                "count": "1",
+                "count": "2",
                 "type": "NVIDIA_TESLA_A100"
               },
-              "cpuLimit": 12.0,
-              "memoryLimit": 85.0
+              "cpuLimit": 24.0,
+              "memoryLimit": 1.7e-07
             }
           }
         }

@@ -46,7 +46,7 @@ python /scripts/alphafold_components/alphafold_runners/hhblits_runner.py
 ## aggregate features
 
 export SEQUENCE_PATH=/src/sequences/T1050.fasta
-export MSA_PATHS=/inputs/msas/uniref90/output.sto,/inputs/msas/mgnify/output.sto,/inputs/msas/uniclust30/output.a3m,/inputs/msas/bfd/output.a3m
+export MSAS_PATH=/inputs/msas
 export TEMPLATE_FEATURES_PATH=/inputs/templates/pdb/features.pkl
 export OUTPUT_FEATURES_PATH=/output/testing/aggregate/features.pkl
 
