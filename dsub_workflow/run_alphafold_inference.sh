@@ -130,12 +130,11 @@ job_ids=()
 echo "Starting feature engineering on: $(date)"
 feature_engineering_start_time=$(date +%s)
 
-msas_path="${output_path}/msas"
 
 # Starting Uniref90 search
 task=search_uniref90
-logging_path="${output_path}/${task}/logging"
-uniref_output_msa_path="${msas_path}/${task}.sto"
+logging_path="${output_path}/logging/${task}"
+uniref_output_msa_path="${msas_path}/msas/${task}.sto"
 echo "Starting Uniref90 search on: $(date)" 
 uniref90_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
@@ -157,8 +156,8 @@ job_ids+=( $uniref90_job_id )
 
 # Starting MGnify search
 task=search_mgnify
-logging_path="${output_path}/${task}/logging"
-mgnify_output_msa_path="${msas_path}/${task}.sto"
+logging_path="${output_path}/logging/${task}"
+mgnify_output_msa_path="${output_path}/msas/${task}.sto"
 echo "Starting Mgnify search on: $(date)" 
 mgnify_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
@@ -180,8 +179,8 @@ job_ids+=( $mgnify_job_id )
 
 # Starting Uniclust search
 task=search_uniclust
-logging_path="${output_path}/${task}/logging"
-uniclust_output_msa_path="${msas_path}/${task}.a3m"
+logging_path="${output_path}/logging/${task}"
+uniclust_output_msa_path="${output_path}/msas/${task}.a3m"
 echo "Starting Uniclust search on: $(date)" 
 uniclust_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
@@ -203,8 +202,8 @@ job_ids+=( $uniclust_job_id )
 
 # Starting BFD search
 task=search_bfd
-logging_path="${output_path}/${task}/logging"
-bfd_output_msa_path="${msas_path}/${task}.a3m"
+logging_path="${output_path}/logging/${task}"
+bfd_output_msa_path="${output_path}/msas/${task}.a3m"
 echo "Starting BFD search on: $(date)" 
 bfd_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
@@ -227,8 +226,7 @@ job_ids+=( $bfd_job_id )
 # Starting PDB search
 # We will wait till Uniref90 completes
 task=search_pdb
-logging_path="${output_path}/${task}/logging"
-pdb_output_msa_path="${msas_path}/${task}.a3m"
+logging_path="${output_path}/logging/${task}"
 pdb_output_templates_path="${output_path}/templates/${task}.hhr"
 pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
@@ -258,8 +256,8 @@ pdb_job_id=$(dsub \
 job_ids+=( $pdb_job_id )
 
 task=aggregate_features
-logging_path="${output_path}/${task}/logging"
-output_features_path="${output_path}/${task}/features.pkl"
+logging_path="${output_path}/logging/${task}"
+output_features_path="${output_path}/features/aggregated_features.pkl"
 echo "Starting feature aggregation on: $(date)" 
 pdb_job_id=$(dsub \
 --command "$AGGREGATE_FEATURES_COMMAND" \
