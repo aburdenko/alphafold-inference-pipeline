@@ -125,7 +125,8 @@ if [[ -z ${SEQUENCE+x} ]] || \
    [[ -z ${PROJECT+x} ]] || \
    [[ -z ${REGION+x} ]] || \
    [[ -z ${OUTPUT_PATH+x} ]] || \
-   [[ -x ${REFERENCE_DISK+x} ]]
+   [[ -z ${REFERENCE_DISK+x} ]] || \
+   [[ -z ${MAX_TEMPLATE_DATE+x} ]]
 then
     usage
 fi
@@ -140,11 +141,10 @@ echo "Starting feature engineering on: $(date)"
 feature_engineering_start_time=$(date +%s)
 
 
-# Starting Uniref90 search
+echo "Starting Uniref90 search on: $(date)" 
 task=search_uniref90
 logging_path="${output_path}/logging/${task}"
 uniref_output_msa_path="${output_path}/msas/${task}.sto"
-echo "Starting Uniref90 search on: $(date)" 
 uniref90_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -163,11 +163,10 @@ uniref90_job_id=$(dsub \
 
 job_ids+=( $uniref90_job_id )
 
-# Starting MGnify search
+echo "Starting Mgnify  on: $(date)" 
 task=search_mgnify
 logging_path="${output_path}/logging/${task}"
 mgnify_output_msa_path="${output_path}/msas/${task}.sto"
-echo "Starting Mgnify search on: $(date)" 
 mgnify_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -186,11 +185,10 @@ mgnify_job_id=$(dsub \
 
 job_ids+=( $mgnify_job_id )
 
-# Starting Uniclust search
+echo "Starting Uniclust search on: $(date)" 
 task=search_uniclust
 logging_path="${output_path}/logging/${task}"
 uniclust_output_msa_path="${output_path}/msas/${task}.a3m"
-echo "Starting Uniclust search on: $(date)" 
 uniclust_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -209,11 +207,10 @@ uniclust_job_id=$(dsub \
 
 job_ids+=( $uniclust_job_id ) 
 
-# Starting BFD search
+echo "Starting BFD search on: $(date)" 
 task=search_bfd
 logging_path="${output_path}/logging/${task}"
 bfd_output_msa_path="${output_path}/msas/${task}.a3m"
-echo "Starting BFD search on: $(date)" 
 bfd_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -232,17 +229,15 @@ bfd_job_id=$(dsub \
 
 job_ids+=( $bfd_job_id ) 
 
-# Starting PDB search
-# We will wait till Uniref90 completes
+echo "Starting PDB search on: $(date)" 
 task=search_pdb
 logging_path="${output_path}/logging/${task}"
 pdb_output_templates_path="${output_path}/templates/${task}.hhr"
 pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
-echo "Starting PDB search on: $(date)" 
 pdb_job_id=$(dsub \
---command "$HHBLITS_COMMAND" \
+--command "$HHSEARCH_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
 --machine-type "$HHBLITS_MACHINE_TYPE" \
@@ -260,15 +255,16 @@ pdb_job_id=$(dsub \
 --env MAXSEQ="$PDB_MAXSEQ" \
 --env MMCIF_PATH="$PDB_MMCIF_PATH" \
 --env OBSOLETE_PATH="$PDB_OBSOLETE_PATH" \
---after "$uniref90_job_id" \
-)
+--env MAX_TEMPLATE_DATE="$MAX_TEMPLATE_DATE" \
+--after "$uniref90_job_id")
+
 job_ids+=( $pdb_job_id )
 
+echo "Starting feature aggregation on: $(date)" 
 task=aggregate_features
 logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 msas_path="${output_path}/msas"
-echo "Starting feature aggregation on: $(date)" 
 aggregate_job_id=$(dsub \
 --command "${AGGREGATE_COMMAND}" \
 --provider "${DSUB_PROVIDER}" \

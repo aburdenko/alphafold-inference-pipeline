@@ -1,4 +1,4 @@
-docker run -it --rm --gpus all \
+docker run -it --rm \
 -v /mnt:/data \
 -v /home/jupyter/testing:/inputs \
 -v /home/jupyter/alphafold-inference-pipeline:/src \
@@ -56,14 +56,25 @@ python /src/alphafold_components/alphafold_runners/aggregate_features_runner.py
 
 ## predict relax
 
-export DB_ROOT=/data
-export PARAMS_PATH=params
-export FEATURES_PATH=features/features.pkl
+docker run -it --rm --gpus all \
+-v /home/jupyter/testing:/inputs \
+-v /home/jupyter/alphafold-inference-pipeline:/src \
+-v /home/jupyter/output:/output \
+-e PYTHONPATH=/app/alphafold \
+--entrypoint /bin/bash \
+gcr.io/jk-mlops-dev/alphafold-components
+
+
+
+export MODEL_PARAMS_PATH=/inputs/params
+export FEATURES_PATH=/inputs/features/features.pkl
 export MODEL_NAME=model_1
 export NUM_ENSEMBLE=1
-export OUTPUT_DIR=/output/testing/predict
+export RANDOM_SEED=0
+export RAW_PREDICTION_PATH=/output/testing/predict/prediction.pkl
+export UNRELAXED_PROTEIN_PATH=/output/testing/predict/unrelaxed_protein.pdb
 
-python /scripts/alphafold_components/alphafold_runners/predict_runner.py
+python /src/alphafold_components/alphafold_runners/predict_runner.py
 
 
 

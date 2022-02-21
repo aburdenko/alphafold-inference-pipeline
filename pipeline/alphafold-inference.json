@@ -872,10 +872,6 @@
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components",
             "resources": {
-              "accelerator": {
-                "count": "2",
-                "type": "NVIDIA_TESLA_A100"
-              },
               "cpuLimit": 24.0,
               "memoryLimit": 1.7e-07
             }
