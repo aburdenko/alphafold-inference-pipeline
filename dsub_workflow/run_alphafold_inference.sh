@@ -50,8 +50,6 @@ readonly PREDICT_MACHINE_TYPE=a2-highgpu-1g
 readonly BOOT_DISK_SIZE=200
 readonly PREDICT_ACCELERATOR_TYPE=nvidia-tesla-a100
 readonly PREDICT_ACCELERATOR_COUNT=1
-readonly RELAX_ACCELERATOR_TYPE=nvidia-tesla-a100
-readonly RELAX_ACCELERATOR_COUNT=1
 
 readonly JACKHMMER_CPU=8
 readonly HHBLITS_CPU=12
@@ -94,7 +92,7 @@ then
 fi
 
 output_path="${OUTPUT_PATH}/$(date +"%Y-%m-%d-%H-%M-%S")"
-#output_path=gs://jk-dsub-staging/outputs/2022-02-21-19-33-03
+output_path=gs://jk-dsub-staging/outputs/2022-02-21-21-28-57
 echo "Starting the pipeline on: $(date)"
 echo "Pipeline outputs at: ${output_path}"
 pipeline_start_time=$(date +%s)
@@ -108,6 +106,7 @@ task=uniref90_search
 logging_path="${output_path}/logging/${task}"
 uniref_output_msa_path="${output_path}/msas/${task}.sto"
 uniref90_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -130,6 +129,7 @@ task=mgnify_search
 logging_path="${output_path}/logging/${task}"
 mgnify_output_msa_path="${output_path}/msas/${task}.sto"
 mgnify_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -152,6 +152,7 @@ task=uniclust30_search
 logging_path="${output_path}/logging/${task}"
 uniclust_output_msa_path="${output_path}/msas/${task}.a3m"
 uniclust_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \

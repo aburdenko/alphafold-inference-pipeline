@@ -100,4 +100,14 @@ export RELAX_USE_GPU=1
 python /src/alphafold_components/alphafold_runners/predict_relax_runner.py
 
 
+### Rank runner
+
+export PREDICTION_RESULTS_PATH=/inputs/predictions
+export RANKING_RESULTS_PATH=/output/testing/ranking/ranking.json
+
+python /src/alphafold_components/alphafold_runners/rank_runner.py
+
+
+
+
 
