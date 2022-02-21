@@ -134,7 +134,7 @@ feature_engineering_start_time=$(date +%s)
 # Starting Uniref90 search
 task=search_uniref90
 logging_path="${output_path}/logging/${task}"
-uniref_output_msa_path="${msas_path}/msas/${task}.sto"
+uniref_output_msa_path="${output_path}/msas/${task}.sto"
 echo "Starting Uniref90 search on: $(date)" 
 uniref90_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
