@@ -34,7 +34,8 @@ flags.DEFINE_string('dsub_logging_path', 'gs://jk-dsub-staging/logging', 'dsub l
 flags.DEFINE_string('project', 'jk-mlops-dev', 'GCP Project')
 flags.DEFINE_string('project_number', '895222332033', 'Project number')
 flags.DEFINE_string('region', 'us-central1', 'GCP Region')
-flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/Q9Y490.fasta', 'A path to a sequence')
+#flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/Q9Y490.fasta', 'A path to a sequence')
+flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/T1050.fasta', 'A path to a sequence')
 flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Vertex SA')
 flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
@@ -42,7 +43,7 @@ flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepo
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
-flags.DEFINE_bool('enable_caching', True, 'Enable pipeline run caching')
+flags.DEFINE_bool('enable_caching', False, 'Enable pipeline run caching')
 flags.DEFINE_bool('use_gpu_for_relaxation', True, 'Use GPU for relaxation')
 flags.DEFINE_string('sequence_desc', 'T1050 A7LXT1, Bacteroides Ovatus, 779 residues', '')
 
@@ -54,18 +55,18 @@ def _main(argv):
         {
             'model_name': 'model_1', 'random_seed': 1,
         },
-        {
-            'model_name': 'model_2', 'random_seed': 2,
-        },
-        {
-            'model_name': 'model_3', 'random_seed': 3,
-        },
-                {
-            'model_name': 'model_4', 'random_seed': 4,
-        },
-                {
-            'model_name': 'model_5', 'random_seed': 5,
-        },
+    #    {
+    #        'model_name': 'model_2', 'random_seed': 2,
+    #    },
+    #    {
+    #        'model_name': 'model_3', 'random_seed': 3,
+    #    },
+    #            {
+    #        'model_name': 'model_4', 'random_seed': 4,
+    #    },
+    #            {
+    #        'model_name': 'model_5', 'random_seed': 5,
+    #    },
 
     ]
     

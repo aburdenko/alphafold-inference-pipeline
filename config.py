@@ -43,9 +43,9 @@ PDB_OBSOLETE = 'pdb_obsolete'
 PDB_SEQRES = 'pdb_seqres'
 UNIPROT = 'uniprot'
 
-RELAX_MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "170")
-RELAX_CPU_LIMIT = os.getenv("CPU_LIMIT", "24")
-RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
+RELAX_MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "85")
+RELAX_CPU_LIMIT = os.getenv("CPU_LIMIT", "12")
+RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
 RELAX_GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
 
 MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "85")

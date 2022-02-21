@@ -150,7 +150,7 @@ def pipeline(
         model_predict.set_gpu_limit(config.GPU_LIMIT)
         model_predict.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.GPU_TYPE)
         model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
-        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
+        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "0.5")
 
         relax_protein = RelaxProteinOp(
             unrelaxed_protein=model_predict.outputs['unrelaxed_protein'],
@@ -159,10 +159,10 @@ def pipeline(
         relax_protein.set_display_name('Relax protein')#.set_caching_options(enable_caching=True)
         relax_protein.set_cpu_limit(config.RELAX_CPU_LIMIT)
         relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
-        #relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
-        #relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
+        relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
+        relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
         model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", "1")
-        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "2.0")
+        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", "0.5")
  
 
 

@@ -84,3 +84,20 @@ export RELAX_USE_GPU=1
 
 python /src/alphafold_components/alphafold_runners/relax_runner.py
 
+
+### Relax predict
+
+export MODEL_PARAMS_PATH=/inputs/params
+export FEATURES_PATH=/inputs/features/features.pkl
+export MODEL_NAME=model_1
+export NUM_ENSEMBLE=1
+export RANDOM_SEED=0
+export RAW_PREDICTION_PATH=/output/testing/predict/prediction.pkl
+export UNRELAXED_PROTEIN_PATH=/output/testing/predict/unrelaxed_protein.pdb
+export RELAXED_PROTEIN_PATH=/output/testing/relax/relaxed_protein.pdb
+export RELAX_USE_GPU=1
+
+python /src/alphafold_components/alphafold_runners/predict_relax_runner.py
+
+
+

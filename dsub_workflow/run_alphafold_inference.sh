@@ -45,9 +45,13 @@ readonly POLLING_INTERVAL=30s
 readonly JACKHMMER_MACHINE_TYPE=n1-standard-8
 readonly HHBLITS_MACHINE_TYPE=c2-standard-16
 readonly HHSEARCH_MACHINE_TYPE=c2-standard-16
-readonly AGGREGATE_MACHINE_TYPE=n1-standard-4
+readonly AGGREGATE_MACHINE_TYPE=n1-standard-8
 readonly PREDICT_MACHINE_TYPE=a2-highgpu-1g
 readonly BOOT_DISK_SIZE=200
+readonly PREDICT_ACCELERATOR_TYPE=nvidia-tesla-a100
+readonly PREDICT_ACCELERATOR_COUNT=1
+readonly RELAX_ACCELERATOR_TYPE=nvidia-tesla-a100
+readonly RELAX_ACCELERATOR_COUNT=1
 
 readonly JACKHMMER_CPU=8
 readonly HHBLITS_CPU=12
@@ -76,62 +80,21 @@ readonly BFD_MAXSEQ=1_000_000
 readonly PDB_MAXSEQ=1_000_000
 
 
-# Process command line parameters
-#optstring=":hf:o:d:p:l:"
-#while getopts ${optstring} arg; do 
-#    case ${arg} in        
-#        f ) 
-#            sequence=$OPTARG
-#            ;;
-#        o )
-#            output_path=${OPTARG}
-#            ;;
-#        d ) 
-#            disk_image=${OPTARG}
-#            ;;
-#        p )
-#            project=${OPTARG}
-#            ;;
-#        l )
-#            location=${OPTARG}
-#            ;;
-#        h )
-#            usage
-#            ;;
-#        : ) 
-#            echo "Must supple an argument to -${OPTARG}" >&2 
-#            usage
-#            ;;
-#        ? )
-#            echo "Invalid option: -${OPTARG}" >&2
-#            usage
-#            ;;
-#
-#
-#    esac
-#done
-#shift $((OPTIND-1))
-#if [ ${#} != 0 ] || \
-#   [ -z ${sequence+x} ] || \
-#   [ -z ${output_path+x} ] || \
-#   [ -z ${disk_image+x} ] || \
-#   [ -z ${project+x} ] || \
-#   [ -z ${location+x} ]
-#then
-#    usage
-#fi
 
+# Check the input parameters
 if [[ -z ${SEQUENCE+x} ]] || \
    [[ -z ${PROJECT+x} ]] || \
    [[ -z ${REGION+x} ]] || \
    [[ -z ${OUTPUT_PATH+x} ]] || \
    [[ -z ${REFERENCE_DISK+x} ]] || \
-   [[ -z ${MAX_TEMPLATE_DATE+x} ]]
+   [[ -z ${MAX_TEMPLATE_DATE+x} ]] || \
+   [[ -z ${MODEL_PARAMS+x} ]]
 then
     usage
 fi
 
 output_path="${OUTPUT_PATH}/$(date +"%Y-%m-%d-%H-%M-%S")"
+#output_path=gs://jk-dsub-staging/outputs/2022-02-21-19-33-03
 echo "Starting the pipeline on: $(date)"
 echo "Pipeline outputs at: ${output_path}"
 pipeline_start_time=$(date +%s)
@@ -140,12 +103,12 @@ job_ids=()
 echo "Starting feature engineering on: $(date)"
 feature_engineering_start_time=$(date +%s)
 
-
 echo "Starting Uniref90 search on: $(date)" 
-task=search_uniref90
+task=uniref90_search
 logging_path="${output_path}/logging/${task}"
 uniref_output_msa_path="${output_path}/msas/${task}.sto"
 uniref90_job_id=$(dsub \
+--name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
@@ -160,14 +123,14 @@ uniref90_job_id=$(dsub \
 --env DB_PATH="$UNIREF90_PATH" \
 --env N_CPU="$JACKHMMER_CPU" \
 --env MAXSEQ="$UNIREF90_MAXSEQ")
-
 job_ids+=( $uniref90_job_id )
 
 echo "Starting Mgnify  on: $(date)" 
-task=search_mgnify
+task=mgnify_search
 logging_path="${output_path}/logging/${task}"
 mgnify_output_msa_path="${output_path}/msas/${task}.sto"
 mgnify_job_id=$(dsub \
+--name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
@@ -182,14 +145,14 @@ mgnify_job_id=$(dsub \
 --env DB_PATH="$MGNIFY_PATH" \
 --env N_CPU="$JACKHMMER_CPU" \
 --env MAXSEQ="$MGNIFY_MAXSEQ")
-
 job_ids+=( $mgnify_job_id )
 
 echo "Starting Uniclust search on: $(date)" 
-task=search_uniclust
+task=uniclust30_search
 logging_path="${output_path}/logging/${task}"
 uniclust_output_msa_path="${output_path}/msas/${task}.a3m"
 uniclust_job_id=$(dsub \
+--name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
@@ -204,14 +167,14 @@ uniclust_job_id=$(dsub \
 --env DB_PATHS="$UNICLUST30_PATH" \
 --env N_CPU="$HHBLITS_CPU" \
 --env MAXSEQ="$UNICLUST30_MAXSEQ")
-
 job_ids+=( $uniclust_job_id ) 
 
 echo "Starting BFD search on: $(date)" 
-task=search_bfd
+task=bfd_search
 logging_path="${output_path}/logging/${task}"
 bfd_output_msa_path="${output_path}/msas/${task}.a3m"
 bfd_job_id=$(dsub \
+--name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
@@ -226,17 +189,17 @@ bfd_job_id=$(dsub \
 --env DB_PATHS="$BFD_PATH" \
 --env N_CPU="$HHBLITS_CPU" \
 --env MAXSEQ="$BFD_MAXSEQ")
-
 job_ids+=( $bfd_job_id ) 
 
 echo "Starting PDB search on: $(date)" 
-task=search_pdb
+task=pdb_search
 logging_path="${output_path}/logging/${task}"
 pdb_output_templates_path="${output_path}/templates/${task}.hhr"
 pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
 pdb_job_id=$(dsub \
+--name "$task" \
 --command "$HHSEARCH_COMMAND" \
 --provider "$DSUB_PROVIDER" \
 --image "$IMAGE" \
@@ -256,35 +219,62 @@ pdb_job_id=$(dsub \
 --env MMCIF_PATH="$PDB_MMCIF_PATH" \
 --env OBSOLETE_PATH="$PDB_OBSOLETE_PATH" \
 --env MAX_TEMPLATE_DATE="$MAX_TEMPLATE_DATE" \
---after "$uniref90_job_id")
-
+--after "$uniref90_job_id" )
 job_ids+=( $pdb_job_id )
 
 echo "Starting feature aggregation on: $(date)" 
-task=aggregate_features
+task=aggregate
 logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 msas_path="${output_path}/msas"
 aggregate_job_id=$(dsub \
---command "${AGGREGATE_COMMAND}" \
---provider "${DSUB_PROVIDER}" \
---image "{$IMAGE}" \
---machine-type "${AGGREGATE_MACHINE_TYPE}" \
---boot-disk-size "${BOOT_DISK_SIZE}" \
---project "${PROJECT}" \
---regions "${REGION}" \
---logging "${logging_path}" \
---input-recursive MSAS_PATH="${msas_path}" \
---input SEQUENCE_PATH="${SEQUENCE}" \
---input TEMPLATE_FEATURES_PATH="${pdb_output_features_path}" \
---output OUTPUT_FEATURES_PATH="${output_features_path}" \
---after "${job_ids[@]}" )
+--name "$task" \
+--command "$AGGREGATE_COMMAND" \
+--provider "$DSUB_PROVIDER" \
+--image "$IMAGE" \
+--machine-type "$AGGREGATE_MACHINE_TYPE" \
+--boot-disk-size "$BOOT_DISK_SIZE" \
+--project "$PROJECT" \
+--regions "$REGION" \
+--logging "$logging_path" \
+--input-recursive MSAS_PATH="$msas_path" \
+--input SEQUENCE_PATH="$SEQUENCE" \
+--input TEMPLATE_FEATURES_PATH="$pdb_output_features_path" \
+--output OUTPUT_FEATURES_PATH="$output_features_path" \
+--after "${job_ids[@]}" \
+--wait )
 
 
 feature_engineering_end_time=$(date +%s)
 echo "Feature engineering completed on: $(date)"
 echo "Feature engineering elapsed time $(( $feature_engineering_end_time - $feature_engineering_start_time ))"
 
+echo "Starting predictions on $(date)"
+task=predict
+model_name=model_1
+logging_path="${output_path}/logging/${task}"
+raw_prediction_path="${output_path}/predictions/raw_prediction.pkl"
+unrelaxed_protein_path="${output_path}/predictions/unrelaxed_protein.pb"
+predict_job_id=$(dsub \
+--name "$task" \
+--command "$PREDICT_COMMAND" \
+--provider "$DSUB_PROVIDER" \
+--project "$PROJECT" \
+--regions "$REGION" \
+--logging "$logging_path" \
+--image "$IMAGE" \
+--machine-type "$PREDICT_MACHINE_TYPE" \
+--boot-disk-size "$BOOT_DISK_SIZE" \
+--accelerator-type "$PREDICT_ACCELERATOR_TYPE" \
+--accelerator-count "$PREDICT_ACCELERATOR_COUNT" \
+--input-recursive MODEL_PARAMS_PATH="$MODEL_PARAMS" \
+--input FEATURES_PATH="$output_features_path" \
+--env MODEL_NAME="$model_name" \
+--env RANDOM_SEED=0 \
+--env NUM_ENSEMBLE=1 \
+--output RAW_PREDICTION_PATH="$raw_prediction_path" \
+--output UNRELAXED_PROTEIN_PATH="$unrelaxed_protein_path" \
+--wait )
 
 
 pipeline_end_time=$(date +%s)
