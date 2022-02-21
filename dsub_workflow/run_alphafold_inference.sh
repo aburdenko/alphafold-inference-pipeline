@@ -258,6 +258,7 @@ job_ids+=( $pdb_job_id )
 task=aggregate_features
 logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
+msas_path="${output_path}/msas"
 echo "Starting feature aggregation on: $(date)" 
 aggregate_job_id=$(dsub \
 --command "${AGGREGATE_COMMAND}" \
