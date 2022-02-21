@@ -21,6 +21,19 @@
 set -o errexit
 set -o nounset
 
+trap 'exit_handler $? $LINENO' 1 2 3 15 ERR EXIT 
+
+exit_handler() {
+    echo "Error $1 occured in line $2"
+    
+    # Delete orphaned jobs
+    for job_id in "${job_ids[@]}"
+    do
+        echo "Deleting job $job_id" 
+        ddel --provider  "$DSUB_PROVIDER" --project "$project" --job "$job_id"
+    done
+}
+
 function usage {
     echo "Usage ..."
     exit 1
@@ -110,10 +123,12 @@ output_path=${output_path}/$(date +"%Y-%m-%d-%M-%S")
 echo "Starting the pipeline on: $(date)"
 echo "Pipeline outputs at: ${output_path}"
 pipeline_start_time=$(date +%s)
+job_ids=()
 
 echo "Starting feature engineering on: $(date)"
 feature_engineering_start_time=$(date +%s)
 
+# Starting Uniref90 search
 task=search_uniref90
 task_output=${output_path}/${task}
 logging_path=${task_output}/logging
@@ -135,15 +150,14 @@ uniref90_job_id=$(dsub \
 --env N_CPU="$JACKHMMER_CPU" \
 --env MAXSEQ="$UNIREF90_MAXSEQ" 
 )
-end_time=$(date +%s)
-echo "Uniref90 search completed. Elapsed time $(( end_time - start_time ))"
+job_ids+=( $uniref90_job_id )
 
+# Starting MGnify search
 task=search_mgnify
 task_output=${output_path}/${task}
 logging_path=${task_output}/logging
 mgnify_output_msa_path=${task_output}/msa/output.sto
 echo "Starting Mgnify search on: $(date)" 
-start_time=$(date +%s)
 mgnify_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -160,13 +174,14 @@ mgnify_job_id=$(dsub \
 --env N_CPU="$JACKHMMER_CPU" \
 --env MAXSEQ="$MGNIFY_MAXSEQ" 
 )
+job_ids+=( $mgnify_job_id )
 
+# Starting Uniclust search
 task=search_uniclust
 task_output=${output_path}/${task}
 logging_path=${task_output}/logging
 uniclust_output_msa_path=${task_output}/msa/output.a3m
 echo "Starting Uniclust search on: $(date)" 
-start_time=$(date +%s)
 uniclust_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -183,13 +198,14 @@ uniclust_job_id=$(dsub \
 --env N_CPU="$HHBLITS_CPU" \
 --env MAXSEQ="$UNICLUST30_MAXSEQ" 
 )
+job_ids+=( $uniclust_job_id )
 
+# Starting BFD search
 task=search_bfd
 task_output=${output_path}/${task}
 logging_path=${task_output}/logging
 bfd_output_msa_path=${task_output}/msa/output.a3m
 echo "Starting BFD search on: $(date)" 
-start_time=$(date +%s)
 bfd_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -206,16 +222,18 @@ bfd_job_id=$(dsub \
 --env N_CPU="$HHBLITS_CPU" \
 --env MAXSEQ="$BFD_MAXSEQ" 
 )
+job_ids+=( $bfd_job_id )
 
+# Starting PDB search
+# We will wait till Uniref90 completes
 task=search_pdb
 task_output=${output_path}/${task}
 logging_path=${task_output}/logging
 pdb_output_templates_path=${task_output}/templates/output.hhr
 pdb_output_features_path=${task_output}/features/output.pkl
-msa_input_path=uniref_output_msa_path
+msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
 echo "Starting PDB search on: $(date)" 
-start_time=$(date +%s)
 pdb_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -233,10 +251,22 @@ pdb_job_id=$(dsub \
 --mount DB_ROOT="$disk_image" \
 --env DB_PATHS="$PDB70_PATH" \
 --env MAXSEQ="$PDB_MAXSEQ" \
---env MMCIF_PATH="$PDB_MMCIF_PATH" \ 
+--env MMCIF_PATH="$PDB_MMCIF_PATH" \
 --env OBSOLETE_PATH="$PDB_OBSOLETE_PATH" \
 --after "$uniref90_job_id"
 )
+job_ids+=( $pdb_job_id )
+
+
+feature_engineering_end_time=$(date +%s)
+echo "Feature engineering completed on: $(date)"
+echo "Feature engineering elapsed time $(( $feature_engineering_end_time - $feature_engineering_start_time ))"
+
+
+
+pipeline_end_time=$(date +%s)
+echo "Pipeline completed on: $(date)"
+echo "Pipeline elapsed time $(( $pipeline_end_time - $pipeline_start_time ))"
 
 
 
