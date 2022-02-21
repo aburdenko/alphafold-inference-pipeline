@@ -259,20 +259,21 @@ task=aggregate_features
 logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 echo "Starting feature aggregation on: $(date)" 
-pdb_job_id=$(dsub \
---command "$AGGREGATE_FEATURES_COMMAND" \
---provider "$DSUB_PROVIDER" \
---image "$IMAGE" \
---machine-type "$AGGREGATE_MACHINE_TYPE" \
---boot-disk-size "$BOOT_DISK_SIZE" \
---project "$project" \
---regions "$location" \
---logging "$logging_path" \
---input-recursive MSAS_PATH="$msas_path" \
---input SEQUENCE_PATH="$sequence" \
---input TEMPLATE_FEATURES_PATH="$pdb_output_features_path" \
---output OUTPUT_FEATURES_PATH="$output_features_path" \
---wait "${job_ids[@]}"
+aggregate_job_id=$(dsub \
+--command "${AGGREGATE_FEATURES_COMMAND}" \
+--provider "${DSUB_PROVIDER}" \
+--image "{$IMAGE}" \
+--machine-type "${AGGREGATE_MACHINE_TYPE}" \
+--boot-disk-size "${BOOT_DISK_SIZE}" \
+--project "${project}" \
+--regions "${location}" \
+--logging "${logging_path}" \
+--input-recursive MSAS_PATH="${msas_path}" \
+--input SEQUENCE_PATH="${sequence}" \
+--input TEMPLATE_FEATURES_PATH="${pdb_output_features_path}" \
+--output OUTPUT_FEATURES_PATH="${output_features_path}" \
+--wait "${job_ids[@]}" \
+)
 
 
 feature_engineering_end_time=$(date +%s)
