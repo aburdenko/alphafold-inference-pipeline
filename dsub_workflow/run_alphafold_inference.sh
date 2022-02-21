@@ -260,7 +260,7 @@ logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 echo "Starting feature aggregation on: $(date)" 
 aggregate_job_id=$(dsub \
---command "${AGGREGATE_FEATURES_COMMAND}" \
+--command "${AGGREGATE_COMMAND}" \
 --provider "${DSUB_PROVIDER}" \
 --image "{$IMAGE}" \
 --machine-type "${AGGREGATE_MACHINE_TYPE}" \
