@@ -62,7 +62,6 @@ def predict(
         return utils.flat_params_to_haiku(params)
 
     def _load_features(features_path):
-        features_path = model_features.path
         with open(features_path, 'rb') as f:
             features = pickle.load(f)
         return features

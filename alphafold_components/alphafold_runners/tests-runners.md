@@ -54,7 +54,7 @@ python /src/alphafold_components/alphafold_runners/aggregate_features_runner.py
 
 
 
-## predict relax
+## Predict 
 
 docker run -it --rm --gpus all \
 -v /home/jupyter/testing:/inputs \
@@ -76,5 +76,11 @@ export UNRELAXED_PROTEIN_PATH=/output/testing/predict/unrelaxed_protein.pdb
 
 python /src/alphafold_components/alphafold_runners/predict_runner.py
 
+## Relax
 
+export UNRELAXED_PROTEIN_PATH=/inputs/unrelaxed_proteins/unrelaxed_protein.pdb
+export RELAXED_PROTEIN_PATH=/output/testing/relax/relaxed_protein.pdb
+export RELAX_USE_GPU=1
+
+python /src/alphafold_components/alphafold_runners/relax_runner.py
 
