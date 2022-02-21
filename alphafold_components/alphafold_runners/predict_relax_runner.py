@@ -99,6 +99,6 @@ if __name__=='__main__':
         random_seed=random_seed,
         raw_prediction_path=os.environ['RAW_PREDICTION_PATH'],
         unrelaxed_protein_path=os.environ["UNRELAXED_PROTEIN_PATH"],
-        relax_after_predict=bool(os.getenv('RELAX_USE_GPU')),
+        relax_after_predict=bool(int(os.getenv('RELAX_USE_GPU'))),
         relaxed_protein_path=os.getenv('RELAXED_PROTEIN_PATH')
     )

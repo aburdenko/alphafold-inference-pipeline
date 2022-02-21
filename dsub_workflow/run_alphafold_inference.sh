@@ -59,7 +59,7 @@ readonly JACKHMMER_COMMAND='python /scripts/alphafold_runners/jackhmmer_runner.p
 readonly HHBLITS_COMMAND='python /scripts/alphafold_runners/hhblits_runner.py'
 readonly HHSEARCH_COMMAND='python /scripts/alphafold_runners/hhsearch_runner.py'
 readonly AGGREGATE_COMMAND='python /scripts/alphafold_runners/aggregate_features_runner.py'
-readonly PREDICT_COMMAND='python /scripts/alphafold_runners/predict_runner.py'
+readonly PREDICT_COMMAND='python /scripts/alphafold_runners/predict_relax_runner.py'
 
 readonly UNIREF90_PATH='uniref90/uniref90.fasta'
 readonly MGNIFY_PATH='mgnify/mgy_clusters_2018_12.fa'
@@ -76,6 +76,8 @@ readonly MGNIFY_MAXSEQ=10_000
 readonly UNICLUST30_MAXSEQ=1_000_000
 readonly BFD_MAXSEQ=1_000_000
 readonly PDB_MAXSEQ=1_000_000
+
+readonly RELAX_USE_GPU=1
 
 
 
@@ -175,6 +177,7 @@ task=bfd_search
 logging_path="${output_path}/logging/${task}"
 bfd_output_msa_path="${output_path}/msas/${task}.a3m"
 bfd_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -200,6 +203,7 @@ pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
 pdb_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$HHSEARCH_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -229,6 +233,7 @@ logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 msas_path="${output_path}/msas"
 aggregate_job_id=$(dsub \
+--skip \
 --name "$task" \
 --command "$AGGREGATE_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -251,11 +256,12 @@ echo "Feature engineering completed on: $(date)"
 echo "Feature engineering elapsed time $(( $feature_engineering_end_time - $feature_engineering_start_time ))"
 
 echo "Starting predictions on $(date)"
-task=predict
+task=predict_relax
 model_name=model_1
 logging_path="${output_path}/logging/${task}"
-raw_prediction_path="${output_path}/predictions/raw_prediction.pkl"
-unrelaxed_protein_path="${output_path}/predictions/unrelaxed_protein.pb"
+raw_prediction_path="${output_path}/predictions/${model_name}_raw_prediction_.pkl"
+unrelaxed_protein_path="${output_path}/proteins/${model_name}/unrelaxed_protein.pb"
+relaxed_protein_path="${output_path}/proteins/${model_name}/relaxed_protein.pdb"
 predict_job_id=$(dsub \
 --name "$task" \
 --command "$PREDICT_COMMAND" \
@@ -275,6 +281,8 @@ predict_job_id=$(dsub \
 --env NUM_ENSEMBLE=1 \
 --output RAW_PREDICTION_PATH="$raw_prediction_path" \
 --output UNRELAXED_PROTEIN_PATH="$unrelaxed_protein_path" \
+--output RELAXED_PROTEIN_PATH="$relaxed_protein_path" \
+--env RELAX_USE_GPU="$RELAX_USE_GPU" \
 --wait )
 
 
