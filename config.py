@@ -48,9 +48,9 @@ RELAX_CPU_LIMIT = os.getenv("CPU_LIMIT", "12")
 RELAX_GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
 RELAX_GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
 
-MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "85")
-CPU_LIMIT = os.getenv("CPU_LIMIT", "12")
-GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
+MEMORY_LIMIT = os.getenv("MEMORY_LIMIT", "170")
+CPU_LIMIT = os.getenv("CPU_LIMIT", "24")
+GPU_LIMIT = os.getenv("GPU_LIMIT", "2")
 GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
 GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 

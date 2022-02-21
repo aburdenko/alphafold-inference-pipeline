@@ -21,7 +21,7 @@
 set -o errexit
 set -o nounset
 
-trap 'exit_handler $? $LINENO' 1 2 3 15 ERR EXIT 
+trap 'exit_handler $? $LINENO' 1 2 3 15 ERR  
 
 exit_handler() {
     echo "Error $1 occured in line $2"
