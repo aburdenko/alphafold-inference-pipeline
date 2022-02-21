@@ -23,7 +23,7 @@ jobs=()
 
 job1=$(dsub --provider local \
 --logging gs://jk-dsub-staging/sandbox/logging \
---command 'echo 1; sleep 30; exit 1')
+--command 'echo 1; sleep 5; exit 0')
 
 jobs+=( "$job1" )
 
@@ -31,24 +31,28 @@ echo 'Dsub 2'
 
 job2=$(dsub --provider local \
 --logging gs://jk-dsub-staging/sandbox/logging \
---command 'echo 2; exit 0' \
+--command 'echo 2; sleep 20; exit 1' \
 )
 
 jobs+=( "$job2" )
 
+sleep 60
+
 
 job3=$(dsub --provider local \
 --logging gs://jk-dsub-staging/sandbox/logging \
---command 'echo 3; sleep 600; exit 0')
+--command 'echo 3; sleep 60; exit 0' \
+--after "$job2" \
+)
 
 jobs+=( "$job3" )
 
-job4=$(dsub --provider local \
---logging gs://jk-dsub-staging/sandbox/logging \
---command 'echo 3; sleep 600; exit 0' \
---after "$job1" )
 
-jobs+=( "$job4" )
+
+dstat --provider local --wait --jobs  "$job2" 
+
+echo 'All completed'
+
 
 
 

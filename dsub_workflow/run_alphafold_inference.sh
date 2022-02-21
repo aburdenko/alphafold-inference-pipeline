@@ -45,6 +45,7 @@ readonly POLLING_INTERVAL=30s
 readonly JACKHMMER_MACHINE_TYPE=n1-standard-8
 readonly HHBLITS_MACHINE_TYPE=c2-standard-16
 readonly HHSEARCH_MACHINE_TYPE=c2-standard-16
+readonly AGGREGATE_MACHINE_TYPE=n1-standard-4
 readonly PREDICT_MACHINE_TYPE=a2-highgpu-1g
 readonly BOOT_DISK_SIZE=200
 
@@ -55,6 +56,7 @@ readonly IMAGE=gcr.io/jk-mlops-dev/alphafold-components
 readonly JACKHMMER_COMMAND='python /scripts/alphafold_runners/jackhmmer_runner.py'
 readonly HHBLITS_COMMAND='python /scripts/alphafold_runners/hhblits_runner.py'
 readonly HHSEARCH_COMMAND='python /scripts/alphafold_runners/hhsearch_runner.py'
+readonly AGGREGATE_COMMAND='python /scripts/alphafold_runners/aggregate_features_runner.py'
 readonly PREDICT_COMMAND='python /scripts/alphafold_runners/predict_runner.py'
 
 readonly UNIREF90_PATH='uniref90/uniref90.fasta'
@@ -128,11 +130,12 @@ job_ids=()
 echo "Starting feature engineering on: $(date)"
 feature_engineering_start_time=$(date +%s)
 
+msas_path="${output_path}/msas"
+
 # Starting Uniref90 search
 task=search_uniref90
-task_output=${output_path}/${task}
-logging_path=${task_output}/logging
-uniref_output_msa_path=${task_output}/msa/output.sto
+logging_path="${output_path}/${task}/logging"
+uniref_output_msa_path="${msas_path}/${task}.sto"
 echo "Starting Uniref90 search on: $(date)" 
 uniref90_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
@@ -154,9 +157,8 @@ job_ids+=( $uniref90_job_id )
 
 # Starting MGnify search
 task=search_mgnify
-task_output=${output_path}/${task}
-logging_path=${task_output}/logging
-mgnify_output_msa_path=${task_output}/msa/output.sto
+logging_path="${output_path}/${task}/logging"
+mgnify_output_msa_path="${msas_path}/${task}.sto"
 echo "Starting Mgnify search on: $(date)" 
 mgnify_job_id=$(dsub \
 --command "$JACKHMMER_COMMAND" \
@@ -178,9 +180,8 @@ job_ids+=( $mgnify_job_id )
 
 # Starting Uniclust search
 task=search_uniclust
-task_output=${output_path}/${task}
-logging_path=${task_output}/logging
-uniclust_output_msa_path=${task_output}/msa/output.a3m
+logging_path="${output_path}/${task}/logging"
+uniclust_output_msa_path="${msas_path}/${task}.a3m"
 echo "Starting Uniclust search on: $(date)" 
 uniclust_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
@@ -202,9 +203,8 @@ job_ids+=( $uniclust_job_id )
 
 # Starting BFD search
 task=search_bfd
-task_output=${output_path}/${task}
-logging_path=${task_output}/logging
-bfd_output_msa_path=${task_output}/msa/output.a3m
+logging_path="${output_path}/${task}/logging"
+bfd_output_msa_path="${msas_path}/${task}.a3m"
 echo "Starting BFD search on: $(date)" 
 bfd_job_id=$(dsub \
 --command "$HHBLITS_COMMAND" \
@@ -227,10 +227,10 @@ job_ids+=( $bfd_job_id )
 # Starting PDB search
 # We will wait till Uniref90 completes
 task=search_pdb
-task_output=${output_path}/${task}
-logging_path=${task_output}/logging
-pdb_output_templates_path=${task_output}/templates/output.hhr
-pdb_output_features_path=${task_output}/features/output.pkl
+logging_path="${output_path}/${task}/logging"
+pdb_output_msa_path="${msas_path}/${task}.a3m"
+pdb_output_templates_path="${output_path}/templates/${task}.hhr"
+pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
 echo "Starting PDB search on: $(date)" 
@@ -256,6 +256,25 @@ pdb_job_id=$(dsub \
 --after "$uniref90_job_id"
 )
 job_ids+=( $pdb_job_id )
+
+task=aggregate_features
+logging_path="${output_path}/${task}/logging"
+output_features_path="${output_path}/${task}/features.pkl"
+echo "Starting feature aggregation on: $(date)" 
+pdb_job_id=$(dsub \
+--command "$AGGREGATE_FEATURES_COMMAND" \
+--provider "$DSUB_PROVIDER" \
+--image "$IMAGE" \
+--machine-type "$AGGREGATE_MACHINE_TYPE" \
+--boot-disk-size "$BOOT_DISK_SIZE" \
+--project "$project" \
+--regions "$location" \
+--logging "$logging_path" \
+--input-recursive MSAS_PATH="$msas_path" \
+--input SEQUENCE_PATH="$sequence" \
+--input TEMPLATE_FEATURES_PATH="$pdb_output_features_path" \
+--output OUTPUT_FEATURES_PATH="$output_features_path" \
+--wait "${job_ids[@]}"
 
 
 feature_engineering_end_time=$(date +%s)

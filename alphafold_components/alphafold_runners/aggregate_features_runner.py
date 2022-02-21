@@ -31,7 +31,7 @@ from alphafold.data import templates
 
 # Required inputs
 SEQUENCE_PATH = os.environ['SEQUENCE_PATH']
-MSA_PATHS = os.environ['MSA_PATHS']
+MSAS_PATH = os.environ['MSAS_PATH']
 TEMPLATE_FEATURES_PATH = os.environ['TEMPLATE_FEATURES_PATH']
 OUTPUT_FEATURES_PATH = os.environ['OUTPUT_FEATURES_PATH']
 
@@ -164,9 +164,9 @@ if __name__=='__main__':
                         datefmt='%d-%m-%y %H:%M:%S',
                         stream=sys.stdout)
 
-    msa_paths = MSA_PATHS.split(',')
-    msa_paths = {msa_path: pathlib.Path(msa_path).suffix[1:] 
-                 for msa_path in msa_paths} 
+
+    msa_paths = {str(msa_path): pathlib.Path(msa_path).suffix[1:] 
+                 for msa_path in pathlib.Path(MSAS_PATH).iterdir()}
 
     aggregate_features(
         sequence_path=SEQUENCE_PATH,
