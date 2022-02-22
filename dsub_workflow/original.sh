@@ -34,11 +34,12 @@ python /app/alphafold/run_alphafold.py \
  --uniclust30_database_path=${DB}/uniclust30/uniclust30_2018_08/uniclust30_2018_08 \
  --bfd_database_path=${DB}/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt \
  --output_dir=${OUT_PATH} \
- --model_names=model_1,model_2,model_3,model_4,model_5 \
+ --model_preset=monomer \
  --max_template_date=2020-05-14 \
- --preset=full_dbs \
+ --db_preset=full_dbs \
  --benchmark=False \
- --logtostderr
+ --logtostderr \
+ --use_gpu_relax
 
 pipeline_end_time=$(date +%s)
 echo "Pipeline completed on: $(date)"
