@@ -56,5 +56,5 @@ GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
 ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold-components')
 
-XLA_PYTHON_CLIENT_MEM_FRACTION = "0.3"
+XLA_PYTHON_CLIENT_MEM_FRACTION = "4.0"
 TF_FORCE_UNIFIED_MEMORY = "1"

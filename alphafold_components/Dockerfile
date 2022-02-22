@@ -71,7 +71,7 @@ WORKDIR /scripts
 ADD alphafold_runners alphafold_runners
 ADD *.py ./
 
-
+#ENV TF_FORCE_UNIFIED_MEMORY=1
 ENV PYTHONPATH=/app/alphafold
 # We need to run `ldconfig` first to ensure GPUs are visible, due to some quirk
 # with Debian. See https://github.com/NVIDIA/nvidia-docker/issues/1399 for

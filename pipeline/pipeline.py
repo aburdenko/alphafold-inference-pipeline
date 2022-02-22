@@ -161,8 +161,8 @@ def pipeline(
         relax_protein.set_memory_limit(config.RELAX_MEMORY_LIMIT)
         relax_protein.set_gpu_limit(config.RELAX_GPU_LIMIT)
         relax_protein.add_node_selector_constraint(config.GKE_ACCELERATOR_KEY, config.RELAX_GPU_TYPE)
-        model_predict.set_env_variable("TF_FORCE_UNIFIED_MEMORY", config.TF_FORCE_UNIFIED_MEMORY)
-        model_predict.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", config.XLA_PYTHON_CLIENT_MEM_FRACTION)
+        relax_protein.set_env_variable("TF_FORCE_UNIFIED_MEMORY", config.TF_FORCE_UNIFIED_MEMORY)
+        relax_protein.set_env_variable("XLA_PYTHON_CLIENT_MEM_FRACTION", config.XLA_PYTHON_CLIENT_MEM_FRACTION)
  
 
 

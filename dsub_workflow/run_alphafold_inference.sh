@@ -85,7 +85,6 @@ readonly RELAX_USE_GPU=1
 readonly MODELS=( model_1 model_2 )
 
 
-
 # Check the input parameters
 if [[ -z ${SEQUENCE+x} ]] || \
    [[ -z ${PROJECT+x} ]] || \
@@ -99,7 +98,6 @@ then
 fi
 
 output_path="${OUTPUT_PATH}/$(date +"%Y-%m-%d-%H-%M-%S")"
-output_path=gs://jk-dsub-staging/outputs/2022-02-21-21-28-57
 echo "Starting the pipeline on: $(date)"
 echo "Pipeline outputs at: ${output_path}"
 pipeline_start_time=$(date +%s)
@@ -113,7 +111,6 @@ task=uniref90_search
 logging_path="${output_path}/logging/${task}"
 uniref_output_msa_path="${output_path}/msas/${task}.sto"
 uniref90_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -136,7 +133,6 @@ task=mgnify_search
 logging_path="${output_path}/logging/${task}"
 mgnify_output_msa_path="${output_path}/msas/${task}.sto"
 mgnify_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$JACKHMMER_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -159,7 +155,6 @@ task=uniclust30_search
 logging_path="${output_path}/logging/${task}"
 uniclust_output_msa_path="${output_path}/msas/${task}.a3m"
 uniclust_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -182,7 +177,6 @@ task=bfd_search
 logging_path="${output_path}/logging/${task}"
 bfd_output_msa_path="${output_path}/msas/${task}.a3m"
 bfd_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$HHBLITS_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -208,7 +202,6 @@ pdb_output_features_path="${output_path}/features/${task}.pkl"
 msa_input_path="$uniref_output_msa_path"
 msa_data_format=sto
 pdb_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$HHSEARCH_COMMAND" \
 --provider "$DSUB_PROVIDER" \
@@ -238,7 +231,6 @@ logging_path="${output_path}/logging/${task}"
 output_features_path="${output_path}/features/aggregated_features.pkl"
 msas_path="${output_path}/msas"
 aggregate_job_id=$(dsub \
---skip \
 --name "$task" \
 --command "$AGGREGATE_COMMAND" \
 --provider "$DSUB_PROVIDER" \
