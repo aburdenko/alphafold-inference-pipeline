@@ -47,6 +47,7 @@ readonly HHBLITS_MACHINE_TYPE=c2-standard-16
 readonly HHSEARCH_MACHINE_TYPE=c2-standard-16
 readonly AGGREGATE_MACHINE_TYPE=n1-standard-8
 readonly PREDICT_MACHINE_TYPE=a2-highgpu-1g
+readonly RANK_MACHINE_TYPE=n1-standard-8
 readonly BOOT_DISK_SIZE=200
 readonly PREDICT_ACCELERATOR_TYPE=nvidia-tesla-a100
 readonly PREDICT_ACCELERATOR_COUNT=1
@@ -60,6 +61,7 @@ readonly HHBLITS_COMMAND='python /scripts/alphafold_runners/hhblits_runner.py'
 readonly HHSEARCH_COMMAND='python /scripts/alphafold_runners/hhsearch_runner.py'
 readonly AGGREGATE_COMMAND='python /scripts/alphafold_runners/aggregate_features_runner.py'
 readonly PREDICT_COMMAND='python /scripts/alphafold_runners/predict_relax_runner.py'
+readonly RANK_COMMAND='python /scripts/alphafold_runners/rank_runner.py'
 
 readonly UNIREF90_PATH='uniref90/uniref90.fasta'
 readonly MGNIFY_PATH='mgnify/mgy_clusters_2018_12.fa'
@@ -78,6 +80,9 @@ readonly BFD_MAXSEQ=1_000_000
 readonly PDB_MAXSEQ=1_000_000
 
 readonly RELAX_USE_GPU=1
+
+#readonly MODELS=( model_1 model_2 model_3 model_4 model_5 )
+readonly MODELS=( model_1 model_2 )
 
 
 
@@ -256,35 +261,63 @@ echo "Feature engineering completed on: $(date)"
 echo "Feature engineering elapsed time $(( $feature_engineering_end_time - $feature_engineering_start_time ))"
 
 echo "Starting predictions on $(date)"
-task=predict_relax
-model_name=model_1
+prediction_start_time=$(date +%s)
+job_ids=()
+for model_name in "${MODELS[@]}"
+do
+    task="${model_name}_predict_relax"
+    logging_path="${output_path}/logging/${task}"
+    raw_prediction_path="${output_path}/predictions/${model_name}_raw_prediction_.pkl"
+    unrelaxed_protein_path="${output_path}/proteins/${model_name}/unrelaxed_protein.pb"
+    relaxed_protein_path="${output_path}/proteins/${model_name}/relaxed_protein.pdb"
+    echo "Starting prediction for model ${model_name}" 
+
+    predict_job_id=$(dsub \
+    --name "$task" \
+    --command "$PREDICT_COMMAND" \
+    --provider "$DSUB_PROVIDER" \
+    --project "$PROJECT" \
+    --regions "$REGION" \
+    --logging "$logging_path" \
+    --image "$IMAGE" \
+    --machine-type "$PREDICT_MACHINE_TYPE" \
+    --boot-disk-size "$BOOT_DISK_SIZE" \
+    --accelerator-type "$PREDICT_ACCELERATOR_TYPE" \
+    --accelerator-count "$PREDICT_ACCELERATOR_COUNT" \
+    --input-recursive MODEL_PARAMS_PATH="$MODEL_PARAMS" \
+    --input FEATURES_PATH="$output_features_path" \
+    --env MODEL_NAME="$model_name" \
+    --env RANDOM_SEED=0 \
+    --env NUM_ENSEMBLE=1 \
+    --output RAW_PREDICTION_PATH="$raw_prediction_path" \
+    --output UNRELAXED_PROTEIN_PATH="$unrelaxed_protein_path" \
+    --output RELAXED_PROTEIN_PATH="$relaxed_protein_path" \
+    --env RELAX_USE_GPU="$RELAX_USE_GPU" )
+    job_ids+=( "$predict_job_id" )
+done
+
+echo "Starting ranking on: $(date)" 
+task=rank
 logging_path="${output_path}/logging/${task}"
-raw_prediction_path="${output_path}/predictions/${model_name}_raw_prediction_.pkl"
-unrelaxed_protein_path="${output_path}/proteins/${model_name}/unrelaxed_protein.pb"
-relaxed_protein_path="${output_path}/proteins/${model_name}/relaxed_protein.pdb"
-predict_job_id=$(dsub \
+prediction_results_path="${output_path}/predictions"
+ranking_results_path="${output_path}/rank/rankings.json"
+rank_job_id=$(dsub \
 --name "$task" \
---command "$PREDICT_COMMAND" \
+--command "$AGGREGATE_COMMAND" \
 --provider "$DSUB_PROVIDER" \
+--image "$IMAGE" \
+--machine-type "$AGGREGATE_MACHINE_TYPE" \
+--boot-disk-size "$BOOT_DISK_SIZE" \
 --project "$PROJECT" \
 --regions "$REGION" \
 --logging "$logging_path" \
---image "$IMAGE" \
---machine-type "$PREDICT_MACHINE_TYPE" \
---boot-disk-size "$BOOT_DISK_SIZE" \
---accelerator-type "$PREDICT_ACCELERATOR_TYPE" \
---accelerator-count "$PREDICT_ACCELERATOR_COUNT" \
---input-recursive MODEL_PARAMS_PATH="$MODEL_PARAMS" \
---input FEATURES_PATH="$output_features_path" \
---env MODEL_NAME="$model_name" \
---env RANDOM_SEED=0 \
---env NUM_ENSEMBLE=1 \
---output RAW_PREDICTION_PATH="$raw_prediction_path" \
---output UNRELAXED_PROTEIN_PATH="$unrelaxed_protein_path" \
---output RELAXED_PROTEIN_PATH="$relaxed_protein_path" \
---env RELAX_USE_GPU="$RELAX_USE_GPU" \
+--input-recursive PREDICTION_RESULTS_PATH="$prediction_results_path" \
+--output RANKING_RESULTS_PATH="$ranking_results_path" \
+--after "${job_ids[@]}" \
 --wait )
 
+prediction_end_time=$(date +%s)
+echo "Prediction elapsed time $(( $prediction_end_time - $prediction_start_time ))"
 
 pipeline_end_time=$(date +%s)
 echo "Pipeline completed on: $(date)"

@@ -19,13 +19,13 @@
 # basis so we can push it back to Vertex Pipelines
 
 
-FASTA=gs://gs://jk-alphafold-datasets-archive/fasta/T1050.fasta
+FASTA=gs://jk-alphafold-datasets-archive/fasta/T1050.fasta
 TASK=T1050
 
 readonly PROJECT_ID=jk-mlops-dev
 readonly REGION=us-central1
-readonly LOGGING="gs://jk-dsub-staging/benchmarks/logging/${TASK}"
-readonly OUTPUT_PATH="gs://jk-dsub-staging/benchmarks/output${TASK}"
+readonly LOGGING="gs://jk-dsub-staging/benchmarks/${TASK}logging"
+readonly OUTPUT_PATH="gs://jk-dsub-staging/benchmarks/${TASK}/output"
 readonly IMAGE=gcr.io/jk-mlops-dev/alphafold-components
 readonly SCRIPT=original.sh
 readonly DISK_IMAGE="https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
@@ -33,6 +33,7 @@ readonly MACHINE_TYPE=a2-highgpu-1g
 readonly BOOT_DISK_SIZE=200
 readonly ACCELERATOR_TYPE=nvidia-tesla-a100
 readonly ACCELERATOR_COUNT=1
+
 
 
 dsub --provider google-cls-v2 \
