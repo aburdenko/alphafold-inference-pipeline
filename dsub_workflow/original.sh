@@ -23,7 +23,7 @@ cd /app/alphafold
 echo "Starting pipeline on $(date)"
 pipeline_start_time=$(date +%s)
 
-/app/run_alphafold.sh \
+python /app/alphafold/run_alphafold.py \
  --fasta_paths=${FASTA} \
  --uniref90_database_path=${DB}/uniref90/uniref90.fasta \
  --mgnify_database_path=${DB}/mgnify/mgy_clusters_2018_12.fa \

@@ -43,7 +43,7 @@ flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepo
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
 flags.DEFINE_integer('num_ensemble', 1, 'TBD')
 flags.DEFINE_integer('random_seed', None, 'TBD')
-flags.DEFINE_bool('enable_caching', False, 'Enable pipeline run caching')
+flags.DEFINE_bool('enable_caching', True, 'Enable pipeline run caching')
 flags.DEFINE_bool('use_gpu_for_relaxation', True, 'Use GPU for relaxation')
 flags.DEFINE_string('sequence_desc', 'T1050 A7LXT1, Bacteroides Ovatus, 779 residues', '')
 

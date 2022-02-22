@@ -839,7 +839,7 @@
               },
               {
                 "name": "XLA_PYTHON_CLIENT_MEM_FRACTION",
-                "value": "0.5"
+                "value": "0.7"
               }
             ],
             "image": "gcr.io/jk-mlops-dev/alphafold-components",

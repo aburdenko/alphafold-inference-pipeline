@@ -45,9 +45,9 @@ readonly POLLING_INTERVAL=30s
 readonly JACKHMMER_MACHINE_TYPE=n1-standard-8
 readonly HHBLITS_MACHINE_TYPE=c2-standard-16
 readonly HHSEARCH_MACHINE_TYPE=c2-standard-16
-readonly AGGREGATE_MACHINE_TYPE=n1-standard-8
+readonly AGGREGATE_MACHINE_TYPE=e2-standard-4
 readonly PREDICT_MACHINE_TYPE=a2-highgpu-1g
-readonly RANK_MACHINE_TYPE=n1-standard-8
+readonly RANK_MACHINE_TYPE=e2-standard-2
 readonly BOOT_DISK_SIZE=200
 readonly PREDICT_ACCELERATOR_TYPE=nvidia-tesla-a100
 readonly PREDICT_ACCELERATOR_COUNT=1
@@ -296,25 +296,20 @@ do
     job_ids+=( "$predict_job_id" )
 done
 
-echo "Starting ranking on: $(date)" 
-task=rank
+# The only goal of this step is to watch for failues
+# Dstat --wait always returns 0 so we don't know if the prediction
+# job failed. That is a small hack
+echo "Waiting for prediction jobs to complete" 
+task=wait
 logging_path="${output_path}/logging/${task}"
-prediction_results_path="${output_path}/predictions"
-ranking_results_path="${output_path}/rank/rankings.json"
-rank_job_id=$(dsub \
+dsub \
 --name "$task" \
---command "$AGGREGATE_COMMAND" \
+--command 'echo Done!' \
 --provider "$DSUB_PROVIDER" \
---image "$IMAGE" \
---machine-type "$AGGREGATE_MACHINE_TYPE" \
---boot-disk-size "$BOOT_DISK_SIZE" \
 --project "$PROJECT" \
 --regions "$REGION" \
 --logging "$logging_path" \
---input-recursive PREDICTION_RESULTS_PATH="$prediction_results_path" \
---output RANKING_RESULTS_PATH="$ranking_results_path" \
---after "${job_ids[@]}" \
---wait )
+--after "${job_ids[@]}" 
 
 prediction_end_time=$(date +%s)
 echo "Prediction elapsed time $(( $prediction_end_time - $prediction_start_time ))"

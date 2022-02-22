@@ -24,7 +24,7 @@ TASK=T1050
 
 readonly PROJECT_ID=jk-mlops-dev
 readonly REGION=us-central1
-readonly LOGGING="gs://jk-dsub-staging/benchmarks/${TASK}logging"
+readonly LOGGING="gs://jk-dsub-staging/benchmarks/${TASK}/logging"
 readonly OUTPUT_PATH="gs://jk-dsub-staging/benchmarks/${TASK}/output"
 readonly IMAGE=gcr.io/jk-mlops-dev/alphafold-components
 readonly SCRIPT=original.sh
