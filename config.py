@@ -54,7 +54,7 @@ GPU_LIMIT = os.getenv("GPU_LIMIT", "1")
 GPU_TYPE = os.getenv("GPU_TYPE", "nvidia-tesla-a100")
 GKE_ACCELERATOR_KEY = 'cloud.google.com/gke-accelerator'
 
-ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/jk-mlops-dev/alphafold-components')
+ALPHAFOLD_COMPONENTS_IMAGE = os.getenv("ALPHAFOLD_COMPONETS_IMAGE", 'gcr.io/aburdenko-project/alphafold')
 
 XLA_PYTHON_CLIENT_MEM_FRACTION = "4.0"
 TF_FORCE_UNIFIED_MEMORY = "1"

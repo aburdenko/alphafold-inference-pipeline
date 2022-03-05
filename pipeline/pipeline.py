@@ -1,3 +1,4 @@
+#! /usr/local/bin/python
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +36,7 @@ from alphafold_components import  (
 def pipeline(
     sequence_path: str,
     sequence_desc: str,
-    project: str='jk-mlops-dev',
+    project: str='aburdenk-project',
     region: str='us-central1',
     max_template_date: str='2020-05-14',
     models: List[Mapping]=[{'model_name': 'model_1', 'random_seed': 1}],

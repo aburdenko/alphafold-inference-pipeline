@@ -1,3 +1,5 @@
+#! /usr/local/bin/python
+
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,15 +31,15 @@ _PIPELINE_JOB_NAME = 'alphafold-inference'
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('pipeline_spec', 'alphafold-inference.json', 'Path to pipeline spec')
-flags.DEFINE_string('pipeline_staging_location', 'gs://jk-vertex-staging/pipelines', 'Vertex AI staging bucket')
-flags.DEFINE_string('dsub_logging_path', 'gs://jk-dsub-staging/logging', 'dsub logging')
-flags.DEFINE_string('project', 'jk-mlops-dev', 'GCP Project')
-flags.DEFINE_string('project_number', '895222332033', 'Project number')
+flags.DEFINE_string('pipeline_staging_location', 'gs://alphafold_protein_structure/pipelines', 'Vertex AI staging bucket')
+flags.DEFINE_string('dsub_logging_path', 'gs://alphafold_protein_structure/logging', 'dsub logging')
+flags.DEFINE_string('project', 'aburdenko-project', 'GCP Project')
+flags.DEFINE_string('project_number', '653488387759', 'Project number')
 flags.DEFINE_string('region', 'us-central1', 'GCP Region')
-flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/Q9Y490.fasta', 'A path to a sequence')
+flags.DEFINE_string('fasta_path', 'gs://alphafold_protein_structure/upload/sequences.fasta', 'A path to a sequence')
 #flags.DEFINE_string('fasta_path', 'gs://jk-alphafold-datasets-archive/fasta/T1050.fasta', 'A path to a sequence')
-flags.DEFINE_string('vertex_sa', 'training-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Vertex SA')
-flags.DEFINE_string('pipelines_sa', 'pipelines-sa@jk-mlops-dev.iam.gserviceaccount.com', 'Pipelines SA')
+flags.DEFINE_string('vertex_sa', 'aburdenko-jupyter-notebook@aburdenko-project.iam.gserviceaccount.com', 'Vertex SA')
+flags.DEFINE_string('pipelines_sa', 'aburdenko-jupyter-notebook@aburdenko-project.iam.gserviceaccount.com', 'Pipelines SA')
 flags.DEFINE_string('uniref90_database_path', 'test1', 'Database paths')
 flags.DEFINE_string('databases_disk_image', 'http://test.com', 'Disk image prepopulated with databases')
 flags.DEFINE_string('max_template_date', '2020-05-14', 'Max template date')
