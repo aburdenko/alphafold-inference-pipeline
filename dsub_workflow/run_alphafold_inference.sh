@@ -55,7 +55,7 @@ readonly PREDICT_ACCELERATOR_COUNT=1
 readonly JACKHMMER_CPU=8
 readonly HHBLITS_CPU=12
 
-readonly IMAGE=gcr.io/jk-mlops-dev/alphafold-components
+readonly IMAGE=gcr.io/aburdenko-project/alphafold
 readonly JACKHMMER_COMMAND='python /scripts/alphafold_runners/jackhmmer_runner.py'
 readonly HHBLITS_COMMAND='python /scripts/alphafold_runners/hhblits_runner.py'
 readonly HHSEARCH_COMMAND='python /scripts/alphafold_runners/hhsearch_runner.py'

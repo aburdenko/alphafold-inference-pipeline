@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+notebook/custom_train_pipeline.json
+pipeline/alphafold-inference.json
+pipeline/component_create_features.yaml
+pipeline/component_import_sequence.yaml
+pipeline/component_msa_search.yaml
+pipeline/component_predict.yaml
+pipeline/component_relax.yaml
+pipeline/component_template_search.yaml

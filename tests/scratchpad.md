@@ -5,7 +5,7 @@ docker run -it --rm \
 -v /home/jupyter/alphafold-inference-pipeline/fasta:/fasta \
 -v /home/jupyter/alphafold-inference-pipeline:/src \
 --entrypoint /bin/bash \
-gcr.io/jk-mlops-dev/alphafold-components
+gcr.io/aburdenko-project/alphafold
 
 
 python jackhmmer_runner.py \
