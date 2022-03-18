@@ -15,14 +15,10 @@
 # limitations under the License.
 
 if [[ -n $1 ]]; then
-	git clone https://github.com/deepmind/alphafold.git
-	pushd alphafold
-	docker build -f docker/Dockerfile -t alphafold .
-	docker tag alphafold gcr.io/$1/alphafold
-	docker push gcr.io/$1/alphafold
-	pip install -r ./pipeline/requirements.txt
-        sudo chmod -R 755 ./pipeline	
-	export set GOOGLE_APPLICATION_CREDENTIALS=/content/aburdenko-project-d93f3d235d90.json
-	sudo ./pipelne/run.py
+	pushd pipeline
+	pip3 install -r ./requirements.txt
+    #chmod -R 755 .	
+	export set GOOGLE_APPLICATION_CREDENTIALS=$1
+	python3 ./run.py
 	popd
 fi

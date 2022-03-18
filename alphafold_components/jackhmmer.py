@@ -50,7 +50,7 @@ def jackhmmer(
     from job_runner import CustomJob
 
     _SUPPORTED_DATABASES = ['uniref90', 'mgnify']
-    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/aburdenko-project/alphafold'
     _SCRIPT = '/scripts/alphafold_runners/jackhmmer_runner.py'  
 
 

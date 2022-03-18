@@ -48,7 +48,7 @@ def hhblits(
     from job_runner import CustomJob
 
     _SUPPORTED_DATABASES = ['bfd', 'uniclust30']
-    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/aburdenko-project/alphafold'
     _SCRIPT = '/scripts/alphafold_runners/hhblits_runner.py'  
 
 
