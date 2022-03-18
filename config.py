@@ -18,10 +18,10 @@ PIPELINE_NAME = 'alphafold-inference'
 PIPELINE_DESCRIPTION = 'Alphafold inference'
 
 REFERENCE_DATASETS_IMAGE = "https://www.googleapis.com/compute/v1/projects/jk-mlops-dev/global/images/jk-alphafold-datasets 3000"
-REFERENCE_DATASETS_GCS_LOCATION = 'gs://jk-alphafold-datasets-archive/jan-22'
+REFERENCE_DATASETS_GCS_LOCATION = 'gs://alphafold_protein_structure'
 REFERENCE_DATASETS_URI = '10.71.1.10,/datasets_v1,/mnt/nfs/alphafold,projects/895222332033/global/networks/default'
-MODEL_PARAMS_GCS_LOCATION='gs://jk-alphafold-datasets-archive/jan-22/params'
-MODEL_PARAMS_URI='gs://jk-alphafold-datasets-archive/jan-22/params'
+MODEL_PARAMS_GCS_LOCATION='gs://alphafold_protein_structure/upload/model_params'
+MODEL_PARAMS_URI='gs://alphafold_protein_structure'
 
 UNIREF90_PATH = 'uniref90/uniref90.fasta'
 MGNIFY_PATH = 'mgnify/mgy_clusters_2018_12.fa'

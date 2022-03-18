@@ -54,7 +54,7 @@ def hhsearch(
     from job_runner import CustomJob
     from dsub_wrapper import run_dsub_job
 
-    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/jk-mlops-dev/alphafold-components'
+    _ALPHAFOLD_RUNNER_IMAGE = 'gcr.io/aburdenko-project/alphafold'
     _SCRIPT = '/scripts/alphafold_runners/hhsearch_runner.py'
    
     logging.basicConfig(format='%(asctime)s - %(message)s',
