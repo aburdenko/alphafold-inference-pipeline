@@ -16,9 +16,9 @@
 
 if [[ -n $1 ]]; then
 	pushd pipeline
-	pip install -r ./requirements.txt
-        sudo chmod -R 755 .	
-	export set GOOGLE_APPLICATION_CREDENTIALS=/content/$1-d93f3d235d90.json
-	./run.py
+	pip3 install -r ./requirements.txt
+    #chmod -R 755 .	
+	export set GOOGLE_APPLICATION_CREDENTIALS=$1
+	python3 ./run.py
 	popd
 fi
